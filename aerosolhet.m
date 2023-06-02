@@ -3,8 +3,8 @@ function aerosolhet(inputs,variables)
 % Shi et al
 % calculate water in partial pressure hPa
 %variables.T = 200;
-ph2o_hpa = variables.H2O .* variables.pressure; % pressure is in hPa;
-pHCl = variables.HCl .* variables.pressure ./ 1013.25;
+ph2o_hpa = variables.vmr.H2O .* variables.pressure; % pressure is in hPa;
+%pHCl = variables.HCl .* variables.pressure ./ 1013.25;
 
 wt_e0 = 18.452406985;
 wt_e1 = 3505.1578807;
@@ -39,14 +39,31 @@ den_h2so4 = 1 + m_h2so4.*(z1 + z2.*sqrt(m_h2so4) + z3.*m_h2so4);
 % weight percent and mole fraction
 wt = 9800 .* m_h2so4 ./ (98 * m_h2so4 + 1000);
 %wt (wt > 70) = NaN;
-x_h2so4 = wt ./ (wt + (100 - wt) .* 98 ./ 18); % mole fraction
+%molar_h2so4 = den_h2so4.*wt./9.8; %mol/l
+%molar_h20 = den_h2so4.*(100-wt)./.18; %mol/l
 
-molar_h2so4 = den_h2so4.*wt./9.8; %mol/l
-molar_h20 = den_h2so4.*(100-wt)./.18; %mol/l
+%% with hexanoic solubility
+switch inputs.HCLSolubility
+    case 'control'
+        x_h2so4 = wt ./ (wt + (100 - wt) .* 98 ./ 18); % mole fraction
+        
+        term1 = .094 - x_h2so4 .* (.61 - 1.2 .* x_h2so4);        
+        term2 = (8515 - 10718 .* (x_h2so4.^.7)).*T_limiti;                
+        H_hcl_h2so4 = term1 .* exp( -8.68 + term2); %(mol / l / atm)         
+        M_hcl_h2so4 = H_hcl_h2so4.*variables.pp.HCl; %(mol/l/atm * atm) = mol/l        
+        molar_h2so4 = den_h2so4.*wt./9.8;
+    case 'solubility'
+        hex_smoothing_strat = exp(28.986 - 33.458./(variables.T/100) - 18.135 .* log(variables.T/100));
+        ratio_hcl = 1./(1./hex_smoothing_strat - 1);
+        Ka = 10^5.9;        
+        Mm_hex = 116.16;        
+        hex_den = (-5.0083e-7 * variables.T.^2 - 5.2309e-4 .* variables.T + 1.1238) .* 1000; %(from Ghatee et al. 2013 [may not be applicable]) dx.doi.org/10.1021/ie3018675
+        molarity = ratio_hcl .* 1./Mm_hex .* hex_den;
+        H_hcl_h2so4 = molarity .* Ka;
+        M_hcl_h2so4 = H_hcl_h2so4.*variables.pp.HCl; %(mol/l/atm * atm) = mol/l
+        molar_h2so4 = den_h2so4.*wt./9.8; 
+end
 
-term1 = .094 - x_h2so4 .* (.61 - 1.2 * x_h2so4);
-term2 = (8515 - 10718 .* (x_h2so4.^.7)).*Tinv;
-H_hcl_h2so4 = term1 .* exp( -8.68 + term2); %(mol / l / atm)
-M_hcl_h2so4 = H_hcl_h2so4.*pHCl; %(mol/l/atm * atm) = mol/l
+[rxt] = calchetrates(variables,wt,M_hcl_h2so4,molar_h2so4,aw);
 
 end

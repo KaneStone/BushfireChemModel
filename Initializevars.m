@@ -16,11 +16,24 @@ function variables = Initializevars(inputs)
     variables.T = variables.T(20,1);
     switch inputs.region
         case 'midlatitudes'            
-            variables.HCl = .75.*1e-9; 
-            variables.ClONO2 = .75.*1e-10; 
-            variables.ClO = .75.*1e-11;
-            variables.HOCl = .75.*1e-12;
-            variables.H2O = 4.*1e-6;
+            variables.vmr.HCl = .75.*1e-9; 
+            variables.vmr.ClONO2 = .75.*1e-10; 
+            variables.vmr.ClO = .75.*1e-11;
+            variables.vmr.HOCl = .75.*1e-12;
+            variables.vmr.H2O = 4.*1e-6;
+            variables.vmr.SAD = 5e-8;
+            
+            variables.pp.HCl = .75.*1e-9 .* variables.pressure ./ 1013.25; 
+            variables.pp.ClONO2 = .75.*1e-10 .* variables.pressure ./ 1013.25; 
+            variables.pp.ClO = .75.*1e-11 .* variables.pressure ./ 1013.25; 
+            variables.pp.HOCl = .75.*1e-12 .* variables.pressure ./ 1013.25; 
+            variables.pp.H2O = 4.*1e-6 .* variables.pressure ./ 1013.25; 
+            
+            variables.nd.HCl = .75.*1e-9 ./ (inputs.boltz.*variables.T).*(variables.pressure.*1e-6);      
+            variables.nd.ClONO2 = .75.*1e-10 ./ (inputs.boltz.*variables.T).*(variables.pressure.*1e-6); 
+            variables.nd.ClO = .75.*1e-11 ./ (inputs.boltz.*variables.T).*(variables.pressure.*1e-6);     
+            variables.nd.HOCl = .75.*1e-12 ./ (inputs.boltz.*variables.T).*(variables.pressure.*1e-6);     
+            variables.nd.H2O = 4.*1e-6 ./ (inputs.boltz.*variables.T).*(variables.pressure.*1e-6);     
         case 'southpole'            
             variables.HCl = [.5 .75 1].*1e-9; 
             variables.ClONO2 = [.5 .75 1].*1e-10; 

@@ -10,7 +10,7 @@ function [inputs] = Minputs
     inputs.modeltop = 51; %km
     % location
     inputs.region = 'midlatitudes';
-    
+    inputs.HCLSolubility = 'solubility';
     switch inputs.region
         case 'midlatitudes'
             inputs.latitude = -45;
@@ -24,7 +24,7 @@ function [inputs] = Minputs
     inputs.wavelength = 200:400;
     
     % physics
-    inputs.boltz = 1.38066e-23;
+    inputs.k = 1.38066e-23; % boltzmann's
     inputs.earthradius = 6371e3;
     inputs.temperature_surface = 288.15; 
     inputs.pressure_surface = 1013.25; 
