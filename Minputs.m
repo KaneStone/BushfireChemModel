@@ -1,13 +1,16 @@
 function [inputs] = Minputs
 
     % time
+    inputs.year = 2020;
     inputs.hourstep = 3;            %2 hour time step
+    %inputs.secondstep = inputs.hourstep.*60.*60;    
+    inputs.secondstep = 24.*60.*60;    
     inputs.runlength = 1;           %years
     inputs.timesteps = 365*24/inputs.hourstep*inputs.runlength;
+    inputs.days = 365;
     
     % height
-    inputs.heights = 20; % altitude to analyse in km
-    inputs.modeltop = 51; %km
+    inputs.altitude = 20; % altitude to analyse in km    
     % location
     inputs.region = 'midlatitudes';
     inputs.HCLSolubility = 'solubility';
@@ -15,6 +18,7 @@ function [inputs] = Minputs
         case 'midlatitudes'
             inputs.latitude = -45;
             inputs.longitude = -180;
+            inputs.ancildir = '/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/Ancil/variables/';
         case 'polar'
             inputs.latitude = -80;
             inputs.longitude = -180;
