@@ -2,7 +2,8 @@
 clear variables
 %vars = {'O3','HCL','CLONO2','CLO','CL2O2','HOCL','HNO3','O'};
 %vars = {'H2', 'H2O2', 'HO2','CHO2','CL','OH','CH4','CLO','HOCL','CH3CL','CH3BR','CH2BR2','CHBR3'};
-vars = {'O', 'OH','HO2','CL','BR','NO','NO2','O1D','T','H','NO3','N2O5','CLO'};
+vars = {'T','O', 'OH','HO2','CL','BR','NO','NO2','O1D','H','NO3','N2O5','CLO','CLONO2','HCL','HOCL','CL2','H2','CH3CL','CH4','H2O2','OCLO','CL2O2',...
+    'CH3O2','BRO','SO','SO2','CH3CCL3','CH3BR','CCL4','BRCL'};
 tic;
 data = readinBfolder(['/Volumes/ExternalOne/work/data/Bushfire/CESM/finalensembles/','SD/','raw','/'],'*control.nc',1); 
 %data.data.T2 = data.data.T;

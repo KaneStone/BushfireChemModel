@@ -31,7 +31,7 @@ atmosphere.atLevel.P = atmosphere.P(inputs.altitude+1,:);
 atmosphere.atLevel.M = atmosphere.M(inputs.altitude+1,:);
 
 atmosphere.atLevel.O2.nd = atmosphere.atLevel.M.*.21;
-atmosphere.atLevel.ND.nd = atmosphere.atLevel.M.*.78;
+atmosphere.atLevel.N2.nd = atmosphere.atLevel.M.*.78;
 % remove temperature, pressure, and density from fieldnames
 
 

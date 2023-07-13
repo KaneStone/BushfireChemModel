@@ -19,7 +19,7 @@ function [] = createTUVinput(inputs,atmosphere,step)
     fprintf(fid, '%.0f\n', step.year); % year
     fprintf(fid, '%.0f\n', step.month); % month
     fprintf(fid, '%.0f\n', step.day);% day      
-    fprintf(fid, '%.0f\n', step.hour);% day      
+    fprintf(fid, '%.2f\n', step.hour);% day      
     fclose(fid);
 
     % ozone
