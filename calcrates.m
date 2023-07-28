@@ -1,7 +1,7 @@
-function [rates,photo,photoout] = calcrates(inputs,step,atmosphere,variables,dayaverage,i,photoload,photoout,climScaleFactor,SZAdiff)
+function [rates,photo,photoout] = calcrates(inputs,step,atmosphere,variables,dayaverage,i,photoload,photoout,climScaleFactor,SZAdiff,RN)
 
 
-    [photo,TUVnamelist,rates,SZA] = photolysis(inputs,step,atmosphere,variables,i,photoload);                
+    [photo,TUVnamelist,rates,SZA] = photolysis(inputs,step,atmosphere,variables,i,photoload,RN);                
     %SZA2(i) = SZA;   
     
     if inputs.photosave
@@ -12,6 +12,6 @@ function [rates,photo,photoout] = calcrates(inputs,step,atmosphere,variables,day
     end
     
     % gas phase rates
-    rates = gasphaserates(inputs,step,variables,dayaverage,atmosphere,i,rates,photo.data,climScaleFactor,SZAdiff);
+    rates = gasphaserates(inputs,step,variables,dayaverage,atmosphere,i,rates,photo.data,climScaleFactor,SZAdiff,RN);
     
 end

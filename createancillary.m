@@ -109,8 +109,8 @@ for j = 1:length(vars)
         case 'T'
             ancil.T = dtempout2;
         otherwise
-            ancil.(vars{j}).vmr = fillmissing(ancil.(vars{j}).vmr','previous')';
-            ancil.(vars{j}).nd = fillmissing(ancil.(vars{j}).nd','previous')';
+            ancil.(vars{j}).vmr = double(fillmissing(ancil.(vars{j}).vmr','previous')');
+            ancil.(vars{j}).nd = double(fillmissing(ancil.(vars{j}).nd','previous')');
     end
     
     
@@ -192,12 +192,12 @@ if TUV
 
 end
 
-ancil.T = tempout;
-ancil.P = pressureout;
-ancil.M = densityout;
-ancil.O3.nd = ozoneout_nd;
-ancil.O3.vmr = ozoneout;
-ancil.altitude = 0:90;
+ancil.T = double(tempout);
+ancil.P = double(pressureout);
+ancil.M = double(densityout);
+ancil.O3.nd = double(ozoneout_nd);
+ancil.O3.vmr = double(ozoneout);
+ancil.altitude = double(0:90);
     %% output temperature and density data for TUV code
 
 save('/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/Ancil/variables/climIn.mat','ancil');

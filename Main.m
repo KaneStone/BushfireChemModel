@@ -13,6 +13,7 @@ inputs = Minputs;
 % Read in profiles then select by layer
 [atmosphere] = Initializevars(inputs);
 
+
 % initialize changing variables
 variables.O3 = atmosphere.atLevel.O3.nd(1);
 variables.O3 = 0;
@@ -31,6 +32,11 @@ dayaverage.CL(1) = atmosphere.atLevel.CL.nd(1);
 %variables.O = atmosphere.atLevel.O.nd(1);
 
 variables_be = variables;
+variables_be.O3 = atmosphere.atLevel.O3.nd(1);
+
+variables_lst = variables_be;
+variables_lst.O3 = 0;
+
 vars = {'O3','CLONO2','HCL','HOCL','CLO','CL2','CL2O2'};
 %% initiate time step
 photo = [];
@@ -60,8 +66,12 @@ for i = 1:inputs.timesteps
         [climScaleFactor,SZAdiff] = diurnalfromclim(inputs,i);
     end    
     
+    if i == 250
+        a = 1
+    end
+    
     % photolysis and gas phase (will need to add in heterogeneous here)
-    [rates,photo,photoout] = calcrates(inputs,step,atmosphere,variables,dayaverage,i,photoload,photoout,climScaleFactor,SZAdiff);
+    [rates,photo,photoout] = calcrates(inputs,step,atmosphere,variables,dayaverage,i,photoload,photoout,climScaleFactor,SZAdiff,0);
     
     if ~isempty(photoout)
         continue
@@ -104,11 +114,10 @@ for i = 1:inputs.timesteps
     %jclo1(count2) = sum(rates.CLO.destruction([1,2]))./variables.CLO(i);
     
     % setup backwards euler
-    if i == 24
-        a = 1
-    end
     
-    varsOut = raphsonnewton(inputs,i,rates,photo,atmosphere,step,variables_be,dayaverage,vars,climScaleFactor,SZAdiff,photoload);
+    % raphson newton currently doesnt work
+    variables_be = raphsonnewton(inputs,i,rates,photo,atmosphere,step,variables_be,dayaverage,vars,climScaleFactor,SZAdiff,photoload);
+    %variables_lst = linsourceterm(inputs,i,rates,photo,atmosphere,step,variables_lst,dayaverage,vars,climScaleFactor,SZAdiff,photoload);
     
     if isnan(jclo(count2))
         jclo(count2) = 0;
@@ -135,7 +144,7 @@ for i = 1:inputs.timesteps
     end
     count2 = count2+1;
 
-    if i == 20000
+    if i == 200
         a = 1
     end
     if i ==count*1000

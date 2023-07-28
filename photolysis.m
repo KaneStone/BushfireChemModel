@@ -1,4 +1,10 @@
-function [photo,photoNamlist,rates,sza] = photolysis(inputs,step,atmosphere,variables,i,photoload)
+function [photo,photoNamlist,rates,sza] = photolysis(inputs,step,atmosphere,variables,i,photoload,RN)
+
+    if RN
+        timeind = 1;
+    else
+        timeind = i;
+    end
 
     switch inputs.whichphoto
         case 'inter'
@@ -42,7 +48,7 @@ function [photo,photoNamlist,rates,sza] = photolysis(inputs,step,atmosphere,vari
     photoReaction.O3.reactionID = [2;3];
     
     % O3
-    rates.O3.destruction(1) = sum(photo.data(photoReaction.O3.reactionID).*variables.O3(i));
+    rates.O3.destruction(1) = sum(photo.data(photoReaction.O3.reactionID).*variables.O3(timeind));
     
     % O
 %     photoReaction.O.reactionID = [1;1;3;6;8;10;64];
@@ -54,13 +60,13 @@ function [photo,photoNamlist,rates,sza] = photolysis(inputs,step,atmosphere,vari
     % CLONO2
     photoReaction.CLONO2.reactionID = [73;74];
     for k = 1:length(photoReaction.CLONO2.reactionID)
-        rates.CLONO2.destruction(k) = photo.data(photoReaction.CLONO2.reactionID(k)).*variables.CLONO2(i);
+        rates.CLONO2.destruction(k) = photo.data(photoReaction.CLONO2.reactionID(k)).*variables.CLONO2(timeind);
     end
     
     % HCL
     photoReaction.HCL.reactionID = [68];
     for k = 1:length(photoReaction.HCL.reactionID)
-        rates.HCL.destruction(k) = photo.data(photoReaction.HCL.reactionID(k)).*variables.HCL(i);
+        rates.HCL.destruction(k) = photo.data(photoReaction.HCL.reactionID(k)).*variables.HCL(timeind);
     end
     
     % CLO
@@ -68,14 +74,14 @@ function [photo,photoNamlist,rates,sza] = photolysis(inputs,step,atmosphere,vari
     photoReaction.CLO.preactionID = [66,74];
    
     for k = 1:length(photoReaction.CLO.dreactionID)
-            rates.CLO.destruction(k) = photo.data(photoReaction.CLO.dreactionID(k)).*variables.CLO(i);        
+            rates.CLO.destruction(k) = photo.data(photoReaction.CLO.dreactionID(k)).*variables.CLO(timeind);        
     end
     
     photoReaction.CLO.vars = {'OCLO','CLONO2'};
     for k = 1:length(photoReaction.CLO.preactionID)
         fields = fieldnames(variables);
         if sum(contains(fields,photoReaction.CLO.vars{k}))
-            rates.CLO.production(k) = photo.data(photoReaction.CLO.preactionID(k)).*variables.(photoReaction.CLO.vars{k})(i);
+            rates.CLO.production(k) = photo.data(photoReaction.CLO.preactionID(k)).*variables.(photoReaction.CLO.vars{k})(timeind);
         else
             rates.CLO.production(k) = photo.data(photoReaction.CLO.preactionID(k)).*atmosphere.atLevel.(photoReaction.CLO.vars{k}).nd(step.doy);
         end
@@ -84,7 +90,7 @@ function [photo,photoNamlist,rates,sza] = photolysis(inputs,step,atmosphere,vari
     % CL2
     photoReaction.CL2.dreactionID = [62];    
     for k = 1:length(photoReaction.CL2.dreactionID)
-        rates.CL2.destruction(k) = photo.data(photoReaction.CL2.dreactionID(k)).*variables.CL2(i);        
+        rates.CL2.destruction(k) = photo.data(photoReaction.CL2.dreactionID(k)).*variables.CL2(timeind);        
     end    
     
 %     % CL
@@ -93,7 +99,7 @@ function [photo,photoNamlist,rates,sza] = photolysis(inputs,step,atmosphere,vari
 %     for k = 1:length(photoReaction.CL.preactionID)
 %         fields = fieldnames(variables);
 %         if sum(contains(fields,photoReaction.CL.vars{k}))
-%             rates.CL.production(k) = photo.data(photoReaction.CL.preactionID(k)).*variables.(photoReaction.CL.vars{k})(i);
+%             rates.CL.production(k) = photo.data(photoReaction.CL.preactionID(k)).*variables.(photoReaction.CL.vars{k})(timeind);
 %         else
 %             rates.CL.production(k) = photo.data(photoReaction.CL.preactionID(k)).*atmosphere.atLevel.(photoReaction.CL.vars{k}).nd(step.doy);
 %         end
@@ -102,13 +108,13 @@ function [photo,photoNamlist,rates,sza] = photolysis(inputs,step,atmosphere,vari
     %CL2O2
     photoReaction.CL2O2.dreactionID = 67;
     for k = 1:length(photoReaction.CL2O2.dreactionID)
-        rates.CL2O2.destruction(k) = photo.data(photoReaction.CL2O2.dreactionID(k)).*variables.CL2O2(i);
+        rates.CL2O2.destruction(k) = photo.data(photoReaction.CL2O2.dreactionID(k)).*variables.CL2O2(timeind);
     end
     
     %HOCL
     photoReaction.HOCL.dreactionID = 69;
     for k = 1:length(photoReaction.HOCL.dreactionID)
-        rates.HOCL.destruction(k) = photo.data(photoReaction.HOCL.dreactionID(k)).*variables.HOCL(i);
+        rates.HOCL.destruction(k) = photo.data(photoReaction.HOCL.dreactionID(k)).*variables.HOCL(timeind);
     end
     
 end
