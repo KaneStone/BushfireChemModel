@@ -93,17 +93,17 @@ function [photo,photoNamlist,rates,sza] = photolysis(inputs,step,atmosphere,vari
         rates.CL2.destruction(k) = photo.data(photoReaction.CL2.dreactionID(k)).*variables.CL2(timeind);        
     end    
     
-%     % CL
-%     photoReaction.CL.preactionID = [62,63,64,67,68,69,73,74,75,103];    
-%     photoReaction.CL.vars = {'CL2','CLO','CLO','CL2O2','HCL','HOCL','CLONO2','CLONO2','CCL4','BRCL'};
-%     for k = 1:length(photoReaction.CL.preactionID)
-%         fields = fieldnames(variables);
-%         if sum(contains(fields,photoReaction.CL.vars{k}))
-%             rates.CL.production(k) = photo.data(photoReaction.CL.preactionID(k)).*variables.(photoReaction.CL.vars{k})(timeind);
-%         else
-%             rates.CL.production(k) = photo.data(photoReaction.CL.preactionID(k)).*atmosphere.atLevel.(photoReaction.CL.vars{k}).nd(step.doy);
-%         end
-%     end    
+    % CL
+    photoReaction.CL.preactionID = [62,62,63,64,67,67,68,69,73,74,75,103];    
+    photoReaction.CL.vars = {'CL2','CL2','CLO','CLO','CL2O2','CL2O2','HCL','HOCL','CLONO2','CLONO2','CCL4','BRCL'};
+    for k = 1:length(photoReaction.CL.preactionID)
+        fields = fieldnames(variables);
+        if sum(contains(fields,photoReaction.CL.vars{k}))
+            rates.CL.production(k) = photo.data(photoReaction.CL.preactionID(k)).*variables.(photoReaction.CL.vars{k})(timeind);
+        else
+            rates.CL.production(k) = photo.data(photoReaction.CL.preactionID(k)).*atmosphere.atLevel.(photoReaction.CL.vars{k}).nd(step.doy);
+        end
+    end    
     
     %CL2O2
     photoReaction.CL2O2.dreactionID = 67;

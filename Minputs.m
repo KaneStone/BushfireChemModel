@@ -10,7 +10,7 @@ function [inputs] = Minputs
     inputs.days = 365.*inputs.runlength;
     
     % height
-    inputs.altitude = 20; % altitude to analyse in km    
+    inputs.altitude = 25; % altitude to analyse in km    
     % location
     inputs.region = 'midlatitudes';
     inputs.HCLSolubility = 'solubility';
