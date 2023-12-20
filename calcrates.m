@@ -14,4 +14,7 @@ function [rates,photo,photoout] = calcrates(inputs,step,atmosphere,variables,day
     % gas phase rates
     rates = gasphaserates(inputs,step,variables,dayaverage,atmosphere,i,rates,photo.data,climScaleFactor,SZAdiff,RN);
     
+    % heterogeneous rates
+    rates = hetrates(inputs,step,variables,atmosphere,i,rates,RN);
+    
 end

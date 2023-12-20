@@ -53,7 +53,7 @@ function [varsIteration] = backwards(i,varsIteration,vars) % varsVector = yb, % 
     count = 1;
     varsIteration(count+1,:) = varsIteration(count,:);
     conv = 0;
-    eps = .1; %percent
+    eps = .01; %percent
     while conv == 0       
         
         for k = 1:length(vars)
@@ -69,7 +69,11 @@ function [varsIteration] = backwards(i,varsIteration,vars) % varsVector = yb, % 
         % convert from struct to array
         
         G = varsIteration(count+1,:) - varsIteration(count,:) - ratessum.*inputs.secondstep;
-        J = Jacobian(varsIteration(count:count+1,:),varsIteration(1,:),inputs,atmosphere,step,dayaverage,vars,climScaleFactor,SZAdiff,photoload,G,i);
+        if count == 1
+            J = Jacobian(varsIteration(count:count+1,:),varsIteration(1,:),inputs,atmosphere,step,dayaverage,vars,climScaleFactor,SZAdiff,photoload,G,i);
+        elseif inputs.evolvingJ
+            J = Jacobian(varsIteration(count:count+1,:),varsIteration(1,:),inputs,atmosphere,step,dayaverage,vars,climScaleFactor,SZAdiff,photoload,G,i);
+        end
         %J (J < 1) = 0;
 
         JG = J'\G';

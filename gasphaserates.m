@@ -277,7 +277,7 @@ rates.NO2.destruction(NO2_dlength+8) = kout.NO2_HO2_M;
 rates.NO2.destruction(NO2_dlength+9) = kout.CLO_NO2_M;
 rates.NO2.destruction(NO2_dlength+10) = kout.BRO_NO2_M;
 
-
+lifetime = 1./((sum(rates.NO2.destruction))./variables.NO2(timeind));
 %%NO
 % d(NO)/dt = j6*NO2  + j8*N2O5  + j11*NO3  + r52*O2*N  + .5*r266*NO2  + 2*r7*O1D*N2O  + 2*r55*N*NO2  + r60*NO2*O      
 % + r282*SO*NO2                                                                                           
@@ -349,6 +349,89 @@ rates.N2O5.production(1) = kout.NO2_NO3_M;
 %rates.N2O5.production(N2O5_plength+14) = kout.CH3O3_N2O5;
 
 rates.N2O5.destruction(N2O5_dlength+1) = kout.N2O5_M;
+
+
+%% N2O5
+% d(N2O5)/dt = r63*M*NO2*NO3                                                                                          
+% - j7*N2O5  - j8*N2O5  - r64*M*N2O5  - r264*N2O5  - r289*N2O5  - r295*N2O5  - r300*N2O5                
+HNO3_dlength = length(rates.HNO3.destruction); 
+
+rates.HNO3.destruction(HNO3_dlength) = kout.HNO3_OH;
+
+%rates.N2O5.production(N2O5_plength+14) = kout.CH3O3_N2O5;
+
+rates.HNO3.production(HNO3_dlength+1) = kout.NO2_OH_M;
+rates.HNO3.production(HNO3_dlength+1) = kout.NO3_HO2;
+
+
+%% OH
+
+% d(OH)/dt = j9*HNO3  + j12*HO2NO2  + j14*CH3OOH  + j17*H2O  + 2*j20*H2O2  + j25*HOCL  + j31*HOBR  + .66*j55*CH4      
+% + j57*POOH  + j58*CH3COOOH  + j64*C2H5OOH  + j65*EOOH  + j66*C3H7OOH  + j67*ROOH  + j70*XOOH            
+% + j78*ALKOOH  + j79*MEKOOH  + j80*TOLOOH  + j81*TERPOOH  + .5*r266*NO2  + 2*r6*O1D*H2O  + r26*O1D*CH4   
+% + r29*O1D*H2  + r30*O1D*HCL  + r31*O1D*HBR  + r32*O1D*HCN  + r34*H*O3  + 2*r35*H*HO2  + r45*H2*O        
+% + r46*HO2*O  + r47*HO2*O3  + r49*H2O2*O  + r58*NO*HO2  + r70*NO3*HO2  + r78*CL*HO2  + r94*HCL*O         
+% + r95*HOCL*O  + r114*HBR*O  + r115*HOBR*O  + r134*CH2O*O  + .3*r141*CH3OOH*OH  + .65*r147*M*C2H2*OH     
+% + .12*r154*C2H4*O3  + .5*r160*C2H5OOH*OH  + .33*r175*C3H6*O3  + .5*r184*POOH*OH  + .08*r197*MVK*O3      
+% + .215*r203*MACR*O3  + .1*r210*MACROOH*OH  + .27*r221*ISOP*O3  + .7*r259*C10H16*O3                      
+% - r38*O*OH  - r39*O3*OH  - r40*HO2*OH  - 2*r41*OH*OH  - 2*r42*M*OH*OH  - r43*H2*OH  - r44*H2O2*OH       
+% - r50*M*HCN*OH  - r51*CH3CN*OH  - r65*M*NO2*OH  - r66*HNO3*OH  - r69*NO3*OH  - r72*HO2NO2*OH            
+% - r82*CLO*OH  - r83*CLO*OH  - r93*HCL*OH  - r97*HOCL*OH  - r99*CLONO2*OH  - r105*BRO*OH  - r113*HBR*OH  
+% - r118*CH3CL*OH  - r119*CH3CCL3*OH  - r120*HCFC22*OH  - r121*CH3BR*OH  - r123*HCFC141B*OH               
+% - r124*HCFC142B*OH  - r125*CH2BR2*OH  - r126*CHBR3*OH  - r129*CH4*OH  - r130*CO*OH  - r131*M*CO*OH      
+% - r133*CH2O*OH  - r140*CH3OH*OH  - r141*CH3OOH*OH  - r142*HCOOH*OH  - r147*M*C2H2*OH  - r148*C2H6*OH    
+% - r149*M*C2H4*OH  - r155*CH3COOH*OH  - r160*C2H5OOH*OH  - r161*CH3CHO*OH  - r168*CH3COOOH*OH            
+% - r169*GLYALD*OH  - r170*GLYOXAL*OH  - r171*C2H5OH*OH  - r173*PAN*OH  - r174*M*C3H6*OH                  
+% - r180*C3H7OOH*OH  - r181*C3H8*OH  - r184*POOH*OH  - r185*CH3COCH3*OH  - r189*ROOH*OH  - r190*HYAC*OH   
+% - r191*CH3COCHO*OH  - r193*ONIT*OH  - r194*BIGENE*OH  - r196*MVK*OH  - r198*MEK*OH  - r201*MEKOOH*OH    
+% - r202*MACR*OH  - r210*MACROOH*OH  - r219*M*MPAN*OH  - r220*ISOP*OH  - r226*ISOPOOH*OH                  
+% - r232*BIGALK*OH  - r233*ONITR*OH  - r235*HYDRALD*OH  - r238*ALKOOH*OH  - r244*XOOH*OH                  
+% - r246*TOLUENE*OH  - r249*TOLOOH*OH  - r250*CRESOL*OH  - r252*BENZENE*OH  - r255*XYLENE*OH              
+% - r258*C10H16*OH  - r263*TERPOOH*OH  - r268*DMS*OH  - r269*DMS*OH  - r271*NH3*OH  - r275*OCS*OH         
+% - r276*S*OH  - r279*SO*OH  - r286*M*SO2*OH    
+
+OH_plength = length(rates.OH.production);
+
+rates.OH.destruction(1) = kout.OH_O;
+rates.OH.destruction(2) = kout.OH_O3;
+rates.OH.destruction(3) = kout.OH_OH.*2;
+rates.OH.destruction(4) = kout.OH_HO2;
+rates.OH.destruction(5) = kout.OH_H2;
+rates.OH.destruction(6) = kout.OH_H2O2;
+rates.OH.destruction(7) = kout.OH_OH_M.*2;
+rates.OH.destruction(8) = kout.OH_CO_Ma;
+rates.OH.destruction(9) = kout.OH_CO_Mb;
+
+rates.OH.production(OH_plength+1) = kout.H2O_O1D.*2;
+rates.OH.production(OH_plength+2) = kout.H_O3;
+rates.OH.production(OH_plength+3) = kout.HO2_O3;
+rates.OH.production(OH_plength+4) = kout.HO2_O;
+rates.OH.production(OH_plength+5) = kout.H2_O;
+rates.OH.production(OH_plength+6) = kout.H_HO2a*2;
+rates.OH.production(OH_plength+7) = kout.NO_HO2;
+rates.OH.production(OH_plength+8) = kout.H2O2_O;
+rates.OH.production(OH_plength+9) = kout.H2_O1D;
+rates.OH.production(OH_plength+10) = kout.CH4_O1D;
+
+%% HO2
+   
+% - r276*S*OH  - r279*SO*OH  - r286*M*SO2*OH    
+
+HO2_plength = length(rates.HO2.production);
+HO2_dlength = length(rates.HO2.destruction);
+
+rates.HO2.destruction(HO2_dlength+1) = kout.HO2_O3;
+rates.HO2.destruction(HO2_dlength+2) = kout.HO2_O;
+rates.HO2.destruction(HO2_dlength+3) = kout.H_HO2a;
+rates.HO2.destruction(HO2_dlength+4) = kout.H_HO2b;
+rates.HO2.destruction(HO2_dlength+5) = kout.H_HO2c;
+rates.HO2.destruction(HO2_dlength+6) = kout.NO_HO2;
+rates.HO2.destruction(HO2_dlength+7) = kout.OH_HO2;
+
+rates.HO2.production(HO2_plength+1) = kout.H_O2_M;
+rates.HO2.production(HO2_plength+2) = kout.OH_O3;
+rates.HO2.production(HO2_plength+3) = kout.OH_H2O2;
+rates.HO2.production(HO2_plength+4) = kout.H2O2_O;
 
 
 end

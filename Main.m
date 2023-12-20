@@ -42,11 +42,14 @@ variables_be.NO = 1e1;
 variables_be.NO2 = atmosphere.atLevel.NO2.nd(1);
 variables_be.NO3 = atmosphere.atLevel.NO3.nd(1);
 variables_be.N2O5 = atmosphere.atLevel.N2O5.nd(1);
+variables_be.HNO3 = atmosphere.atLevel.HNO3.nd(1);
+variables_be.OH = atmosphere.atLevel.OH.nd(1);
+variables_be.HO2 = atmosphere.atLevel.HO2.nd(1);
 
 variables_lst = variables_be;
 variables_lst.O3 = 0;
 
-vars = {'O','O3','CLONO2','HCL','HOCL','CLO','CL2','CL2O2','CL','NO2','NO','NO3','N2O5'}; % NO NO2 NO3 N2O5, H HO HO2, 
+vars = {'O','O3','CLONO2','HCL','HOCL','CLO','CL2','CL2O2','CL','NO2','NO','NO3','N2O5','OH','HO2','HNO3'}; % NO NO2 NO3 N2O5, H HO HO2, 
 %% put in OH and HO2
 %% Then put in midlatitude aerosol chemistry using SAD
 %% initiate time step
@@ -66,6 +69,8 @@ count2 = 1;
 daycount = 1;
 photoout = [];
 tic;
+
+%atmosphere.atLevel.T(:) = atmosphere.atLevel.T(1);
 for i = 1:inputs.timesteps
     rates = [];
     
@@ -127,6 +132,8 @@ for i = 1:inputs.timesteps
     variables_be = raphsonnewton(inputs,i,rates,photo,atmosphere,step,variables_be,dayaverage,vars,climScaleFactor,SZAdiff,photoload);
     %variables_lst = linsourceterm(inputs,i,rates,photo,atmosphere,step,variables_lst,dayaverage,vars,climScaleFactor,SZAdiff,photoload);
     variables_be.NO3 (variables_be.NO3 <= 0) = 1e5;
+    variables_be.CL (variables_be.CL <= 0) = 50;
+    variables_be.CL2O2 (variables_be.CL2O2 <= 0) = 100;
 %     if isnan(jclo(count2))
 %         jclo(count2) = 0;
 %     end
@@ -152,7 +159,8 @@ for i = 1:inputs.timesteps
 %     end
 %     count2 = count2+1;
 %     
-    if i == 300
+    if i == 200
+        toc;
         a = 1;
     end
      if i ==count*1000

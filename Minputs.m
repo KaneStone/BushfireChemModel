@@ -10,10 +10,10 @@ function [inputs] = Minputs
     inputs.days = 365.*inputs.runlength;
     
     % height
-    inputs.altitude = 35; % altitude to analyse in km    
+    inputs.altitude = 25; % altitude to analyse in km    
     % location
     inputs.region = 'midlatitudes';
-    inputs.HCLSolubility = 'solubility';
+    inputs.HCLSolubility = 'control';
     switch inputs.region
         case 'midlatitudes'
             inputs.latitude = -45;
@@ -22,10 +22,7 @@ function [inputs] = Minputs
         case 'polar'
             inputs.latitude = -80;
             inputs.longitude = -180;
-    end
-    
-    % photochemistry    
-    inputs.wavelength = 200:400;
+    end   
     
     % physics
     inputs.k = 1.38066e-23; % boltzmann's
@@ -39,5 +36,7 @@ function [inputs] = Minputs
     inputs.photosave = 0;
     inputs.whichphoto = 'load'; % load, inter
     
+    %solver
+    inputs.evolvingJ = 0;
     
 end

@@ -144,8 +144,7 @@ function [photo,photoNamlist,rates,sza] = photolysis(inputs,step,atmosphere,vari
     
     % NO    
     photoReaction.NO.preactionID = [6,7,10];
-    photoReaction.NO.vars = {'NO2','NO3','N2O5'};
-    
+    photoReaction.NO.vars = {'NO2','NO3','N2O5'};    
     %production
     for k = 1:length(photoReaction.NO.preactionID)
         fields = fieldnames(variables);
@@ -185,7 +184,46 @@ function [photo,photoNamlist,rates,sza] = photolysis(inputs,step,atmosphere,vari
         rates.N2O5.destruction(k) = photo.data(photoReaction.N2O5.dreactionID(k)).*variables.N2O5(timeind);
     end
     
+    % HNO3
+    photoReaction.HNO3.dreactionID = [13];
     
+    %destruction
+    for k = 1:length(photoReaction.HNO3.dreactionID)
+        rates.HNO3.destruction(k) = photo.data(photoReaction.HNO3.dreactionID(k)).*variables.HNO3(timeind);
+    end
+    
+    % OH
+    % dont havae HO2NO2 -> OH + NO3, so will use reaction HON2NO2 -> HO2 +
+    % NO2 divided by 2 as a proxy.
+    photoReaction.OH.preactionID = [4,5,5,13,14];
+    photoReaction.OH.vars = {'HO2','H2O2','H2O2','HNO3','HO2NO2'};
+    %production
+    for k = 1:length(photoReaction.OH.preactionID)
+        if sum(strcmp(fields,photoReaction.OH.vars{k}))
+            rates.OH.production(k) = photo.data(photoReaction.OH.preactionID(k)).*variables.(photoReaction.OH.vars{k})(timeind);
+        else
+            rates.OH.production(k) = photo.data(photoReaction.OH.preactionID(k)).*atmosphere.atLevel.(photoReaction.OH.vars{k}).nd(step.doy);
+        end
+        rates.OH.production(end) = rates.OH.production(end)./2;
+    end
+    
+    % HO2        
+    photoReaction.HO2.preactionID = [14];
+    photoReaction.HO2.dreactionID = [4];
+    photoReaction.HO2.vars = {'HO2NO2'};
+    %production
+    for k = 1:length(photoReaction.HO2.preactionID)
+        if sum(strcmp(fields,photoReaction.HO2.vars{k}))
+            rates.HO2.production(k) = photo.data(photoReaction.HO2.preactionID(k)).*variables.(photoReaction.HO2.vars{k}).nd(timeind);
+        else
+            rates.HO2.production(k) = photo.data(photoReaction.HO2.preactionID(k)).*atmosphere.atLevel.(photoReaction.HO2.vars{k}).nd(step.doy);
+        end        
+    end
+    
+    %destruction
+    for k = 1:length(photoReaction.HO2.preactionID)
+        rates.HO2.destruction(k) = photo.data(photoReaction.HO2.dreactionID(k)).*variables.HO2(timeind);
+    end
 end
 
     

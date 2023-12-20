@@ -30,18 +30,18 @@ function rate = gasphaseequations(atmosphere,variables,photo,timeind,step,day)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % binary
     rate.N_O2 = 1.50e-11*exp(-3600./atmosphere.atLevel.T(step.doy))... 
-        .*atmosphere.atLevel.N.nd(timeind).*variables.NO2(timeind);                     % N + O2 ->  NO + O             
+        .*atmosphere.atLevel.N.nd(step.doy).*variables.NO2(timeind);                     % N + O2 ->  NO + O             
     rate.N_NO = 2.10e-11*exp(100./atmosphere.atLevel.T(step.doy))...
-        .*atmosphere.atLevel.N.nd(timeind).*variables.NO(timeind);                      % N + NO ->  N2 + O             
+        .*atmosphere.atLevel.N.nd(step.doy).*variables.NO(timeind);                      % N + NO ->  N2 + O             
     
     rate.N_NO2a = 2.90e-12*exp(220./atmosphere.atLevel.T(step.doy))...
-        .*atmosphere.atLevel.N.nd(timeind).*variables.NO2(timeind);                     % N + NO2 ->  N2O + O           
+        .*atmosphere.atLevel.N.nd(step.doy).*variables.NO2(timeind);                     % N + NO2 ->  N2O + O           
     rate.N_NO2b = 1.45e-12*exp(220./atmosphere.atLevel.T(step.doy))...
-        .*atmosphere.atLevel.N.nd(timeind).*variables.NO2(timeind);                     % N + NO2 ->  2*NO              
+        .*atmosphere.atLevel.N.nd(step.doy).*variables.NO2(timeind);                     % N + NO2 ->  2*NO              
     rate.N_NO2c = 1.45e-12*exp(220./atmosphere.atLevel.T(step.doy))...
         .*atmosphere.atLevel.N.nd(step.doy).*variables.NO2(timeind);                     % N + NO2 ->  N2 + O2                  
     rate.NO_HO2 = 3.30e-12*exp(270./atmosphere.atLevel.T(step.doy))...
-        .*variables.NO(timeind).*atmosphere.atLevel.HO2.nd(step.doy).*day;                    % NO + HO2 ->  NO2 + OH         
+        .*variables.NO(timeind).*variables.HO2(timeind);                    % NO + HO2 ->  NO2 + OH         
     rate.NO_O3 = 3.00e-12*exp(-1500./atmosphere.atLevel.T(step.doy))...
         .*variables.NO(timeind).*variables.O3(timeind);                     % NO + O3 ->  NO2 + O2          
     rate.NO2_O = 5.10e-12*exp(210./atmosphere.atLevel.T(step.doy))...
@@ -51,8 +51,8 @@ function rate = gasphaseequations(atmosphere,variables,photo,timeind,step,day)
     rate.NO3_NO = 1.50e-11*exp(170./atmosphere.atLevel.T(step.doy))...
         .*variables.NO3(timeind).*variables.NO(timeind);                    % NO3 + NO ->  2*NO2            
     rate.NO3_O = 1.00e-11.*variables.NO3(timeind).*variables.O(timeind);    % NO3 + O ->  NO2 + O2          
-    rate.NO3_OH = 2.20e-11.*variables.NO3(timeind).*atmosphere.atLevel.OH.nd(step.doy).*day;  % NO3 + OH ->  HO2 + NO2        
-    rate.NO3_HO2 = 3.50e-12.*variables.NO3(timeind).*atmosphere.atLevel.HO2.nd(step.doy).*day;% NO3 + HO2 ->  OH + NO2 + O2   
+    rate.NO3_OH = 2.20e-11.*variables.NO3(timeind).*variables.OH(timeind);  % NO3 + OH ->  HO2 + NO2        
+    rate.NO3_HO2 = 3.50e-12.*variables.NO3(timeind).*variables.HO2(timeind);% NO3 + HO2 ->  OH + NO2 + O2   
     rate.O1D_N2Oa = 7.25E-11*exp(20./atmosphere.atLevel.T(step.doy))...
         .*O1D.*variables.NO2(timeind);                                      % O1D + N2O ->  2*NO
     rate.O1D_N2Ob = 4.63E-11*exp(110./atmosphere.atLevel.T(step.doy))...
@@ -71,14 +71,14 @@ function rate = gasphaseequations(atmosphere,variables,photo,timeind,step,day)
     k3 = 6.5e-34.*exp(1335./atmosphere.atLevel.T(step.doy));
     rate.HNO3_OH = k0 + k3.*atmosphere.atLevel.M(step.doy)./...
         (1 + k3.*atmosphere.atLevel.M(step.doy)./k2)...
-        .*atmosphere.atLevel.HNO3.nd(step.doy).*atmosphere.atLevel.OH.nd(step.doy);                   % HNO3 + OH ->  NO3 + H2O       
+        .*variables.HNO3(timeind).*variables.OH(timeind);                   % HNO3 + OH ->  NO3 + H2O       
     
     %ternary
     k0 = 2.00e-31*(300./atmosphere.atLevel.T(step.doy)).^3.40;           %NO2 + HO2 + M ->  HO2NO2 + M  
     ki = 2.90e-12*(300./atmosphere.atLevel.T(step.doy)).^1.10;  
     kNO2HO2 = termolecular(k0,ki);
     rate.NO2_HO2_M = kNO2HO2...
-        .*variables.NO2(timeind).*atmosphere.atLevel.HO2.nd(step.doy).*day;
+        .*variables.NO2(timeind).*variables.HO2(timeind);
 
     k0 = 9.00e-32*(300./atmosphere.atLevel.T(step.doy)).^1.50;           % NO + O + M ->  NO2 + M        
     ki = 3.00e-11;                                                                 
@@ -99,7 +99,7 @@ function rate = gasphaseequations(atmosphere,variables,photo,timeind,step,day)
     k0 = 1.80e-30*(300./atmosphere.atLevel.T(step.doy)).^3.00;           % NO2 + OH + M ->  HNO3 + M     
     ki = 2.80e-11;  
     rate.NO2_OH_M = termolecular(k0,ki)...
-        .*variables.NO2(timeind).*atmosphere.atLevel.OH.nd(step.doy).*day;
+        .*variables.NO2(timeind).*variables.OH(timeind);
     
     %rate.N2O5_M = kNO2NO3.*1.724138e26.*exp(-10840./atmosphere.atLevel.T(step.doy));          
     N2O5_KO = (5.8e-27.*exp(10840./atmosphere.atLevel.T(step.doy)));
@@ -112,29 +112,36 @@ function rate = gasphaseequations(atmosphere,variables,photo,timeind,step,day)
           
     rate.H_O3 = 1.40e-10*exp(-470./atmosphere.atLevel.T(step.doy))...
         .*atmosphere.atLevel.H.nd(step.doy).*variables.O3(timeind);                       % H + O3 ->  OH + O2       
-    rate.H_HO2a = 7.20e-11.*atmosphere.atLevel.H.nd(step.doy).*atmosphere.atLevel.HO2.nd(step.doy);    % H + HO2 ->  2*OH         
-    rate.H_HO2b = 6.90e-12.*atmosphere.atLevel.H.nd(step.doy).*atmosphere.atLevel.HO2.nd(step.doy);    % H + HO2 ->  H2 + O2      
-    rate.H_HO2c = 1.60e-12.*atmosphere.atLevel.H.nd(step.doy).*atmosphere.atLevel.HO2.nd(step.doy);    % H + HO2 ->  H2O + O      
+    rate.H_HO2a = 7.20e-11.*atmosphere.atLevel.H.nd(step.doy).*variables.HO2(timeind);    % H + HO2 ->  2*OH         
+    rate.H_HO2b = 6.90e-12.*atmosphere.atLevel.H.nd(step.doy).*variables.HO2(timeind);    % H + HO2 ->  H2 + O2      
+    rate.H_HO2c = 1.60e-12.*atmosphere.atLevel.H.nd(step.doy).*variables.HO2(timeind);    % H + HO2 ->  H2O + O      
     rate.OH_O = 1.80e-11*exp(180./atmosphere.atLevel.T(step.doy))...
-        .*atmosphere.atLevel.OH.nd(step.doy).*atmosphere.atLevel.H.nd(step.doy);                      % OH + O ->  H + O2        
+        .*variables.OH(timeind).*atmosphere.atLevel.H.nd(step.doy);                      % OH + O ->  H + O2        
     rate.OH_O3 = 1.70e-12*exp(-940./atmosphere.atLevel.T(step.doy))...
-        .*atmosphere.atLevel.OH.nd(step.doy).*variables.O3(timeind);                     % OH + O3 ->  HO2 + O2     
+        .*variables.OH(timeind).*variables.O3(timeind);                     % OH + O3 ->  HO2 + O2     
     rate.OH_HO2 = 4.80e-11*exp(250./atmosphere.atLevel.T(step.doy))...
-        .*atmosphere.atLevel.OH.nd(step.doy).*atmosphere.atLevel.HO2.nd(step.doy);                    % OH + HO2 ->  H2O + O2    
-    rate.OH_OH = 1.80e-12.*atmosphere.atLevel.OH.nd(step.doy).^2;                        % OH + OH ->  H2O + O                                            
+        .*variables.OH(timeind).*variables.HO2(timeind);                    % OH + HO2 ->  H2O + O2    
+    rate.OH_OH = 1.80e-12.*variables.OH(timeind).^2;                        % OH + OH ->  H2O + O                                            
     rate.OH_H2 = 2.80e-12*exp(-1800./atmosphere.atLevel.T(step.doy))...
-        .*atmosphere.atLevel.OH.nd(step.doy).*atmosphere.atLevel.H2.nd(step.doy);                     % OH + H2 ->  H2O + H      
-    rate.OH_H2O2 = 1.80e-12.*atmosphere.atLevel.OH.nd(step.doy).*atmosphere.atLevel.H2O2.nd(step.doy);% OH + H2O2 ->  H2O + HO2  
+        .*variables.OH(timeind).*atmosphere.atLevel.H2.nd(step.doy);                     % OH + H2 ->  H2O + H      
+    rate.OH_H2O2 = 1.80e-12.*variables.OH(timeind).*atmosphere.atLevel.H2O2.nd(step.doy);% OH + H2O2 ->  H2O + HO2  
     rate.H2_O = 1.60e-11*exp(-4570./atmosphere.atLevel.T(step.doy))...
         .*atmosphere.atLevel.H2.nd(step.doy).*variables.O(timeind);                      % H2 + O ->  OH + H        
     rate.HO2_O = 3.00e-11*exp(200./atmosphere.atLevel.T(step.doy))...
-        .*atmosphere.atLevel.HO2.nd(step.doy).*variables.O(timeind);                     % HO2 + O ->  OH + O2      
+        .*variables.HO2(timeind).*variables.O(timeind);                     % HO2 + O ->  OH + O2      
     rate.HO2_O3 = 1.00e-14*exp(-490./atmosphere.atLevel.T(step.doy))...
-        .*atmosphere.atLevel.HO2.nd(step.doy).*variables.O3(timeind);                    % HO2 + O3 ->  OH + 2*O2       
+        .*variables.HO2(timeind).*variables.O3(timeind);                    % HO2 + O3 ->  OH + 2*O2       
     rate.H2O2_O = 1.40e-12*exp(-2000./atmosphere.atLevel.T(step.doy))...
         .*atmosphere.atLevel.H2O2.nd(step.doy).*variables.O(timeind);                    % H2O2 + O ->  OH + HO2    
     rate.CH3CN_OH = 7.80e-13*exp(-1050./atmosphere.atLevel.T(step.doy))...
-        .*atmosphere.atLevel.CH3CN.nd(step.doy).*atmosphere.atLevel.OH.nd(step.doy);                  % CH3CN + OH ->  HO2       
+        .*atmosphere.atLevel.CH3CN.nd(step.doy).*variables.OH(timeind);                  % CH3CN + OH ->  HO2       
+    
+    rate.H2O_O1D = 1.63e-10.*exp(60./atmosphere.atLevel.T(step.doy))...
+        .*atmosphere.atLevel.H2O.nd(step.doy).*O1D;                        %O1D + H2O ->  2*OH         
+    rate.H2_O1D = 1.2e-10...
+        .*atmosphere.atLevel.H2O.nd(step.doy).*O1D;                        %O1D + H2 ->  H + OH         
+    rate.CH4_O1D = 1.31e-10...
+        .*atmosphere.atLevel.H2O.nd(step.doy).*O1D;                        %O1D + CH4 ->  CH3O2 + OH         
     
     ko = 3e-13.*exp(460./atmosphere.atLevel.T(step.doy));
     kinf = 2.1e-33.*atmosphere.atLevel.M(step.doy).*...
@@ -142,10 +149,10 @@ function rate = gasphaseequations(atmosphere,variables,photo,timeind,step,day)
     fc = 1 + 1.4e-21.*atmosphere.atLevel.H2O.vmr(step.doy).*...
         exp(2200./atmosphere.atLevel.T(step.doy));
     
-    rate.HO2_HO2 = (ko + kinf).*fc.*atmosphere.atLevel.HO2.nd(step.doy).^2;              % HO2 + HO2 ->  H2O2 + O2  
+    rate.HO2_HO2 = (ko + kinf).*fc.*variables.HO2(timeind).^2;              % HO2 + HO2 ->  H2O2 + O2  
     
     rate.HO2NO2_OH = 1.30e-12*exp(380./atmosphere.atLevel.T(step.doy))...
-        .*atmosphere.atLevel.HO2NO2.nd(step.doy).*atmosphere.atLevel.OH.nd(step.doy);                 % HO2NO2 + OH ->  H2O + NO2 + O2                               
+        .*atmosphere.atLevel.HO2NO2.nd(step.doy).*variables.OH(timeind);                 % HO2NO2 + OH ->  H2O + NO2 + O2                               
                                                
     HO2NO2_KO = 2.1e-27.*exp(10135./atmosphere.atLevel.T(step.doy));
     rate.HO2NO2_M = kNO2HO2./HO2NO2_KO.*atmosphere.atLevel.HO2NO2.nd(step.doy);          % HO2NO2 + M ->  HO2 + NO2 + M      
@@ -153,17 +160,17 @@ function rate = gasphaseequations(atmosphere,variables,photo,timeind,step,day)
     k0 = 4.28e-33;                                                      % HCN + OH + M ->  HO2 + M 
     ki = 9.30e-15*(300./atmosphere.atLevel.T(step.doy)).^-4.42;                             
     rate.HCN_OH_M = termolecular(k0,ki).*...
-        atmosphere.atLevel.HCN.nd(step.doy).*atmosphere.atLevel.OH.nd(step.doy);
+        atmosphere.atLevel.HCN.nd(step.doy).*variables.OH(timeind);
     
     k0=4.40e-32*(300./atmosphere.atLevel.T(step.doy)).^1.30;             % H + O2 + M ->  HO2 + M    
     ki = 7.50e-11*(300./atmosphere.atLevel.T(step.doy)).^-0.20;                             
     rate.H_O2_M = termolecular(k0,ki)...
-        .*atmosphere.atLevel.H.nd(step.doy).*atmosphere.atLevel.O2.nd(timeind);
+        .*atmosphere.atLevel.H.nd(step.doy).*atmosphere.atLevel.O2.nd(step.doy);
     
     k0 = 6.90e-31*(300./atmosphere.atLevel.T(step.doy)).^1.00;           % OH + OH + M ->  H2O2 + M 
     ki = 2.60e-11;      
     rate.OH_OH_M = termolecular(k0,ki)...
-        .*atmosphere.atLevel.OH.nd(step.doy).^2;
+        .*variables.OH(timeind).^2;
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CLOx
@@ -176,23 +183,23 @@ function rate = gasphaseequations(atmosphere,variables,photo,timeind,step,day)
     rate.CL_H2O2 = 1.10e-11*exp(-980./atmosphere.atLevel.T(step.doy))...
         .*variables.CL(timeind).*atmosphere.atLevel.H2O2.nd(step.doy);             % CL + H2O2 ->  HCL + HO2                                      
     rate.CL_HO2a = 1.40e-11*exp(270./atmosphere.atLevel.T(step.doy))...
-        .*variables.CL(timeind).*atmosphere.atLevel.HO2.nd(step.doy);                % CL + HO2 ->  HCL + O2                                        
+        .*variables.CL(timeind).*variables.HO2(timeind);                % CL + HO2 ->  HCL + O2                                        
     rate.CL_HO2b = 3.60e-11*exp(-375./atmosphere.atLevel.T(step.doy))...
-        .*variables.CL(timeind).*atmosphere.atLevel.HO2.nd(step.doy);                      % CL + HO2 ->  OH + CLO                                        
+        .*variables.CL(timeind).*variables.HO2(timeind);                      % CL + HO2 ->  OH + CLO                                        
     rate.CL_CH2O = 8.10e-11*exp(-30./atmosphere.atLevel.T(step.doy))...
-        .*variables.CL(timeind).*atmosphere.atLevel.CH2O.nd(timeind);                    % CL + CH2O ->  HCL + HO2 + CO                                 
+        .*variables.CL(timeind).*atmosphere.atLevel.CH2O.nd(step.doy);                    % CL + CH2O ->  HCL + HO2 + CO                                 
     rate.CL_CH4 = 7.30e-12*exp(-1280./atmosphere.atLevel.T(step.doy))...
-        .*variables.CL(timeind).*atmosphere.atLevel.CH4.nd(timeind);         % CL + CH4 ->  CH3O2 + HCL                                     
+        .*variables.CL(timeind).*atmosphere.atLevel.CH4.nd(step.doy);         % CL + CH4 ->  CH3O2 + HCL                                     
     rate.CLO_O = 2.80e-11*exp(85./atmosphere.atLevel.T(step.doy))...
         .*variables.CLO(timeind).*variables.O(timeind);            % CLO + O ->  CL + O2                                          
     rate.CLO_OHa = 7.40e-12*exp(270./atmosphere.atLevel.T(step.doy))...
-        .*variables.CLO(timeind).*atmosphere.atLevel.OH.nd(step.doy);           % CLO + OH ->  CL + HO2                                        
+        .*variables.CLO(timeind).*variables.OH(timeind);           % CLO + OH ->  CL + HO2                                        
     rate.CLO_OHb = 6.00e-13*exp(230./atmosphere.atLevel.T(step.doy))...
-        .*variables.CLO(timeind).*atmosphere.atLevel.OH.nd(step.doy);           % CLO + OH ->  HCL + O2                                        
+        .*variables.CLO(timeind).*variables.OH(timeind);           % CLO + OH ->  HCL + O2                                        
     rate.CLO_HO2 = 2.60e-12*exp(290./atmosphere.atLevel.T(step.doy))...
-        .*variables.CLO(timeind).*atmosphere.atLevel.HO2.nd(step.doy);           % CLO + HO2 ->  O2 + HOCL                                      
+        .*variables.CLO(timeind).*variables.HO2(timeind);           % CLO + HO2 ->  O2 + HOCL                                      
     rate.CLO_CH3O2 = 3.30e-12*exp(-115./atmosphere.atLevel.T(step.doy))...
-        .*variables.CL(timeind).*atmosphere.atLevel.CH3O2.nd(timeind);          % CLO + CH3O2 ->  CL + HO2 + CH2O                              
+        .*variables.CL(timeind).*atmosphere.atLevel.CH3O2.nd(step.doy);          % CLO + CH3O2 ->  CL + HO2 + CH2O                              
     rate.CLO_NO = 6.40e-12*exp(290./atmosphere.atLevel.T(step.doy))...
         .*variables.CLO(timeind).*variables.NO(timeind);           % CLO + NO ->  NO2 + CL                                        
     
@@ -218,7 +225,7 @@ function rate = gasphaseequations(atmosphere,variables,photo,timeind,step,day)
     rate.CL2O2_M = kCLO_NO2_M./CL2O2_KO.*variables.CL2O2(timeind);                                 % CL2O2 + M ->  CLO + CLO + M                                  
     
     rate.HCL_OH = 1.80e-12*exp(-250./atmosphere.atLevel.T(step.doy))...
-        .*variables.HCL(timeind).*atmosphere.atLevel.OH.nd(step.doy);          % HCL + OH ->  H2O + CL                                        
+        .*variables.HCL(timeind).*variables.OH(timeind);          % HCL + OH ->  H2O + CL                                        
     rate.HCL_O = 1.00e-11*exp(-3300./atmosphere.atLevel.T(step.doy))...
         .*variables.HCL(timeind).*variables.O(timeind);         % HCL + O ->  CL + OH                                          
     rate.HCL_O1D = 1.5e-10.*variables.HCL(timeind).*O1D;                    % HCL + O1D -> CL + OH
@@ -226,11 +233,11 @@ function rate = gasphaseequations(atmosphere,variables,photo,timeind,step,day)
     rate.HOCL_CL = 3.40e-12*exp(-130./atmosphere.atLevel.T(step.doy))...
         .*variables.HOCL(timeind).*variables.CL(timeind);          % HOCL + CL ->  HCL + CLO                                      
     rate.HOCL_OH = 3.00e-12*exp(-500./atmosphere.atLevel.T(step.doy))...
-        .*variables.HOCL(timeind).*atmosphere.atLevel.OH.nd(step.doy);          % HOCL + OH ->  H2O + CLO                                      
+        .*variables.HOCL(timeind).*variables.OH(timeind);          % HOCL + OH ->  H2O + CLO                                      
     rate.CLONO2_O = 3.60e-12*exp(-840./atmosphere.atLevel.T(step.doy))...
         .*variables.CLONO2(timeind).*variables.O(timeind);          % CLONO2 + O ->  CLO + NO3                                     
     rate.CLONO2_OH = 1.20e-12*exp(-330./atmosphere.atLevel.T(step.doy))...
-        .*variables.CLONO2(timeind).*atmosphere.atLevel.OH.nd(step.doy);          % CLONO2 + OH ->  HOCL + NO3                                   
+        .*variables.CLONO2(timeind).*variables.OH(timeind);          % CLONO2 + OH ->  HOCL + NO3                                   
     rate.CLONO2_CL = 6.50e-12*exp(135./atmosphere.atLevel.T(step.doy))...
         .*variables.CLONO2(timeind).*variables.CL(timeind);% CLONO2 + CL ->  CL2 + NO3
 
@@ -244,15 +251,15 @@ function rate = gasphaseequations(atmosphere,variables,photo,timeind,step,day)
     rate.BR_O3 = 1.60e-11*exp(-780./atmosphere.atLevel.T(step.doy))...
         .*atmosphere.atLevel.BR.nd(step.doy).*variables.O3(timeind);                     % BR + O3 ->  BRO + O2                                         
     rate.BR_HO2 = 4.80e-12*exp(-310./atmosphere.atLevel.T(step.doy))...
-        .*atmosphere.atLevel.BR.nd(step.doy).*atmosphere.atLevel.HO2.nd(step.doy);% BR + HO2 ->  HBR + O2                                        
+        .*atmosphere.atLevel.BR.nd(step.doy).*variables.HO2(timeind);% BR + HO2 ->  HBR + O2                                        
     rate.BR_CH2O = 1.70e-11*exp(-800./atmosphere.atLevel.T(step.doy))...
-        .*atmosphere.atLevel.BR.nd(step.doy).*atmosphere.atLevel.CH2O.nd(timeind);% BR + CH2O ->  HBR + HO2 + CO                                 
+        .*atmosphere.atLevel.BR.nd(step.doy).*atmosphere.atLevel.CH2O.nd(step.doy);% BR + CH2O ->  HBR + HO2 + CO                                 
     rate.BRO_O = 1.90e-11*exp(230./atmosphere.atLevel.T(step.doy))...
         .*atmosphere.atLevel.BRO.nd(step.doy).*variables.O(timeind);% BRO + O ->  BR + O2                                          
     rate.BRO_OH = 1.70e-11*exp(250./atmosphere.atLevel.T(step.doy))...
-        .*atmosphere.atLevel.BRO.nd(step.doy).*atmosphere.atLevel.OH.nd(step.doy);% BRO + OH ->  BR + HO2                                        
+        .*atmosphere.atLevel.BRO.nd(step.doy).*variables.OH(timeind);% BRO + OH ->  BR + HO2                                        
     rate.BRO_HO2 = 4.50e-12*exp(460./atmosphere.atLevel.T(step.doy))...
-        .*atmosphere.atLevel.BRO.nd(step.doy).*atmosphere.atLevel.HO2.nd(step.doy);% BRO + HO2 ->  HOBR + O2                                      
+        .*atmosphere.atLevel.BRO.nd(step.doy).*variables.HO2(timeind);% BRO + HO2 ->  HOBR + O2                                      
     rate.BRO_NO = 8.80e-12*exp(260./atmosphere.atLevel.T(step.doy))...
         .*atmosphere.atLevel.BRO.nd(step.doy).*variables.NO(timeind);           % BRO + NO ->  BR + NO2                                        
     
@@ -270,17 +277,17 @@ function rate = gasphaseequations(atmosphere,variables,photo,timeind,step,day)
     rate.BRO_BRO = 1.50e-12*exp(230./atmosphere.atLevel.T(step.doy))...
         .*atmosphere.atLevel.BRO.nd(step.doy).*atmosphere.atLevel.BRO.nd(step.doy);           % BRO + BRO ->  2*BR + O2                                      
     rate.HBR_OH = 5.50e-12*exp(200./atmosphere.atLevel.T(step.doy))...
-        .*atmosphere.atLevel.HBR.nd(step.doy).*atmosphere.atLevel.OH.nd(step.doy);           % HBR + OH ->  BR + H2O                                        
+        .*atmosphere.atLevel.HBR.nd(step.doy).*variables.OH(timeind);           % HBR + OH ->  BR + H2O                                        
     rate.HBR_O = 5.80e-12*exp(-1500./atmosphere.atLevel.T(step.doy))...
     .*atmosphere.atLevel.HBR.nd(step.doy).*variables.O(timeind);         % HBR + O ->  BR + OH                                          
     rate.HOBR_O = 1.20e-10*exp(-430./atmosphere.atLevel.T(step.doy))...
-        .*atmosphere.atLevel.HOBR.nd(timeind).*variables.O(timeind);          % HOBR + O ->  BRO + OH                                        
+        .*atmosphere.atLevel.HOBR.nd(step.doy).*variables.O(timeind);          % HOBR + O ->  BRO + OH                                        
     rate.BRONO2_O = 1.90e-11*exp(215./atmosphere.atLevel.T(step.doy))...
         .*atmosphere.atLevel.BRONO2.nd(step.doy).*variables.O(timeind);% BRONO2 + O ->  BRO + NO3                                     
     rate.CH3CL_CL = 2.17e-11*exp(-1130./atmosphere.atLevel.T(step.doy))...
         .*atmosphere.atLevel.CH3CL.nd(step.doy).*variables.CL(timeind);% CH3CL + CL ->  HO2 + CO + 2*HCL                              
     rate.CH3CL_OH = 2.40e-12*exp(-1250./atmosphere.atLevel.T(step.doy))...
-        .*atmosphere.atLevel.CH3CL.nd(step.doy).*atmosphere.atLevel.OH.nd(step.doy);         % CH3CL + OH ->  CL + H2O + HO2                                
+        .*atmosphere.atLevel.CH3CL.nd(step.doy).*variables.OH(timeind);         % CH3CL + OH ->  CL + H2O + HO2                                
     rate.CH3BR_CL = 1.40e-11*exp(-1030./atmosphere.atLevel.T(step.doy))...
         .*atmosphere.atLevel.CH3BR.nd(step.doy).*variables.CL(timeind);         % CH3BR + CL ->  HCL + HO2 + BR        
     rate.CH2BR2_CL = 6.30e-12*exp(-800./atmosphere.atLevel.T(step.doy))...
@@ -290,7 +297,21 @@ function rate = gasphaseequations(atmosphere,variables,photo,timeind,step,day)
     rate.C2H6_CL = 7.20e-11*exp(-70./atmosphere.atLevel.T(step.doy))...
         .*atmosphere.atLevel.C2H6.nd(step.doy).*variables.CL(timeind); % C2H6 + CL ->  HCL + C2H5O2  
     rate.CH3CCL3_OH = 1.64e-12*exp(-1520./atmosphere.atLevel.T(step.doy))...
-         .*atmosphere.atLevel.CH3CCL3.nd(step.doy).*atmosphere.atLevel.OH.nd(step.doy);         % CH3CCL3 + OH ->  H2O + 3*CL                                  
+         .*atmosphere.atLevel.CH3CCL3.nd(step.doy).*variables.OH(timeind);         % CH3CCL3 + OH ->  H2O + 3*CL
+     
+    
+    
+    k0=5.90e-33*(300./atmosphere.atLevel.T(step.doy)).^1;            % OH + CO + M ->  HOCO + M
+    ki=1.10e-12*(300./atmosphere.atLevel.T(step.doy)).^1.3;  %                                                         
+    rate.OH_CO_Ma = termolecular(k0,ki)...
+        .*variables.OH(timeind).*atmosphere.atLevel.CO.nd(step.doy);
+    
+    k0=1.50e-13*(300./atmosphere.atLevel.T(step.doy)).^0;            % OH + CO + M ->  H + CO2 + M
+    ki=2.10e9*(300./atmosphere.atLevel.T(step.doy)).^6.1;  %        
+    
+    rate.OH_CO_Mb = chemicalactivation(k0,ki)...
+        .*variables.OH(timeind).*atmosphere.atLevel.CO.nd(step.doy);
+     
 %     rate(93) = 1.05e-12*exp(-1600./atmosphere.atLevel.T(step.doy));         % HCFC22 + OH ->  H2O + CL                                     
 %     rate(94) = 2.35e-12*exp(-1300./atmosphere.atLevel.T(step.doy));         % CH3BR + OH ->  BR + H2O + HO2                                
 
@@ -341,5 +362,13 @@ function rate = gasphaseequations(atmosphere,variables,photo,timeind,step,day)
         kout = rate1.*x.^xpo;                     
     end
 
+    function kout = chemicalactivation(k0,ki)
+        x = .6;
+        xpo = k0./(ki./atmosphere.atLevel.M(step.doy));
+        rate1 = k0./(1+xpo);
+        xpo = log10(xpo);
+        xpo = 1./(1+xpo.^2);
+        kout = rate1.*x.^xpo;     
+    end
 
 end
