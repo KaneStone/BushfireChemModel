@@ -34,12 +34,21 @@ dayaverage.CL(1) = atmosphere.atLevel.CL.nd(1);
 
 variables_be = variables;
 variables_be.O3 = atmosphere.atLevel.O3.nd(1);
+%variables_be.O = atmosphere.atLevel.O.nd(1);
+variables_be.O = 1e1;
 variables_be.CL = atmosphere.atLevel.CL.nd(1);
+variables_be.NO = atmosphere.atLevel.NO.nd(1);
+variables_be.NO = 1e1;
+variables_be.NO2 = atmosphere.atLevel.NO2.nd(1);
+variables_be.NO3 = atmosphere.atLevel.NO3.nd(1);
+variables_be.N2O5 = atmosphere.atLevel.N2O5.nd(1);
 
 variables_lst = variables_be;
 variables_lst.O3 = 0;
 
-vars = {'O3','CLONO2','HCL','HOCL','CLO','CL2','CL2O2','CL'};
+vars = {'O','O3','CLONO2','HCL','HOCL','CLO','CL2','CL2O2','CL','NO2','NO','NO3','N2O5'}; % NO NO2 NO3 N2O5, H HO HO2, 
+%% put in OH and HO2
+%% Then put in midlatitude aerosol chemistry using SAD
 %% initiate time step
 photo = [];
 rates = [];
@@ -117,7 +126,7 @@ for i = 1:inputs.timesteps
     % raphson newton currently doesnt work   
     variables_be = raphsonnewton(inputs,i,rates,photo,atmosphere,step,variables_be,dayaverage,vars,climScaleFactor,SZAdiff,photoload);
     %variables_lst = linsourceterm(inputs,i,rates,photo,atmosphere,step,variables_lst,dayaverage,vars,climScaleFactor,SZAdiff,photoload);
-    
+    variables_be.NO3 (variables_be.NO3 <= 0) = 1e5;
 %     if isnan(jclo(count2))
 %         jclo(count2) = 0;
 %     end
@@ -143,8 +152,8 @@ for i = 1:inputs.timesteps
 %     end
 %     count2 = count2+1;
 %     
-     if i == 300
-         a = 1;
+    if i == 300
+        a = 1;
     end
      if i ==count*1000
          toc;
@@ -172,8 +181,9 @@ dayaverage.CL = mean(reshape(variables_be.CL(1,1:inputs.timesteps),[tstepsinday,
 dayaverage.CL2 = mean(reshape(variables_be.CL2(1,1:inputs.timesteps),[tstepsinday,inputs.days]),1,'omitnan');
 dayaverage.HOCL = mean(reshape(variables_be.HOCL(1,1:inputs.timesteps),[tstepsinday,inputs.days]),1,'omitnan');
 dayaverage.CL2O2 = mean(reshape(variables_be.CL2O2(1,1:inputs.timesteps),[tstepsinday,inputs.days]),1,'omitnan');
-
-
+dayaverage.NO2 = mean(reshape(variables_be.CL2O2(1,1:inputs.timesteps),[tstepsinday,inputs.days]),1,'omitnan');
+dayaverage.NO = mean(reshape(variables_be.CL2O2(1,1:inputs.timesteps),[tstepsinday,inputs.days]),1,'omitnan');
+dayaverage.N2O5 = mean(reshape(variables_be.CL2O2(1,1:inputs.timesteps),[tstepsinday,inputs.days]),1,'omitnan');
 
 %inputs.days
 
