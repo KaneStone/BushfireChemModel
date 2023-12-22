@@ -1,4 +1,4 @@
-function rates = gasphaserates(inputs,step,variables,dayaverage,atmosphere,i,rates,photo,climScaleFactor,SZAdiff,RN)
+function [rates] = gasphaserates(inputs,step,variables,dayaverage,atmosphere,i,rates,photo,climScaleFactor,SZAdiff,RN)
 
     if RN
         timeind = 1;
@@ -6,7 +6,7 @@ function rates = gasphaserates(inputs,step,variables,dayaverage,atmosphere,i,rat
         timeind = i;
     end
 
-Clfact = 1.015;    
+Clfact = 1.000;    
     
 day = climScaleFactor(round(step.hour.*1./inputs.hourstep+1)); % rounding to strip stray 0 decimals    
 kout = gasphaseequations(atmosphere,variables,photo,timeind,step,day);    
@@ -79,6 +79,7 @@ rates.CLONO2.production(1) = kout.CLO_NO2_M;
 rates.CLONO2.destruction(CLONO2_dlength+1) = kout.CLONO2_O;
 rates.CLONO2.destruction(CLONO2_dlength+2) = kout.CLONO2_OH;
 rates.CLONO2.destruction(CLONO2_dlength+3) = kout.CLONO2_CL;
+
 
 %% HCL
 %  r75*CL*H2  + r76*CL*H2O2  + r77*CL*HO2  + r79*CL*CH2O  + r80*CL*CH4  + r83*CLO*OH  + r96*HOCL*CL
@@ -177,7 +178,7 @@ CL_plength = length(rates.CL.production);
 CL_dlength = 0;
 
 
-rates.CL.production(CL_plength+1) = kout.HCL_O1D;
+rates.CL.production(CL_plength+1) = kout.HCL_O1D; 
 rates.CL.production(CL_plength+2) = kout.CLO_O;
 rates.CL.production(CL_plength+3) = kout.CLO_OHa;
 rates.CL.production(CL_plength+4) = kout.CLO_CH3O2;
@@ -190,6 +191,8 @@ rates.CL.production(CL_plength+10) = kout.BRO_CLOb;
 rates.CL.production(CL_plength+11) = kout.CH3CL_OH;
 rates.CL.production(CL_plength+12) = kout.CH3CCL3_OH;
 rates.CL.production(CL_plength+13) = kout.CLO_SO;
+
+%reaction_namelist.CL.production{end+1:}
 
 rates.CL.destruction(CL_dlength+1) = kout.CL_O3.*Clfact; % This term to make temporarily stable (only works at 25 km)
 rates.CL.destruction(CL_dlength+2) = kout.CL_H2;
@@ -205,6 +208,13 @@ rates.CL.destruction(CL_dlength+11) = kout.CH3BR_CL;
 rates.CL.destruction(CL_dlength+12) = kout.CH2BR2_CL;
 rates.CL.destruction(CL_dlength+13) = kout.CHBR3_CL;
 rates.CL.destruction(CL_dlength+14) = kout.C2H6_CL;
+
+%% OCLO
+rates.OCLO.production(1) = kout.CLO_CLOc;
+rates.OCLO.production(2) = kout.BRO_CLOa;
+
+%% BRCL
+rates.BRCL.production(1) = kout.BRO_CLOc;
 
 %% CL2O2 r91*M*CLO*CLO
           %         - j24*CL2O2  - r92*M*CL2O2
@@ -232,6 +242,93 @@ rates.HOCL.destruction(HOCL_dlength+1) =  kout.HOCL_O;
 rates.HOCL.destruction(HOCL_dlength+2) =  kout.HOCL_CL;
 rates.HOCL.destruction(HOCL_dlength+3) =  kout.HOCL_OH;
 
+%% BRO
+% d(BRO)/dt = j34*BRONO2  + r101*BR*O3  + r115*HOBR*O  + r116*BRONO2*O                                                
+% - j30*BRO  - r104*O*BRO  - r105*OH*BRO  - r106*HO2*BRO  - r107*NO*BRO  - r108*M*NO2*BRO  
+BRO_dlength = length(rates.BRO.destruction); 
+BRO_plength = length(rates.BRO.production); 
+
+if i == 267
+    a = 1
+end
+rates.BRO.production(BRO_plength+1) = kout.BR_O3;
+rates.BRO.production(BRO_plength+2) = kout.HOBR_O;
+rates.BRO.production(BRO_plength+3) = kout.BRONO2_O;
+
+rates.BRO.destruction(BRO_dlength+1) =  kout.BRO_O;
+rates.BRO.destruction(BRO_dlength+2) =  kout.BRO_OH;
+rates.BRO.destruction(BRO_dlength+3) =  kout.BRO_HO2;
+rates.BRO.destruction(BRO_dlength+4) =  kout.BRO_NO;
+rates.BRO.destruction(BRO_dlength+5) =  kout.BRO_NO2_M;
+rates.BRO.destruction(BRO_dlength+6) =  kout.BRO_CLOa;
+rates.BRO.destruction(BRO_dlength+7) =  kout.BRO_CLOb;
+rates.BRO.destruction(BRO_dlength+8) =  kout.BRO_CLOc;
+rates.BRO.destruction(BRO_dlength+8) =  kout.BRO_BRO.*2;
+
+%% HOBR
+% d(HOBR)/dt = r291*BRONO2  + r299*BRONO2  + r302*BRONO2  + r106*BRO*HO2                                              
+% - j31*HOBR  - r115*O*HOBR  - r294*HCL*HOBR  - r305*HCL*HOBR   
+
+HOBR_dlength = length(rates.HOBR.destruction); 
+
+rates.HOBR.production(1) = kout.BRO_HO2;
+
+rates.HOBR.destruction(HOBR_dlength+1) =  kout.HOBR_O;
+
+%% HBR
+% d(HBR)/dt = r102*BR*HO2  + r103*BR*CH2O                                                                             
+% - j32*HBR  - r31*O1D*HBR  - r113*OH*HBR  - r114*O*HBR  
+
+rates.HBR.production(1) = kout.BR_HO2;
+rates.HBR.production(2) = kout.BR_CH2O;
+
+rates.HBR.destruction(1) =  kout.HBR_OH;
+rates.HBR.destruction(2) =  kout.HBR_O;
+rates.HBR.destruction(3) =  kout.HBR_O1D;
+
+%% BRONO2
+% d(BRONO2)/dt = r108*M*BRO*NO2                                                                                       
+% - j33*BRONO2  - j34*BRONO2  - r291*BRONO2  - r299*BRONO2  - r302*BRONO2  - r116*O*BRONO2    
+
+BRONO2_dlength = length(rates.BRONO2.destruction); 
+
+rates.BRONO2.production(1) = kout.BRO_NO2_M;
+
+rates.BRONO2.destruction(BRONO2_dlength+1) =  kout.BRONO2_O;
+
+%% BR
+% BR)/dt = j29*BRCL  + j30*BRO  + j31*HOBR  + j32*HBR  + j33*BRONO2  + j46*CH3BR  + j47*CF3BR  + 2*j48*H1202        
+% + 2*j49*H2402  + j50*CF2CLBR  + 3*j51*CHBR3  + 2*j52*CH2BR2  + r19*O1D*CH3BR  + r20*O1D*CF2CLBR         
+% + r21*O1D*CF3BR  + 2*r22*O1D*H1202  + 2*r23*O1D*H2402  + 3*r24*O1D*CHBR3  + 2*r25*O1D*CH2BR2            
+% + r31*O1D*HBR  + r104*BRO*O  + r105*BRO*OH  + r107*BRO*NO  + r109*BRO*CLO  + r110*BRO*CLO               
+% + 2*r112*BRO*BRO  + r113*HBR*OH  + r114*HBR*O  + r121*CH3BR*OH  + r122*CH3BR*CL  + 2*r125*CH2BR2*OH     
+% + 3*r126*CHBR3*OH  + 2*r127*CH2BR2*CL  + 3*r128*CHBR3*CL  + r284*SO*BRO                                 
+% - r101*O3*BR  - r102*HO2*BR  - r103*CH2O*BR 
+
+BR_plength = length(rates.BR.production); 
+
+rates.BR.production(BR_plength+1) = kout.CHBR3_O1D.*3;
+rates.BR.production(BR_plength+1) = kout.CH3BR_O1D;
+rates.BR.production(BR_plength+2) = kout.CH2BR2_O1D.*2;
+rates.BR.production(BR_plength+3) = kout.HBR_O1D;
+rates.BR.production(BR_plength+4) = kout.BRO_O;
+rates.BR.production(BR_plength+5) = kout.BRO_OH;
+rates.BR.production(BR_plength+6) = kout.BRO_NO;
+rates.BR.production(BR_plength+7) = kout.BRO_CLOa;
+rates.BR.production(BR_plength+8) = kout.BRO_CLOb;
+rates.BR.production(BR_plength+9) = kout.BRO_BRO.*2;
+rates.BR.production(BR_plength+10) = kout.HBR_OH;
+rates.BR.production(BR_plength+11) = kout.HBR_O;
+rates.BR.production(BR_plength+12) = kout.CH3BR_CL;
+rates.BR.production(BR_plength+13) = kout.CH3BR_OH;%
+rates.BR.production(BR_plength+14) = kout.CH2BR2_OH.*2;%
+rates.BR.production(BR_plength+15) = kout.CHBR3_OH.*3;%
+rates.BR.production(BR_plength+16) = kout.CH2BR2_CL.*2;
+rates.BR.production(BR_plength+17) = kout.CHBR3_CL.*3;
+
+rates.BR.destruction(1) = kout.BR_O3;
+rates.BR.destruction(2) = kout.BR_HO2;
+rates.BR.destruction(3) = kout.BR_CH2O;
 %% NO2     
 
 % j7*N2O5  + j9*HNO3  + j10*NO3  + j13*HO2NO2  + j28*CLONO2  + j34*BRONO2  + .6*j59*PAN  + j60*MPAN       
@@ -255,7 +352,7 @@ rates.NO2.production(NO2_plength+1) = kout.N2O5_M;
 rates.NO2.production(NO2_plength+2) = kout.HO2NO2_M;
 rates.NO2.production(NO2_plength+3) = kout.NO_O_M;
 rates.NO2.production(NO2_plength+4) = kout.NO_HO2;
-rates.NO2.production(NO2_plength+5) = kout.NO_O3;%.*1.0037; % The 1.0037 term is to make NOx cycle stable at reasonable concentrations. (only works for 25 km)
+rates.NO2.production(NO2_plength+5) = kout.NO_O3; % The 1.0037 term is to make NOx cycle stable at reasonable concentrations. (only works for 25 km)
 rates.NO2.production(NO2_plength+6) = kout.NO3_NO.*2;
 rates.NO2.production(NO2_plength+7) = kout.NO3_O;
 rates.NO2.production(NO2_plength+8) = kout.NO3_OH;
@@ -264,6 +361,7 @@ rates.NO2.production(NO2_plength+10) = kout.HO2NO2_OH;
 rates.NO2.production(NO2_plength+11) = kout.CLO_NO;
 rates.NO2.production(NO2_plength+12) = kout.BRO_NO;
 rates.NO2.production(NO2_plength+13) = kout.CH3O2_NO;
+%rates.NO2.production(NO2_plength+14) = kout.PAN_M;
 %rates.NO2.production(NO2_plength+14) = kout.CH3O3_NO;
 
 rates.NO2.destruction(NO2_dlength+1) = kout.N_NO2a;
@@ -278,6 +376,7 @@ rates.NO2.destruction(NO2_dlength+9) = kout.CLO_NO2_M;
 rates.NO2.destruction(NO2_dlength+10) = kout.BRO_NO2_M;
 
 lifetime = 1./((sum(rates.NO2.destruction))./variables.NO2(timeind));
+
 %%NO
 % d(NO)/dt = j6*NO2  + j8*N2O5  + j11*NO3  + r52*O2*N  + .5*r266*NO2  + 2*r7*O1D*N2O  + 2*r55*N*NO2  + r60*NO2*O      
 % + r282*SO*NO2                                                                                           
@@ -360,9 +459,20 @@ rates.HNO3.destruction(HNO3_dlength) = kout.HNO3_OH;
 
 %rates.N2O5.production(N2O5_plength+14) = kout.CH3O3_N2O5;
 
-rates.HNO3.production(HNO3_dlength+1) = kout.NO2_OH_M;
-rates.HNO3.production(HNO3_dlength+1) = kout.NO3_HO2;
+rates.HNO3.production(1) = kout.NO2_OH_M;
+rates.HNO3.production(2) = kout.NO3_HO2;
 
+%% HO2NO2
+% d(HO2NO2)/dt = r71*M*NO2*HO2                                                                                        
+% - j12*HO2NO2  - j13*HO2NO2  - r73*M*HO2NO2  - r72*OH*HO2NO2                   
+HO2NO2_dlength = length(rates.HO2NO2.destruction); 
+
+rates.HO2NO2.destruction(HO2NO2_dlength+1) = kout.HO2NO2_M;
+rates.HO2NO2.destruction(HO2NO2_dlength+2) = kout.HO2NO2_OH;
+
+%rates.N2O5.production(N2O5_plength+14) = kout.CH3O3_N2O5;
+
+rates.HO2NO2.production(1) = kout.NO2_HO2_M;
 
 %% OH
 
@@ -401,6 +511,8 @@ rates.OH.destruction(6) = kout.OH_H2O2;
 rates.OH.destruction(7) = kout.OH_OH_M.*2;
 rates.OH.destruction(8) = kout.OH_CO_Ma;
 rates.OH.destruction(9) = kout.OH_CO_Mb;
+rates.OH.destruction(10) = kout.CH3BR_OH;
+rates.OH.destruction(11) = kout.CH4_OH;
 
 rates.OH.production(OH_plength+1) = kout.H2O_O1D.*2;
 rates.OH.production(OH_plength+2) = kout.H_O3;
@@ -432,6 +544,8 @@ rates.HO2.production(HO2_plength+1) = kout.H_O2_M;
 rates.HO2.production(HO2_plength+2) = kout.OH_O3;
 rates.HO2.production(HO2_plength+3) = kout.OH_H2O2;
 rates.HO2.production(HO2_plength+4) = kout.H2O2_O;
+rates.HO2.production(HO2_dlength+5) = kout.CH3BR_OH;
+rates.HO2.production(HO2_dlength+6) = kout.CH3BR_CL;
 
 
 end

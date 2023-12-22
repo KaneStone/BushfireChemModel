@@ -44,45 +44,45 @@ kout.hetN2O5 = wrk*av_n2o5*gprob_n2o5.*variables.N2O5(timeind);
 
                   
 
-% C_cnt         = 1474.*sqrt(T_limit); % no
-% S_cnt         = .306 + 24.*T_limiti; % no
-% term1         = exp(-S_cnt.*molar_h2so4); % no
-% H_cnt         = 1.6e-6 .* exp( 4710.*T_limiti ).*term1; % no
-% D_cnt         = 5.e-8.*T_limit ./ vis_h2so4; % no
-% k_h           = 1.22e12.*exp( -6200.*T_limiti ); % no
-% k_h2o         = 1.95e10.*exp( -2800.*T_limiti ); % no
-% k_hydr        = (k_h2o + k_h.*ah).*aw; % no
-% k_hcl         = 7.9e11.*ah.*D_cnt.*M_hcl_h2so4; % maybe
-% rdl_cnt       = sqrt( D_cnt./(k_hydr + k_hcl) ); % no
-% term1         = 1./tanh( rad_sulf./rdl_cnt ); % no
-% term2         = rdl_cnt./rad_sulf; % no
-% f_cnt         = term1 - term2; % no
-% 
-% %     if f_cnt > 0
-% term1         = 4.*H_cnt*.082.*T_limit;
-% term2         = sqrt( D_cnt.*k_hydr );
-% Gamma_b_h2o   = term1.*term2./C_cnt;
-% term1         = sqrt( 1 + k_hcl./k_hydr );
-% Gamma_cnt_rxn = f_cnt.*Gamma_b_h2o.*term1;
-% Gamma_b_hcl   = Gamma_cnt_rxn.*k_hcl./(k_hcl + k_hydr);
-% term1         = exp( -1374.*T_limiti );
-% Gamma_s       = 66.12.*H_cnt.*M_hcl_h2so4.*term1;
-% 
-% term1      = .612.*(Gamma_s+Gamma_b_hcl).*ClONO2atm./HClatm;
-% Fhcl       = 1./(1 + term1);
-% 
-% Gamma_s_prime     = Fhcl.*Gamma_s;
-% Gamma_b_hcl_prime = Fhcl.*Gamma_b_hcl;
-% term1         = Gamma_cnt_rxn.*k_hydr;
-% term2         = k_hcl + k_hydr;
-% Gamma_b       = Gamma_b_hcl_prime + (term1./term2);
-% term1         = 1 ./ (Gamma_s_prime + Gamma_b);
-% gprob_cnt     = 1 ./ (1 + term1);
-% term1         = Gamma_s_prime + Gamma_b_hcl_prime;
-% term2         = Gamma_s_prime + Gamma_b;
-% gprob_cnt_hcl = gprob_cnt .* term1./term2;
-% gprob_cnt_h2o = gprob_cnt - gprob_cnt_hcl;
-% rxt.clono2_h2o = wrk.*av_clono2.*gprob_cnt_h2o;
+C_cnt         = 1474.*sqrt(T_limit); 
+S_cnt         = .306 + 24.*T_limiti; 
+term1         = exp(-S_cnt.*molar_h2so4); 
+H_cnt         = 1.6e-6 .* exp( 4710.*T_limiti ).*term1; 
+D_cnt         = 5.e-8.*T_limit ./ vis_h2so4; 
+k_h           = 1.22e12.*exp( -6200.*T_limiti ); 
+k_h2o         = 1.95e10.*exp( -2800.*T_limiti ); 
+k_hydr        = (k_h2o + k_h.*ah).*aw; 
+k_hcl         = 7.9e11.*ah.*D_cnt.*M_hcl_h2so4; 
+rdl_cnt       = sqrt( D_cnt./(k_hydr + k_hcl) ); 
+term1         = 1./tanh( rad_sulf./rdl_cnt ); 
+term2         = rdl_cnt./rad_sulf; 
+f_cnt         = term1 - term2; 
+
+term1         = 4.*H_cnt*.082.*T_limit;
+term2         = sqrt( D_cnt.*k_hydr );
+Gamma_b_h2o   = term1.*term2./C_cnt;
+term1         = sqrt( 1 + k_hcl./k_hydr );
+Gamma_cnt_rxn = f_cnt.*Gamma_b_h2o.*term1;
+Gamma_b_hcl   = Gamma_cnt_rxn.*k_hcl./(k_hcl + k_hydr);
+term1         = exp( -1374.*T_limiti );
+Gamma_s       = 66.12.*H_cnt.*M_hcl_h2so4.*term1;
+
+term1      = .612.*(Gamma_s+Gamma_b_hcl).*CLONO2atm./HCLatm;
+Fhcl       = 1./(1 + term1);
+
+Gamma_s_prime     = Fhcl.*Gamma_s;
+Gamma_b_hcl_prime = Fhcl.*Gamma_b_hcl;
+term1         = Gamma_cnt_rxn.*k_hydr;
+term2         = k_hcl + k_hydr;
+Gamma_b       = Gamma_b_hcl_prime + (term1./term2);
+term1         = 1 ./ (Gamma_s_prime + Gamma_b);
+gprob_cnt     = 1 ./ (1 + term1);
+term1         = Gamma_s_prime + Gamma_b_hcl_prime;
+term2         = Gamma_s_prime + Gamma_b;
+gprob_cnt_hcl = gprob_cnt .* term1./term2;
+gprob_cnt_h2o = gprob_cnt - gprob_cnt_hcl;
+
+kout.hetCLONO2_H2O = wrk.*av_clono2.*gprob_cnt_h2o.*variables.CLONO2(timeind);
 % 
 % % clodeni = 1./(vmr.CLONO2.*ad_Tbin
 % % hcl = 1./(vmr.HCL.*ad_Tbin

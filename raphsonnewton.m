@@ -89,6 +89,9 @@ function [varsIteration] = backwards(i,varsIteration,vars) % varsVector = yb, % 
         else
             count = count+1;
         end
+        if count == 50
+            error('Not converging')
+        end
         %count = count+1;
 %         if count == 10
 %             conv = 1;

@@ -34,6 +34,8 @@ dayaverage.CL(1) = atmosphere.atLevel.CL.nd(1);
 
 variables_be = variables;
 variables_be.O3 = atmosphere.atLevel.O3.nd(1);
+variables_be.OCLO = atmosphere.atLevel.OCLO.nd(1);
+variables_be.BRCL = atmosphere.atLevel.BRCL.nd(1);
 %variables_be.O = atmosphere.atLevel.O.nd(1);
 variables_be.O = 1e1;
 variables_be.CL = atmosphere.atLevel.CL.nd(1);
@@ -45,11 +47,21 @@ variables_be.N2O5 = atmosphere.atLevel.N2O5.nd(1);
 variables_be.HNO3 = atmosphere.atLevel.HNO3.nd(1);
 variables_be.OH = atmosphere.atLevel.OH.nd(1);
 variables_be.HO2 = atmosphere.atLevel.HO2.nd(1);
+variables_be.HO2NO2 = atmosphere.atLevel.HO2NO2.nd(1);
+variables_be.BRO = atmosphere.atLevel.BRO.nd(1);
+variables_be.HBR = atmosphere.atLevel.HBR.nd(1);
+variables_be.HOBR = atmosphere.atLevel.HOBR.nd(1);
+variables_be.BRONO2 = atmosphere.atLevel.BRONO2.nd(1);
+variables_be.BR = atmosphere.atLevel.BR.nd(1);
 
 variables_lst = variables_be;
 variables_lst.O3 = 0;
-
-vars = {'O','O3','CLONO2','HCL','HOCL','CLO','CL2','CL2O2','CL','NO2','NO','NO3','N2O5','OH','HO2','HNO3'}; % NO NO2 NO3 N2O5, H HO HO2, 
+%% Look at extensive OH BR reactions and CH4 reaction
+%In many cases, when the chemical lifetimes of the N chemical species (which are provided by the inverse of the eigenvalues λi of the Jacobian matrix ∂S/∂y) 
+%look over NOX
+%  Put in sine wave ozone flux
+vars = {'O','O3','CLONO2','HCL','HOCL','CLO','CL2','CL2O2','OCLO','CL','BRCL'...
+    ,'NO2','NO','NO3','N2O5','HO2NO2','OH','HO2','HNO3','BRO','HOBR','HBR','BRONO2','BR'}; %BRO, BRONO2, HOBR, HBR, BR
 %% put in OH and HO2
 %% Then put in midlatitude aerosol chemistry using SAD
 %% initiate time step
@@ -68,10 +80,11 @@ count = 1;
 count2 = 1;
 daycount = 1;
 photoout = [];
-tic;
 
 %atmosphere.atLevel.T(:) = atmosphere.atLevel.T(1);
+tic;
 for i = 1:inputs.timesteps
+    
     rates = [];
     
     %tic
@@ -83,57 +96,20 @@ for i = 1:inputs.timesteps
         [climScaleFactor,SZAdiff] = diurnalfromclim(inputs,i);
     end    
     
-    % photolysis and gas phase (will need to add in heterogeneous here)
-    %[rates,photo,photoout] = calcrates(inputs,step,atmosphere,variables,dayaverage,i,photoload,photoout,climScaleFactor,SZAdiff,0);
-    
     if ~isempty(photoout)
         continue
     end
-      
-    
-%     %if rates.destruction    
-%     variables.diff(i) = (sum(rates.O3.production) - sum(rates.O3.destruction)).*inputs.secondstep;
-%     variables.O3(i+1) = variables.O3(i) + variables.diff(i);
-%     
-%     variables.CLONO2diff(i) = (sum(rates.CLONO2.production) - sum(rates.CLONO2.destruction)).*inputs.secondstep;
-%     variables.CLONO2(i+1) = variables.CLONO2(i) + variables.CLONO2diff(i);
-%     
-%     variables.HCLdiff(i) = (sum(rates.HCL.production) - sum(rates.HCL.destruction)).*inputs.secondstep;
-%     variables.HCL(i+1) = variables.HCL(i) + variables.HCLdiff(i);
-%     
-%     variables.CLOdiff(i) = (sum(rates.CLO.production) - sum(rates.CLO.destruction)).*inputs.secondstep;
-%     variables.CLO(i+1) = variables.CLO(i) + variables.CLOdiff(i);
-%     variables.CLO (variables.CLO < 0) = 0;
-%     
-%     variables.CLO2(i+1) = rates.CLOtest.production;
-%     
-%     variables.CL2diff(i) = (sum(rates.CL2.production) - sum(rates.CL2.destruction)).*inputs.secondstep;
-%     variables.CL2(i+1) = variables.CL2(i) + variables.CL2diff(i);
-%     variables.CL2 (variables.CL2 < 0) = 0;
-%     
-%     variables.CLdiff(i) = (sum(rates.CL.production) - sum(rates.CL.destruction)).*inputs.secondstep;
-%     variables.CL(i+1) = rates.CL.production(1);
-%     variables.CL (variables.CL < 0) = 0;
-% %     
-%     variables.CL2O2diff(i) = (sum(rates.CL2O2.production) - sum(rates.CL2O2.destruction)).*inputs.secondstep;
-%     variables.CL2O2(i+1) = variables.CL2O2(i) + variables.CL2O2diff(i);
-%     variables.CL2O2 (variables.CL2O2 < 0) = 0;
-%     
-%     variables.HOCLdiff(i) = (sum(rates.HOCL.production) - sum(rates.HOCL.destruction)).*inputs.secondstep;
-%     variables.HOCL(i+1) = variables.HOCL(i) + variables.HOCLdiff(i);
-%     variables.HOCL (variables.HOCL < 0) = 0;
-%     
-%     jclo(count2) = sum(rates.CLO.destruction([1,2]))./variables.CLO(i);
-    %jclo1(count2) = sum(rates.CLO.destruction([1,2]))./variables.CLO(i);
-    
+              
     % setup backwards euler
     
     % raphson newton currently doesnt work   
+    variables_be.O3(end) = atmosphere.atLevel.O3.nd(step.doy);
+    variables_be.NO2(end) = atmosphere.atLevel.NO2.nd(step.doy);
     variables_be = raphsonnewton(inputs,i,rates,photo,atmosphere,step,variables_be,dayaverage,vars,climScaleFactor,SZAdiff,photoload);
     %variables_lst = linsourceterm(inputs,i,rates,photo,atmosphere,step,variables_lst,dayaverage,vars,climScaleFactor,SZAdiff,photoload);
-    variables_be.NO3 (variables_be.NO3 <= 0) = 1e5;
-    variables_be.CL (variables_be.CL <= 0) = 50;
-    variables_be.CL2O2 (variables_be.CL2O2 <= 0) = 100;
+    %variables_be.NO3 (variables_be.NO3 <= 0) = 1e5;
+    %variables_be.CL (variables_be.CL <= 0) = 50;
+    %variables_be.CL2O2 (variables_be.CL2O2 <= 0) = 100;
 %     if isnan(jclo(count2))
 %         jclo(count2) = 0;
 %     end
@@ -159,12 +135,12 @@ for i = 1:inputs.timesteps
 %     end
 %     count2 = count2+1;
 %     
-    if i == 200
-        toc;
+    if i == 30
         a = 1;
     end
-     if i ==count*1000
-         toc;
+     if i ==count*100
+         tic
+         i
          count = count + 1;
      end
     %toc
@@ -192,13 +168,3 @@ dayaverage.CL2O2 = mean(reshape(variables_be.CL2O2(1,1:inputs.timesteps),[tsteps
 dayaverage.NO2 = mean(reshape(variables_be.CL2O2(1,1:inputs.timesteps),[tstepsinday,inputs.days]),1,'omitnan');
 dayaverage.NO = mean(reshape(variables_be.CL2O2(1,1:inputs.timesteps),[tstepsinday,inputs.days]),1,'omitnan');
 dayaverage.N2O5 = mean(reshape(variables_be.CL2O2(1,1:inputs.timesteps),[tstepsinday,inputs.days]),1,'omitnan');
-
-%inputs.days
-
-%% heterogeneous chemistry
-aerosolhet(inputs,variables)
-% Shi et al function code here
-
-%% gas phase chemistry
-
-%% photolysis

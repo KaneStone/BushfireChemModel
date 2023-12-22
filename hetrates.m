@@ -1,4 +1,4 @@
-function rates = hetrates(inputs,step,variables,atmosphere,i,rates,RN)
+function [rates] = hetrates(inputs,step,variables,atmosphere,i,rates,RN)
 
     if RN 
         timeind = 1;
@@ -10,6 +10,7 @@ function rates = hetrates(inputs,step,variables,atmosphere,i,rates,RN)
     % calculate water in partial pressure hPa
     %variables.T = 200;
     Pin = atmosphere.atLevel.P(step.doy);
+    Tin = atmosphere.atLevel.T(step.doy);
     ph2o_hpa = atmosphere.atLevel.H2O.vmr(step.doy).*Pin; % pressure is in hPa;
     %pHCl = variables.HCl .* variables.pressure ./ 1013.25;
 
@@ -32,12 +33,12 @@ function rates = hetrates(inputs,step,variables,atmosphere,i,rates,RN)
     y1 = constants.a1.*(aw.^constants.b1) + constants.c1.*aw + constants.d1;
     y2 = constants.a2.*(aw.^constants.b2) + constants.c2.*aw + constants.d2;
 
-    m_h2so4 = y1 + ((atmosphere.atLevel.T(step.doy) - 190) .* (y2 - y1)) / 70;
+    m_h2so4 = y1 + ((Tin - 190) .* (y2 - y1)) / 70;
 
-    wrk = atmosphere.atLevel.T(step.doy).*atmosphere.atLevel.T(step.doy);
+    wrk = Tin.^2;
     z1 =  .12364  - 5.6e-7.*wrk;
     z2 = -.02954  + 1.814e-7.*wrk;
-    z3 =  2.343e-3 - atmosphere.atLevel.T(step.doy).*1.487e-6 - 1.324e-8.*wrk;
+    z3 =  2.343e-3 - Tin.*1.487e-6 - 1.324e-8.*wrk;
     %-----------------------------------------------------------------------
     %     ... where mol_h2so4 is molality in mol/kg
     %-----------------------------------------------------------------------
@@ -51,8 +52,11 @@ function rates = hetrates(inputs,step,variables,atmosphere,i,rates,RN)
 
     %% with hexanoic solubility
     
-    HCLatm = variables.HCL(timeind).*Pin./1013.25;
-    CLONO2atm = variables.CLONO2(timeind).*Pin./1013.25;
+    %HCLvmr = 1./inputs.k*1e-6.*data(i).data.(vartemp).*data2(i).pressure./data(i).data.T;
+    HCLatm = Tin./(100).*inputs.k.*variables.HCL(timeind)./1e-6 / 1013.25;
+    
+    CLONO2atm = Tin./(100).*inputs.k.*variables.CLONO2(timeind)./1e-6 /1013.25;
+    
     switch inputs.HCLSolubility
         case 'control'
             x_h2so4 = wt ./ (wt + (100 - wt) .* 98 ./ 18); % mole fraction
@@ -75,12 +79,12 @@ function rates = hetrates(inputs,step,variables,atmosphere,i,rates,RN)
     end
 
     SAD = 1e-8;% atmosphere.atLevel.SAD.vmr(step.doy);
-    Tin = atmosphere.atLevel.T(step.doy);
-    H2Oin = atmosphere.atLevel.H2O.nd(step.doy);
-    
+        
+    %aw = .01;
     [kout] = calchetrates(variables,Tin,Pin,CLONO2atm,HCLatm,SAD,wt,M_hcl_h2so4,molar_h2so4,aw,timeind);
     
     rates.N2O5.destruction(end+1) = kout.hetN2O5;
     rates.HNO3.production(end+1) = kout.hetN2O5.*2;
 
+    rates.CLONO2.destruction(end+1) = kout.hetCLONO2_H2O;
 end
