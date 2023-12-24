@@ -1,18 +1,17 @@
-function J = Jacobian(varsVector,varsVecIni,inputs,atmosphere,step,dayaverage,vars,climScaleFactor,SZAdiff,photoload,G,timestep_ind)
+function J = Jacobian(varsVector,varsVecIni,inputs,atmosphere,step,vars,photoload,G,timestep_ind)
 
 photoout = [];
-dayaverage = [];
 
 for i = 1:size(varsVector,2)
     varsVector_in = varsVector(2,:);
-    varsVector_in(i) = varsVector_in(i)+varsVector_in(i)./1;
+    varsVector_in(i) = varsVector_in(i)+varsVector_in(i)./100;
     
     for k = 1:length(vars)
         varsIn.(vars{k}) = varsVector_in(k);
     end
     
     
-    [ratesout,~,~] = calcrates(inputs,step,atmosphere,varsIn,dayaverage,timestep_ind,photoload,photoout,climScaleFactor,SZAdiff,1);
+    [ratesout,~,~] = rates(inputs,step,atmosphere,varsIn,timestep_ind,photoload,photoout,1);
     
     for k = 1:length(vars)
         ratessum(i,k) = double((sum(ratesout.(vars{k}).production) - sum(ratesout.(vars{k}).destruction)));                

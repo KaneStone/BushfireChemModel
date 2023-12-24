@@ -12,13 +12,13 @@ function [inputs] = Minputs
     % height
     inputs.altitude = 20; % altitude to analyse in km    
     % location
-    inputs.region = 'midlatitudes';
-    inputs.HCLSolubility = 'control';
+    inputs.region = 'midlatitudes';    
     switch inputs.region
         case 'midlatitudes'
             inputs.latitude = -45;
             inputs.longitude = -180;
-            inputs.ancildir = '/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/Ancil/variables/';
+            inputs.ancildir = '/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/Ancil/';
+            inputs.outputdir = '/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/output/';
         case 'polar'
             inputs.latitude = -80;
             inputs.longitude = -180;
@@ -38,5 +38,15 @@ function [inputs] = Minputs
     
     %solver
     inputs.evolvingJ = 0;
+    
+    % heterogeneous chemistry
+    inputs.runtype = 'control'; %'control','solubility'
+    inputs.radius = 'ancil'; % ancil reads yearly average radius from CARMA ancil (standard is 1e-5 cm)
+    
+    % flux corrections
+    inputs.fluxcorrections = 0;
+    
+    % plotting
+    inputs.fsize = 18;
     
 end

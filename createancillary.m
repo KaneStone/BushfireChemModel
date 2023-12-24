@@ -3,8 +3,8 @@ clear variables
 %vars = {'O3','HCL','CLONO2','CLO','CL2O2','HOCL','HNO3','O'};
 %vars = {'H2', 'H2O2', 'HO2','CHO2','CL','OH','CH4','CLO','HOCL','CH3CL','CH3BR','CH2BR2','CHBR3'};
 vars = {'T','O', 'OH','HO2','CL','BR','NO','NO2','O1D','H','NO3','N2O5','CLO','CLONO2','HCL','HOCL','CL2','H2','CH3CL','CH4','H2O2','OCLO','CL2O2',...
-    'CH3O2','BRO','SO','SO2','CH3CCL3','CH3BR','CCL4','BRCL','C2H4','C2H6','CH2O','CH2BR2','CHBR3','HNO3','HO2NO2','N','CH3CN','H2O','HCN','HBR',...
-    'BRONO2','HOBR','CO','SAD_SULFC','PAN'};
+    'CH3O2','BRO','BRCL','CH2O','HNO3','HO2NO2','H2O','HBR',...
+    'BRONO2','HOBR','CO','SULFRE','SAD_SULFC'};
 tic;
 data = readinBfolder(['/Volumes/ExternalOne/work/data/Bushfire/CESM/finalensembles/','SD/','raw','/'],'*control.nc',1); 
 %data.data.T2 = data.data.T;
@@ -13,7 +13,7 @@ toc;
 TUV = 0;
 
 %% fix bad data points
-temp = squeeze(data.data.T(9,16,:));
+temp = squeeze(data.data.T(9,20,:));
 diff1 = diff(temp);
 badind = find(diff1 < -15)+1;
 
@@ -44,12 +44,16 @@ for i = 1:length(vars)
     switch vars{i}
         case 'SAD_SULFC'
         
-            temp = squeeze(zonalmean.SAD_SULFC.vmrregrid(16,:));
+            temp = squeeze(zonalmean.SAD_SULFC.vmrregrid(20,:));
             diff1 = diff(temp);
-            badind = find(diff1 < -.2e-8)+1;
+            badind = find(abs(diff1) > .03e-8)+1;
             for i = 1:length(badind)
                 zonalmean.SAD_SULFC.vmrregrid(:,badind(i)) = mean([zonalmean.SAD_SULFC.vmrregrid(:,badind(i)-1),zonalmean.SAD_SULFC.vmrregrid(:,badind(i)+1)],2,'omitnan');
             end
+            zonalmean.SAD_SULFC.vmrregrid(:,1) = zonalmean.SAD_SULFC.vmrregrid(:,3);
+            zonalmean.SAD_SULFC.vmrregrid(:,2) = zonalmean.SAD_SULFC.vmrregrid(:,3);
+            badind = find(diff1 > -.2e-8)+1;
+
     end
     
 end
@@ -72,13 +76,13 @@ for j = 1:length(vars)
     % removing 0s in SAD_SULFC.
     if strcmp(vars{j},'SAD_SULFC')
         for i = 1:size(dtemp,1)        
-            for j = 1:size(dtemp,2)
-                if dtemp(i,j) == 0 && j == 1
-                    dtemp(i,j) = dtemp(i,j+1);
-                elseif dtemp(i,j) == 0 && j == size(dtemp,2)
-                    dtemp(i,j) = dtemp(i,j-1);
-                elseif dtemp(i,j) == 0
-                    dtemp(i,j) = (dtemp(i,j+1) + dtemp(i,j-1))./2;
+            for k = 1:size(dtemp,2)
+                if dtemp(i,k) == 0 && k == 1
+                    dtemp(i,k) = dtemp(i,k+1);
+                elseif dtemp(i,k) == 0 && k == size(dtemp,2)
+                    dtemp(i,k) = dtemp(i,k-1);
+                elseif dtemp(i,k) == 0
+                    dtemp(i,k) = (dtemp(i,k+1) + dtemp(i,k-1))./2;
                 end
             end
         end

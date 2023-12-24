@@ -1,29 +1,6 @@
-function [variables_be] = raphsonnewton(inputs,i,rates,photo,atmosphere,step,variables_be,dayaverage,vars,climScaleFactor,SZAdiff,photoload)
+function [variables_be] = raphsonnewton(inputs,i,atmosphere,step,variables_be,vars,photoload)
 
-% setup backwards euler for variables that have very short lifetimes such
-% as CL
 photoout = [];
-dayaverage = [];
-
-% ratescat = zeros(length(vars),30);
-% 
-% for j = 1:length(vars)
-%     
-%     % This will be for G calculation
-%     [rates,~,~] = calcrates(inputs,step,atmosphere,variables_be,dayaverage,i,photoload,photoout,climScaleFactor,SZAdiff,0);
-%     
-%     % Need to calculate Jacobian
-%     % Need to calculate rates but for only a change in one variable
-%     
-%     ratessum(j) = (sum(rates.(vars{j}).production) - sum(rates.(vars{j}).destruction));
-%     rateslength = length(rates.(vars{j}).production) + length(rates.(vars{j}).destruction);
-%     ratescat(j,1:rateslength) = [rates.(vars{j}).production,rates.(vars{j}).destruction];
-%     
-%     varsVector(j) = variables_be.(vars{j})(i);
-%         
-%     % pass through variables, and then setup variables and rates vector
-%     % then recreate variables and rates vectors to pass into rates code
-% end
 
 for j = 1:length(vars)
     varsVector(j) = variables_be.(vars{j})(i);
@@ -33,12 +10,7 @@ varsOut = backwards(i,varsVector,vars);
 % varsOut (varsOut < 0) = 0;
 for k = 1:length(vars)
     variables_be.(vars{k})(i+1) = varsOut(end,k);
-end
-
-
-%xb(i+1) = backwards(i,xb,dx);
-
-    
+end 
 
 function [varsIteration] = backwards(i,varsIteration,vars) % varsVector = yb, % ratessum = dy
 
@@ -46,10 +18,7 @@ function [varsIteration] = backwards(i,varsIteration,vars) % varsVector = yb, % 
     % initial guess be previous time step
     %chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://personal.math.ubc.ca/~anstee/math104/newtonmethod.pdf
     %  dy/dt = S(t,y)        
-
-    % calculate G
-    % calculate J
-    % calculate varsIteration
+    
     count = 1;
     varsIteration(count+1,:) = varsIteration(count,:);
     conv = 0;
@@ -60,7 +29,7 @@ function [varsIteration] = backwards(i,varsIteration,vars) % varsVector = yb, % 
             varsIn.(vars{k}) = varsIteration(count+1,k);
         end
         
-        [ratesout,~,~] = calcrates(inputs,step,atmosphere,varsIn,dayaverage,i,photoload,photoout,climScaleFactor,SZAdiff,1);
+        [ratesout,~,~] = rates(inputs,step,atmosphere,varsIn,i,photoload,photoout,1);
 %             
         for k = 1:length(vars)
             ratessum(k) = double((sum(ratesout.(vars{k}).production) - sum(ratesout.(vars{k}).destruction)));                
@@ -70,17 +39,13 @@ function [varsIteration] = backwards(i,varsIteration,vars) % varsVector = yb, % 
         
         G = varsIteration(count+1,:) - varsIteration(count,:) - ratessum.*inputs.secondstep;
         if count == 1
-            J = Jacobian(varsIteration(count:count+1,:),varsIteration(1,:),inputs,atmosphere,step,dayaverage,vars,climScaleFactor,SZAdiff,photoload,G,i);
+            J = Jacobian(varsIteration(count:count+1,:),varsIteration(1,:),inputs,atmosphere,step,vars,photoload,G,i);
         elseif inputs.evolvingJ
-            J = Jacobian(varsIteration(count:count+1,:),varsIteration(1,:),inputs,atmosphere,step,dayaverage,vars,climScaleFactor,SZAdiff,photoload,G,i);
+            J = Jacobian(varsIteration(count:count+1,:),varsIteration(1,:),inputs,atmosphere,step,vars,photoload,G,i);
         end
-        %J (J < 1) = 0;
-
+        
         JG = J'\G';
-        %JG = inv(J)*G;
-        %JG (isnan(JG)) = 0;
-%         JG (JG == -Inf) = 0;
-%         JG (JG == Inf) = 0;
+       
         varsIteration(count+2,:) = varsIteration(count+1,:)' - JG;
         err(count,:) = (varsIteration(count+2,:) - varsIteration(count+1,:));
         convtest(count) = abs(sum(err(count,:))./sum(varsIteration(count+2,:))*100);
@@ -123,7 +88,7 @@ function [varsIteration] = backwards(i,varsIteration,vars) % varsVector = yb, % 
 %             for k = 1:length(vars)
 %                 varsIn.(vars{k}) = varsIteration(count+1,k);
 %             end
-%             [ratesout,~,~] = calcrates(inputs,step,atmosphere,varsIn,dayaverage,i,photoload,photoout,climScaleFactor,SZAdiff,1);
+%             [ratesout,~,~] = rates(inputs,step,atmosphere,varsIn,dayaverage,i,photoload,photoout,climScaleFactor,SZAdiff,1);
 %             
 %             for k = 1:length(vars)
 %                 ratessum(k) = double((sum(ratesout.(vars{k}).production) - sum(ratesout.(vars{k}).destruction)));                
@@ -148,8 +113,8 @@ function [varsIteration] = backwards(i,varsIteration,vars) % varsVector = yb, % 
 %                 varsIn.(vars{k}) = varsIteration(count+1,k);
 %             end
 %             
-%             %[dy1(count,:),dx1(count,:)] = calcrates(y1(count+1),x1(count+1));
-%             [ratesout,~,~] = calcrates(inputs,step,atmosphere,varsIn,dayaverage,i,photoload,photoout,climScaleFactor,SZAdiff,1);
+%             %[dy1(count,:),dx1(count,:)] = rates(y1(count+1),x1(count+1));
+%             [ratesout,~,~] = rates(inputs,step,atmosphere,varsIn,dayaverage,i,photoload,photoout,climScaleFactor,SZAdiff,1);
 %             
 %             for k = 1:length(vars)
 %                 ratessum(k) = (sum(ratesout.(vars{k}).production) - sum(ratesout.(vars{k}).destruction));                

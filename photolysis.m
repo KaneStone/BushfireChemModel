@@ -51,8 +51,8 @@ function [photo,photoNamlist,rates,sza] = photolysis(inputs,step,atmosphere,vari
     rates.O3.destruction(1) = sum(photo.data(photoReaction.O3.reactionID).*variables.O3(timeind));
     
     % O
-    photoReaction.O.reactionID = [1;1;3;6;8;10;64];
-    photoReaction.O.vars = {'O2','O2','O3','NO2','NO3','N2O5','CLO','H2O'};
+    photoReaction.O.reactionID = [1;1;3;4;6;8;64];
+    photoReaction.O.vars = {'O2','O2','O3','HO2','NO2','NO3','CLO'};
     for k = 1:length(photoReaction.O.reactionID)
         fields = fieldnames(variables);
         if sum(strcmp(fields,photoReaction.O.vars{k}))
@@ -75,7 +75,7 @@ function [photo,photoNamlist,rates,sza] = photolysis(inputs,step,atmosphere,vari
     end
     
     % CLO
-    photoReaction.CLO.dreactionID = [63,64];
+    photoReaction.CLO.dreactionID = 64; %[63,64] 63 is not really important.
     photoReaction.CLO.preactionID = [66,74];
    
     for k = 1:length(photoReaction.CLO.dreactionID)
@@ -111,8 +111,10 @@ function [photo,photoNamlist,rates,sza] = photolysis(inputs,step,atmosphere,vari
     end    
     
     % CL
-    photoReaction.CL.preactionID = [62,62,63,64,67,68,69,73,75,103];    
-    photoReaction.CL.vars = {'CL2','CL2','CLO','CLO','CL2O2','HCL','HOCL','CLONO2','CCL4','BRCL'};
+%     photoReaction.CL.preactionID = [62,62,63,64,67,68,69,73,75,103];    
+%     photoReaction.CL.vars = {'CL2','CL2','CLO','CLO','CL2O2','HCL','HOCL','CLONO2','CCL4','BRCL'};
+    photoReaction.CL.preactionID = [62,62,64,67,69,73,103];    
+    photoReaction.CL.vars = {'CL2','CL2','CLO','CL2O2','HOCL','CLONO2','BRCL'};
     
     for k = 1:length(photoReaction.CL.preactionID)
         if i == 1
@@ -166,8 +168,10 @@ function [photo,photoNamlist,rates,sza] = photolysis(inputs,step,atmosphere,vari
     end        
     
     % BR
-    photoReaction.BR.preactionID = [95,96,102,103,105,105,105,104];    
-    photoReaction.BR.vars = {'BRO','HOBR','BRONO2','BRCL','CHBR3','CHBR3','CHBR3','CH3BR'};        
+%     photoReaction.BR.preactionID = [95,96,102,103,105,105,105,104];    
+%     photoReaction.BR.vars = {'BRO','HOBR','BRONO2','BRCL','CHBR3','CHBR3','CHBR3','CH3BR'};        
+    photoReaction.BR.preactionID = [95,96,102,103];    
+    photoReaction.BR.vars = {'BRO','HOBR','BRONO2','BRCL'};        
     %production
     for k = 1:length(photoReaction.BR.preactionID)
         rates.BR.production(k) = photo.data(photoReaction.BR.preactionID(k)).*atmosphere.atLevel.(photoReaction.BR.vars{k}).nd(step.doy);     
@@ -195,8 +199,10 @@ function [photo,photoNamlist,rates,sza] = photolysis(inputs,step,atmosphere,vari
     end
     
     % NO    
-    photoReaction.NO.preactionID = [6,7,10];
-    photoReaction.NO.vars = {'NO2','NO3','N2O5'};    
+%     photoReaction.NO.preactionID = [6,7,10];
+%     photoReaction.NO.vars = {'NO2','NO3','N2O5'};    
+    photoReaction.NO.preactionID = [6,7];
+    photoReaction.NO.vars = {'NO2','NO3'};    
     %production
     for k = 1:length(photoReaction.NO.preactionID)
         fields = fieldnames(variables);
@@ -210,8 +216,8 @@ function [photo,photoNamlist,rates,sza] = photolysis(inputs,step,atmosphere,vari
     
     % NO3
     photoReaction.NO3.dreactionID = [7,8];
-    photoReaction.NO3.preactionID = [10,11,14];
-    photoReaction.NO3.vars = {'N2O5','N2O5','HO2NO2'};
+    photoReaction.NO3.preactionID = [11,14];
+    photoReaction.NO3.vars = {'N2O5','HO2NO2'};
     
     %production
     for k = 1:length(photoReaction.NO3.preactionID)
@@ -237,7 +243,7 @@ function [photo,photoNamlist,rates,sza] = photolysis(inputs,step,atmosphere,vari
     end
     
     % HNO3
-    photoReaction.HNO3.dreactionID = [13];
+    photoReaction.HNO3.dreactionID = 13;
     
     %destruction
     for k = 1:length(photoReaction.HNO3.dreactionID)
@@ -245,7 +251,7 @@ function [photo,photoNamlist,rates,sza] = photolysis(inputs,step,atmosphere,vari
     end
     
     % HO2NO2
-    photoReaction.HO2NO2.dreactionID = [14];
+    photoReaction.HO2NO2.dreactionID = 14;
     
     %destruction
     for k = 1:length(photoReaction.HO2NO2.dreactionID)
@@ -255,6 +261,7 @@ function [photo,photoNamlist,rates,sza] = photolysis(inputs,step,atmosphere,vari
     % OH
     % dont havae HO2NO2 -> OH + NO3, so will use reaction HON2NO2 -> HO2 +
     % NO2 divided by 2 as a proxy.
+
     photoReaction.OH.preactionID = [4,5,5,13,14];
     photoReaction.OH.vars = {'HO2','H2O2','H2O2','HNO3','HO2NO2'};
     %production

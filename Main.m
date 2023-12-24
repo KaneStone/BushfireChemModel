@@ -9,83 +9,41 @@ clear variables
 
 inputs = Minputs;
 
+vars = {'O','O3','CLONO2','HCL','HOCL','CLO','CL2','CL2O2','OCLO','CL','BRCL'...
+    ,'NO2','NO','NO3','N2O5','HO2NO2','OH','HO2','HNO3','BRO','HOBR','HBR','BRONO2','BR'}; %BRO, BRONO2, HOBR, HBR, BR
+
 %% Initial concentrations
 % Read in profiles then select by layer
-[atmosphere] = Initializevars(inputs);
+[atmosphere,variables] = Initializevars(inputs,vars);
 
-
-% initialize changing variables
-variables.O3 = atmosphere.atLevel.O3.nd(1);
-variables.O3 = 0;
-variables.CLONO2 = atmosphere.atLevel.CLONO2.nd(1);
-%variables.CLONO2  = 0;
-variables.HCL = atmosphere.atLevel.HCL.nd(1);
-variables.CL2 = atmosphere.atLevel.CL2.nd(1);
-variables.CL = 0;%atmosphere.atLevel.CL.nd(1);
-variables.CL2O2 = atmosphere.atLevel.CL2O2.nd(1);
-variables.HOCL = atmosphere.atLevel.HOCL.nd(1);
-%variables.CLO = 0;
-variables.CLO = atmosphere.atLevel.CLO.nd(1);
-%variables.CLO2 = 0;
-climScaleFactor = [];
-dayaverage.CL(1) = atmosphere.atLevel.CL.nd(1);
-%variables.O = 0;
-%variables.O = atmosphere.atLevel.O.nd(1);
-
-variables_be = variables;
-variables_be.O3 = atmosphere.atLevel.O3.nd(1);
-variables_be.OCLO = atmosphere.atLevel.OCLO.nd(1);
-variables_be.BRCL = atmosphere.atLevel.BRCL.nd(1);
-%variables_be.O = atmosphere.atLevel.O.nd(1);
-variables_be.O = 1e1;
-variables_be.CL = atmosphere.atLevel.CL.nd(1);
-variables_be.NO = atmosphere.atLevel.NO.nd(1);
-variables_be.NO = 1e1;
-variables_be.NO2 = atmosphere.atLevel.NO2.nd(1);
-variables_be.NO3 = atmosphere.atLevel.NO3.nd(1);
-variables_be.N2O5 = atmosphere.atLevel.N2O5.nd(1);
-variables_be.HNO3 = atmosphere.atLevel.HNO3.nd(1);
-variables_be.OH = atmosphere.atLevel.OH.nd(1);
-variables_be.HO2 = atmosphere.atLevel.HO2.nd(1);
-variables_be.HO2NO2 = atmosphere.atLevel.HO2NO2.nd(1);
-variables_be.BRO = atmosphere.atLevel.BRO.nd(1);
-variables_be.HBR = atmosphere.atLevel.HBR.nd(1);
-variables_be.HOBR = atmosphere.atLevel.HOBR.nd(1);
-variables_be.BRONO2 = atmosphere.atLevel.BRONO2.nd(1);
-variables_be.BR = atmosphere.atLevel.BR.nd(1);
-
-variables_lst = variables_be;
-variables_lst.O3 = 0;
 %% Look at extensive OH BR reactions and CH4 reaction
 %In many cases, when the chemical lifetimes of the N chemical species (which are provided by the inverse of the eigenvalues λi of the Jacobian matrix ∂S/∂y) 
 %look over NOX
 %  Put in sine wave ozone flux
-vars = {'O','O3','CLONO2','HCL','HOCL','CLO','CL2','CL2O2','OCLO','CL','BRCL'...
-    ,'NO2','NO','NO3','N2O5','HO2NO2','OH','HO2','HNO3','BRO','HOBR','HBR','BRONO2','BR'}; %BRO, BRONO2, HOBR, HBR, BR
+
 %% put in OH and HO2
 %% Then put in midlatitude aerosol chemistry using SAD
 %% initiate time step
-photo = [];
-rates = [];
 
 switch inputs.whichphoto
     case 'load'
-        photoload = load(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/TUVoutput/',num2str(inputs.altitude),'km_0.25hourstep_photo.mat']);
+        photoload = load(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/TUVoutput/',...
+            num2str(inputs.altitude),'km_0.25hourstep_photo.mat']);
         photolength = size(photoload.pout,1);        
     case 'inter'
         photoload = [];
         photolength = 1;
 end
 count = 1;
-count2 = 1;
 daycount = 1;
 photoout = [];
 
 %atmosphere.atLevel.T(:) = atmosphere.atLevel.T(1);
 tic;
+flux = [];
 for i = 1:inputs.timesteps
     
-    rates = [];
+    rates = []; %remove
     
     %tic
     % initialize step components
@@ -99,72 +57,45 @@ for i = 1:inputs.timesteps
     if ~isempty(photoout)
         continue
     end
-              
-    % setup backwards euler
     
-    % raphson newton currently doesnt work   
-    variables_be.O3(end) = atmosphere.atLevel.O3.nd(step.doy);
-    variables_be.NO2(end) = atmosphere.atLevel.NO2.nd(step.doy);
-    variables_be = raphsonnewton(inputs,i,rates,photo,atmosphere,step,variables_be,dayaverage,vars,climScaleFactor,SZAdiff,photoload);
-    %variables_lst = linsourceterm(inputs,i,rates,photo,atmosphere,step,variables_lst,dayaverage,vars,climScaleFactor,SZAdiff,photoload);
-    %variables_be.NO3 (variables_be.NO3 <= 0) = 1e5;
-    %variables_be.CL (variables_be.CL <= 0) = 50;
-    %variables_be.CL2O2 (variables_be.CL2O2 <= 0) = 100;
-%     if isnan(jclo(count2))
-%         jclo(count2) = 0;
-%     end
-% 
-%     if i == daycount*24/inputs.hourstep
-%         
-%         dayaverage.O3(daycount) = mean(variables.O3(1+(daycount-1)*24/inputs.hourstep:daycount*24/inputs.hourstep));
-%         dayaverage.CLO(daycount) = mean(variables.CLO(1+(daycount-1)*24/inputs.hourstep:daycount*24/inputs.hourstep));        
-%         dayaverage.CLONO2(daycount) = mean(variables.CLONO2(1+(daycount-1)*24/inputs.hourstep:daycount*24/inputs.hourstep));        
-%         dayaverage.HCL(daycount) = mean(variables.HCL(1+(daycount-1)*24/inputs.hourstep:daycount*24/inputs.hourstep));        
-%         
-%         d2t = 2.30e-11.*exp(-200./atmosphere.atLevel.T(step.doy)).*dayaverage.O3(daycount);
-%         d3t = 2.80e-11*exp(85./atmosphere.atLevel.T(step.doy)).*atmosphere.atLevel.O.nd(step.doy);
-%         d4t = 6.40e-12*exp(290./atmosphere.atLevel.T(step.doy)).*atmosphere.atLevel.NO.nd(step.doy);
-%         jclo2 = mean(jclo)+3e-5;
-%                
-%         dayaverage.CL(daycount+1) = dayaverage.CLO(daycount)./(d2t./(d3t+d4t+jclo2+.0105));
-%         dayaverage.CL22(daycount+1) = dayaverage.CL(daycount+1);
-%         dayaverage.CL(daycount+1) = atmosphere.atLevel.CL.nd(step.doy+1);
-% 
-%         daycount = daycount+1;
-%         count2 = 1;
-%     end
-%     count2 = count2+1;
+    variables = raphsonnewton(inputs,i,atmosphere,step,variables,vars,photoload);    
+    
+    [variables,flux] = fluxcorrection(inputs,variables,flux,atmosphere,step,i);
+    
+    if i == daycount*24/inputs.hourstep        
+        for k = 1:length(vars)
+            dayaverage.(vars{k})(daycount) = mean(variables.(vars{k})(1+(daycount-1)*24/inputs.hourstep:daycount*24/inputs.hourstep));
+        end        
+        daycount = daycount+1;        
+    end    
 %     
-    if i == 30
-        a = 1;
+    if i == 1000
+        a = 1;        
     end
-     if i ==count*100
-         tic
+     if i ==count*1000
+         toc;
          i
          count = count + 1;
-     end
-    %toc
-    clearvars rates
+     end        
 end
 if inputs.photosave
     for i = 1:size(photoout,3)
         pout = photoout(:,:,i);
-        save(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/TUVoutput/',num2str(i-1),'km','_',num2str(inputs.hourstep),'hourstep','_photo.mat'],'pout')
+        save(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/TUVoutput/',...
+            num2str(i-1),'km','_',num2str(inputs.hourstep),'hourstep','_photo.mat'],'pout')
     end
 end
 
-% take daily averages
-% timesteps er day
-tstepsinday = inputs.timesteps/inputs.days;
-
-dayaverage.O3 = mean(reshape(variables_be.O3(1,1:inputs.timesteps),[tstepsinday,inputs.days]),1,'omitnan');
-dayaverage.CLO = mean(reshape(variables_be.CLO(1,1:inputs.timesteps),[tstepsinday,inputs.days]),1,'omitnan');
-dayaverage.CLONO2 = mean(reshape(variables_be.CLONO2(1,1:inputs.timesteps),[tstepsinday,inputs.days]),1,'omitnan');
-dayaverage.HCL = mean(reshape(variables_be.HCL(1,1:inputs.timesteps),[tstepsinday,inputs.days]),1,'omitnan');
-dayaverage.CL = mean(reshape(variables_be.CL(1,1:inputs.timesteps),[tstepsinday,inputs.days]),1,'omitnan');
-dayaverage.CL2 = mean(reshape(variables_be.CL2(1,1:inputs.timesteps),[tstepsinday,inputs.days]),1,'omitnan');
-dayaverage.HOCL = mean(reshape(variables_be.HOCL(1,1:inputs.timesteps),[tstepsinday,inputs.days]),1,'omitnan');
-dayaverage.CL2O2 = mean(reshape(variables_be.CL2O2(1,1:inputs.timesteps),[tstepsinday,inputs.days]),1,'omitnan');
-dayaverage.NO2 = mean(reshape(variables_be.CL2O2(1,1:inputs.timesteps),[tstepsinday,inputs.days]),1,'omitnan');
-dayaverage.NO = mean(reshape(variables_be.CL2O2(1,1:inputs.timesteps),[tstepsinday,inputs.days]),1,'omitnan');
-dayaverage.N2O5 = mean(reshape(variables_be.CL2O2(1,1:inputs.timesteps),[tstepsinday,inputs.days]),1,'omitnan');
+%%setup save output
+save([inputs.outputdir,'data/',inputs.runtype,'_',sprintf('%.2f',inputs.hourstep),'hours.mat'],'variables','dayaverage');
+%% plot daily output
+tickout = monthtick('short',0);
+for i = 1:length(vars)
+    createfig('medium','on')
+    plot(1:365,dayaverage.(vars{i}),'LineWidth',2)
+    set(gca,'xtick',tickout.tick,'xticklabels',tickout.monthnames,'fontsize',inputs.fsize);
+    xlabel('Month','fontsize',inputs.fsize+2);
+    ylabel('Number Density (molecules cm^-^3)','fontsize',inputs.fsize+2);
+    title([inputs.runtype,', ',vars{i}],'fontsize',inputs.fsize+4);    
+    savefigure([inputs.outputdir,'figures/'],[inputs.runtype,'_',vars{i},sprintf('%.2f',inputs.hourstep),'hours'],1,0,0,0);
+end
