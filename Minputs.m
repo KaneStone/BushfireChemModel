@@ -2,7 +2,7 @@ function [inputs] = Minputs
 
     % time
     inputs.year = 2020;
-    inputs.hourstep = 20/60; %1/60;            %2 hour time step .015625
+    inputs.hourstep = 15/60; %1/60;            %2 hour time step .015625
     inputs.secondstep = inputs.hourstep.*60.*60;    
     %inputs.secondstep = 24.*60.*60;    
     inputs.runlength = 1;%25/365;           %years

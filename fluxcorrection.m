@@ -18,7 +18,7 @@ if inputs.fluxcorrections
             end
     end
     variables.O3(end) = variables.O3(end) - flux.O3(i).*variables.O3(end);
-    variables.NO2(end) = variables.NO2(end) - flux.NO2(i).*variables.NO2(end);
+   % variables.NO2(end) = variables.NO2(end) - flux.NO2(i).*variables.NO2(end);
     variables.CLONO2(end) = variables.CLONO2(end) - flux.CLONO2(i).*variables.CLONO2(end);
     variables.HCL(end) = variables.HCL(end) - flux.HCL(i).*variables.HCL(end);
     

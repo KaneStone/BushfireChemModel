@@ -1,4 +1,4 @@
-function [variables_be] = raphsonnewton(inputs,i,atmosphere,step,variables_be,vars,photoload)
+function [variables_be,ratesout] = raphsonnewton(inputs,i,atmosphere,step,variables_be,vars,photoload)
 
 photoout = [];
 
@@ -6,13 +6,14 @@ for j = 1:length(vars)
     varsVector(j) = variables_be.(vars{j})(i);
 end
 
-varsOut = backwards(i,varsVector,vars);
+[varsOut,ratesout] = backwards(i,varsVector,vars);
 % varsOut (varsOut < 0) = 0;
+
 for k = 1:length(vars)
     variables_be.(vars{k})(i+1) = varsOut(end,k);
 end 
 
-function [varsIteration] = backwards(i,varsIteration,vars) % varsVector = yb, % ratessum = dy
+function [varsIteration,ratesout] = backwards(i,varsIteration,vars) % varsVector = yb, % ratessum = dy
 
     % backwards euler
     % initial guess be previous time step
@@ -24,7 +25,9 @@ function [varsIteration] = backwards(i,varsIteration,vars) % varsVector = yb, % 
     conv = 0;
     eps = .01; %percent
     while conv == 0       
-        
+        if i == 15
+            a = 1
+        end
         for k = 1:length(vars)
             varsIn.(vars{k}) = varsIteration(count+1,k);
         end
@@ -46,11 +49,13 @@ function [varsIteration] = backwards(i,varsIteration,vars) % varsVector = yb, % 
         
         JG = J'\G';
        
-        varsIteration(count+2,:) = varsIteration(count+1,:)' - JG;
+        varsIteration(count+2,:) = varsIteration(count+1,:)' - JG;                
+        
         err(count,:) = (varsIteration(count+2,:) - varsIteration(count+1,:));
         convtest(count) = abs(sum(err(count,:))./sum(varsIteration(count+2,:))*100);
         if convtest(count) < eps
             conv = 1;
+            
         else
             count = count+1;
         end

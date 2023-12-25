@@ -73,6 +73,26 @@ rates.O3.destruction(O3_dlength+9) = kout.BR_O3;
 %     rates.O3.destruction(end+1) = O3dyn;
 % end
 
+%% O1D
+% j2*O3  + j4*N2O  + j18*H2O                                                                              
+%  - r4*N2*O1D  - r5*O2*O1D  - r6*H2O*O1D  - r7*N2O*O1D  - r8*N2O*O1D  - r9*O3*O1D  - r10*CFC11*O1D       
+%  - r11*CFC12*O1D  - r12*CFC113*O1D  - r13*CFC114*O1D  - r14*CFC115*O1D  - r15*HCFC22*O1D                
+%  - r16*HCFC141B*O1D  - r17*HCFC142B*O1D  - r18*CCL4*O1D  - r19*CH3BR*O1D  - r20*CF2CLBR*O1D             
+%  - r21*CF3BR*O1D  - r22*H1202*O1D  - r23*H2402*O1D  - r24*CHBR3*O1D  - r25*CH2BR2*O1D  - r26*CH4*O1D    
+%  - r27*CH4*O1D  - r28*CH4*O1D  - r29*H2*O1D  - r30*HCL*O1D  - r31*HBR*O1D  - r32*HCN*O1D  
+
+%production
+
+%destruction
+rates.O1D.destruction(1) = kout.N2_O1D;
+rates.O1D.destruction(2) = kout.O2_O1D;
+rates.O1D.destruction(3) = kout.H2O_O1D;
+rates.O1D.destruction(4) = kout.O1D_N2Oa;
+rates.O1D.destruction(5) = kout.O1D_N2Ob;
+rates.O1D.destruction(5) = kout.HCL_O1D;
+if i == 25
+    a = 1;
+end
 %% CLONO2 rates
 
 CLONO2_dlength = length(rates.CLONO2.destruction);
@@ -216,13 +236,19 @@ rates.CL.destruction(CL_dlength+6) = kout.CL_CH2O;
 rates.CL.destruction(CL_dlength+7) = kout.CL_CH4;
 rates.CL.destruction(CL_dlength+8) = kout.HOCL_CL;
 rates.CL.destruction(CL_dlength+9) = kout.CLONO2_CL;
+% rates.CL.destruction(CL_dlength+10) = kout.CL_O2_M;
+% rates.CL.destruction(CL_dlength+11) = kout.CL_CO_M;
+% rates.CL.destruction(CL_dlength+12) = kout.CL_NO_M;
+% rates.CL.destruction(CL_dlength+13) = kout.CL_NO2_M;
 %rates.CL.destruction(CL_dlength+10) = kout.CH3CL_CL;
 % rates.CL.destruction(CL_dlength+11) = kout.CH3BR_CL;
 % rates.CL.destruction(CL_dlength+12) = kout.CH2BR2_CL;
 % rates.CL.destruction(CL_dlength+13) = kout.CHBR3_CL;
 % rates.CL.destruction(CL_dlength+14) = kout.C2H6_CL;
 
-
+if i == 30
+    a = 1;
+end
 
 %% OCLO
 rates.OCLO.production(1) = kout.CLO_CLOc;
@@ -368,7 +394,7 @@ rates.NO2.production(NO2_plength+1) = kout.N2O5_M;
 rates.NO2.production(NO2_plength+2) = kout.HO2NO2_M;
 rates.NO2.production(NO2_plength+3) = kout.NO_O_M;
 rates.NO2.production(NO2_plength+4) = kout.NO_HO2;
-rates.NO2.production(NO2_plength+5) = kout.NO_O3; % The 1.0037 term is to make NOx cycle stable at reasonable concentrations. (only works for 25 km)
+rates.NO2.production(NO2_plength+5) = kout.NO_O3;% + variables.NO2(timeind)./16750; % The 1.0037 term is to make NOx cycle stable at reasonable concentrations. (only works for 25 km)
 rates.NO2.production(NO2_plength+6) = kout.NO3_NO.*2;
 rates.NO2.production(NO2_plength+7) = kout.NO3_O;
 rates.NO2.production(NO2_plength+8) = kout.NO3_OH;
@@ -385,12 +411,13 @@ rates.NO2.destruction(NO2_dlength+1) = kout.NO2_O;
 rates.NO2.destruction(NO2_dlength+2) = kout.NO2_O_M;
 rates.NO2.destruction(NO2_dlength+3) = kout.NO2_O3;
 rates.NO2.destruction(NO2_dlength+4) = kout.NO2_NO3_M;
-rates.NO2.destruction(NO2_dlength+5) = kout.NO2_OH_M;
-rates.NO2.destruction(NO2_dlength+6) = kout.NO2_HO2_M;
-rates.NO2.destruction(NO2_dlength+7) = kout.CLO_NO2_M;
-rates.NO2.destruction(NO2_dlength+8) = kout.BRO_NO2_M;
+rates.NO2.destruction(NO2_dlength+5) = kout.NO2_HO2_M;
+rates.NO2.destruction(NO2_dlength+6) = kout.CLO_NO2_M;
+rates.NO2.destruction(NO2_dlength+7) = kout.BRO_NO2_M;
+rates.NO2.destruction(NO2_dlength+8) = kout.NO2_OH_M;
 %rates.NO2.destruction(NO2_dlength+9) = kout.N_NO2a;
 %rates.NO2.destruction(NO2_dlength+10) = kout.N_NO2b;
+
 
 lifetime = 1./((sum(rates.NO2.destruction))./variables.NO2(timeind));
 
@@ -409,9 +436,12 @@ NO_plength = length(rates.NO.production);
 
 
 
+
 rates.NO.production(NO_plength+1) = kout.NO2_O;
+%rates.NO.production(1) = 0;
+
 % rates.NO.production(NO_plength+2) = kout.N_O2;
-% rates.NO.production(NO_plength+3) = kout.O1D_N2Oa.*2;
+rates.NO.production(NO_plength+2) = kout.O1D_N2Oa.*2;
 % rates.NO.production(NO_plength+4) = kout.N_NO2b.*2;
 % rates.NO.production(NO_plength+5) = kout.NO2_SO;
 
@@ -422,7 +452,15 @@ rates.NO.destruction(NO_dlength+4) = kout.NO3_NO;
 rates.NO.destruction(NO_dlength+5) = kout.CLO_NO;
 rates.NO.destruction(NO_dlength+6) = kout.BRO_NO;
 rates.NO.destruction(NO_dlength+7) = kout.CH3O2_NO;
+
+if i == 30
+    a = 1;
+end
+
 %rates.NO.destruction(NO_dlength+8) = kout.N_NO;
+
+dummyNO = (rates.NO2.destruction(1) + rates.NO2.destruction(2))./...
+    (rates.NO2.production(10) + rates.NO2.production(11) + rates.NO2.production(19) + rates.NO2.production(17)).*variables.NO2; 
 
 %% NO3
 % d(NO3)/dt = j7*N2O5  + j8*N2O5  + j12*HO2NO2  + j27*CLONO2  + j33*BRONO2  + .4*j59*PAN  + r64*M*N2O5                

@@ -9,7 +9,7 @@ clear variables
 
 inputs = Minputs;
 
-vars = {'O','O3','CLONO2','HCL','HOCL','CLO','CL2','CL2O2','OCLO','CL','BRCL'...
+vars = {'O','O3','O1D','CLONO2','HCL','HOCL','CLO','CL2','CL2O2','OCLO','CL','BRCL'...
     ,'NO2','NO','NO3','N2O5','HO2NO2','OH','HO2','HNO3','BRO','HOBR','HBR','BRONO2','BR'}; %BRO, BRONO2, HOBR, HBR, BR
 
 %% Initial concentrations
@@ -39,11 +39,13 @@ daycount = 1;
 photoout = [];
 
 %atmosphere.atLevel.T(:) = atmosphere.atLevel.T(1);
+%problem with NO somehow. Calculate NO by using equilibrium.
+% simulate O1D
 tic;
 flux = [];
 for i = 1:inputs.timesteps
     
-    rates = []; %remove
+    %rates = []; %remove
     
     %tic
     % initialize step components
@@ -58,7 +60,17 @@ for i = 1:inputs.timesteps
         continue
     end
     
-    variables = raphsonnewton(inputs,i,atmosphere,step,variables,vars,photoload);    
+    
+    
+    [variables,~] = raphsonnewton(inputs,i,atmosphere,step,variables,vars,photoload);    
+    
+    [ratesout,~,~] = rates(inputs,step,atmosphere,variables,i,photoload,photoout,0);
+    
+%     variables.NO(end) = (ratesout.NO2.destruction(1) + ratesout.NO2.destruction(2))./...
+%         (ratesout.NO2.production(10) + ratesout.NO2.production(11) + ratesout.NO2.production(19) + ratesout.NO2.production(17)).*variables.NO2(end-1); 
+%             
+%     variables.NO2(end) = (ratesout.NO2.production(10) + ratesout.NO2.production(11) + ratesout.NO2.production(19) + ratesout.NO2.production(17))./...
+%        (ratesout.NO2.destruction(1) + ratesout.NO2.destruction(2)).*variables.NO(end); 
     
     [variables,flux] = fluxcorrection(inputs,variables,flux,atmosphere,step,i);
     
@@ -69,7 +81,7 @@ for i = 1:inputs.timesteps
         daycount = daycount+1;        
     end    
 %     
-    if i == 1000
+    if i == 2000
         a = 1;        
     end
      if i ==count*1000
