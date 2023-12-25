@@ -21,7 +21,7 @@ for i = 1:size(varsVector,2)
     end
     G2(i,:) = varsVector_in - varsVecIni - ratessum(i,:).*inputs.secondstep; % I think varsVector initial is wrong here.
     %G2(i,:) = varsVector_in - varsVector(2,i) - ratessum(i,:).*inputs.secondstep; % I think varsVector initial is wrong here.
-    J(i,:) = (G2(i,:)-G)./(varsVector_in(i) - varsVector(2,i));
+    J(i,:) = (G2(i,:)-G)./(varsVector_in(i) - varsVecIni(i));
 end
 
 %J_ij = %dayGi/dayyj

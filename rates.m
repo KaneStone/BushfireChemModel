@@ -16,4 +16,6 @@ function [rates,photo,photoout] = rates(inputs,step,atmosphere,variables,i,photo
     % heterogeneous rates
     [rates] = hetcontrol(inputs,step,variables,atmosphere,i,rates,RN);
     
+    
+    
 end

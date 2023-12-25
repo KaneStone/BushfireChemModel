@@ -23,11 +23,9 @@ function [varsIteration,ratesout] = backwards(i,varsIteration,vars) % varsVector
     count = 1;
     varsIteration(count+1,:) = varsIteration(count,:);
     conv = 0;
-    eps = .01; %percent
+    eps = .001; %percent
     while conv == 0       
-        if i == 15
-            a = 1
-        end
+
         for k = 1:length(vars)
             varsIn.(vars{k}) = varsIteration(count+1,k);
         end
@@ -42,16 +40,27 @@ function [varsIteration,ratesout] = backwards(i,varsIteration,vars) % varsVector
         
         G = varsIteration(count+1,:) - varsIteration(count,:) - ratessum.*inputs.secondstep;
         if count == 1
-            J = Jacobian(varsIteration(count:count+1,:),varsIteration(1,:),inputs,atmosphere,step,vars,photoload,G,i);
-        elseif inputs.evolvingJ
-            J = Jacobian(varsIteration(count:count+1,:),varsIteration(1,:),inputs,atmosphere,step,vars,photoload,G,i);
+            J = Jacobian(varsIteration(count:count+1,:),varsIteration(count,:),inputs,atmosphere,step,vars,photoload,G,i);
+        elseif count > 1 && inputs.evolvingJ
+            J = Jacobian(varsIteration(count:count+1,:),varsIteration(count,:),inputs,atmosphere,step,vars,photoload,G,i);
         end
+        
+        %removing very small J values
+        J (abs(J) < 1e-10) = 1e-10;
         
         JG = J'\G';
        
         varsIteration(count+2,:) = varsIteration(count+1,:)' - JG;                
         
+        
+        
+        
         err(count,:) = (varsIteration(count+2,:) - varsIteration(count+1,:));
+%         if ~sum(varsIteration(count+2,:) < 0)
+%             convtest(count) = abs(sum(err(count,:))./sum(varsIteration(count+2,:))*100);
+%         else
+%             convtest(count) = 1;
+%         end
         convtest(count) = abs(sum(err(count,:))./sum(varsIteration(count+2,:))*100);
         if convtest(count) < eps
             conv = 1;

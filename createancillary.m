@@ -1,12 +1,19 @@
 % create time series averaged over level and latitudes from model data
 clear variables
+
+runcase = 'Solubility';
 %vars = {'O3','HCL','CLONO2','CLO','CL2O2','HOCL','HNO3','O'};
 %vars = {'H2', 'H2O2', 'HO2','CHO2','CL','OH','CH4','CLO','HOCL','CH3CL','CH3BR','CH2BR2','CHBR3'};
 vars = {'T','O','N2O','OH','HO2','CL','BR','NO','NO2','O1D','H','NO3','N2O5','CLO','CLONO2','HCL','HOCL','CL2','H2','CH3CL','CH4','H2O2','OCLO','CL2O2',...
     'CH3O2','BRO','BRCL','CH2O','HNO3','HO2NO2','H2O','HBR',...
-    'BRONO2','HOBR','CO','SULFRE','SAD_SULFC'};
+    'BRONO2','HOBR','CO','SULFRE','aoc','aso4','SAD_SULFC'};
 tic;
-data = readinBfolder(['/Volumes/ExternalOne/work/data/Bushfire/CESM/finalensembles/','SD/','raw','/'],'*control.nc',1); 
+switch runcase
+    case 'Solubility'
+        data = readinBfolder(['/Volumes/ExternalOne/work/data/Bushfire/CESM/finalensembles/','SD/','raw','/'],'*hexanoic_nowt.nc',1); 
+    otherwise
+        data = readinBfolder(['/Volumes/ExternalOne/work/data/Bushfire/CESM/finalensembles/','SD/','raw','/'],'*control.nc',1); 
+end
 %data.data.T2 = data.data.T;
 toc;
 
@@ -44,15 +51,16 @@ for i = 1:length(vars)
     switch vars{i}
         case 'SAD_SULFC'
         
-            temp = squeeze(zonalmean.SAD_SULFC.vmrregrid(20,:));
-            diff1 = diff(temp);
-            badind = find(abs(diff1) > .03e-8)+1;
-            for i = 1:length(badind)
-                zonalmean.SAD_SULFC.vmrregrid(:,badind(i)) = mean([zonalmean.SAD_SULFC.vmrregrid(:,badind(i)-1),zonalmean.SAD_SULFC.vmrregrid(:,badind(i)+1)],2,'omitnan');
-            end
-            zonalmean.SAD_SULFC.vmrregrid(:,1) = zonalmean.SAD_SULFC.vmrregrid(:,3);
-            zonalmean.SAD_SULFC.vmrregrid(:,2) = zonalmean.SAD_SULFC.vmrregrid(:,3);
-            badind = find(diff1 > -.2e-8)+1;
+%             temp = squeeze(zonalmean.SAD_SULFC.vmrregrid(20,:));
+%             diff1 = diff(temp);
+%             badind = find(abs(diff1) > .5e-8)+1;
+%             badind(1:20) = 0;
+%             for i = 1:length(badind)
+%                 zonalmean.SAD_SULFC.vmrregrid(:,badind(i)) = mean([zonalmean.SAD_SULFC.vmrregrid(:,badind(i)-1),zonalmean.SAD_SULFC.vmrregrid(:,badind(i)+1)],2,'omitnan');
+%             end
+%             zonalmean.SAD_SULFC.vmrregrid(:,1) = zonalmean.SAD_SULFC.vmrregrid(:,3);
+%             zonalmean.SAD_SULFC.vmrregrid(:,2) = zonalmean.SAD_SULFC.vmrregrid(:,3);
+%             badind = find(diff1 > -.2e-8)+1;
 
     end
     
@@ -205,7 +213,7 @@ ancil.O3.vmr = double(ozoneout);
 ancil.altitude = double(0:90);
     %% output temperature and density data for TUV code
 
-save('/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/Ancil/variables/climIn.mat','ancil');
+save(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/Ancil/variables/','climIn',runcase,'.mat'],'ancil');
     %% smooth data
 
 

@@ -3,7 +3,13 @@ function [atmosphere,variables] = Initializevars(inputs,vars)
 
 %% read in ancil files
 
-load([inputs.ancildir,'variables/','climIn.mat']);
+load([inputs.ancildir,'variables/','climInControl.mat']);
+
+switch inputs.runtype
+    case 'solubility'
+        solancil = load([inputs.ancildir,'variables/','climInSolubility.mat']);        
+    otherwise
+end
 
 % extract temperature, pressure, and density
 atmosphere.T = ancil.T;
@@ -32,12 +38,12 @@ atmosphere.atLevel.N2.nd = atmosphere.atLevel.M.*.78;
 
 variables.O3 = atmosphere.atLevel.O3.nd(1);
 variables.O1D = atmosphere.atLevel.O1D.nd(1);
-variables.CLO = atmosphere.atLevel.CLO.nd(1);
+variables.CLO = 1e1;%atmosphere.atLevel.CLO.nd(1);
 variables.CLONO2 = atmosphere.atLevel.CLONO2.nd(1);
 variables.HCL = atmosphere.atLevel.HCL.nd(1);
 variables.HOCL = atmosphere.atLevel.HOCL.nd(1);
-variables.OCLO = atmosphere.atLevel.OCLO.nd(1);
-variables.BRCL = atmosphere.atLevel.BRCL.nd(1);
+variables.OCLO = 1e4;%atmosphere.atLevel.OCLO.nd(1);
+variables.BRCL = 1e1;%atmosphere.atLevel.BRCL.nd(1);
 variables.O = 1e1;
 variables.CL = atmosphere.atLevel.CL.nd(1);
 variables.CL2 = atmosphere.atLevel.CL2.nd(1);
@@ -51,7 +57,7 @@ variables.HNO3 = atmosphere.atLevel.HNO3.nd(1);
 variables.OH = atmosphere.atLevel.OH.nd(1);
 variables.HO2 = atmosphere.atLevel.HO2.nd(1);
 variables.HO2NO2 = atmosphere.atLevel.HO2NO2.nd(1);
-variables.BRO = atmosphere.atLevel.BRO.nd(1);
+variables.BRO = 1e1;%atmosphere.atLevel.BRO.nd(1);
 variables.HBR = atmosphere.atLevel.HBR.nd(1);
 variables.HOBR = atmosphere.atLevel.HOBR.nd(1);
 variables.BRONO2 = atmosphere.atLevel.BRONO2.nd(1);
@@ -66,6 +72,10 @@ NO2ini = variables.NO2;
 %atmosphere.dummyNO2 = NO2ini-.5e9 + NO2ini./2.8.*sin(2*pi./inputs.timesteps.*(1:inputs.timesteps) + pi/2);
 atmosphere.dummyNO2 = NO2ini-.5e9 + NO2ini./2.8.*sin(2*pi./365.*(1:365) + pi/2);
 
+HNO3ini = variables.HNO3;
+%atmosphere.dummyHNO3 = HNO3ini-.5e9 + HNO3ini./2.8.*sin(2*pi./inputs.timesteps.*(1:inputs.timesteps) + pi/2);
+atmosphere.dummyHNO3 = HNO3ini-.1e9 + HNO3ini./5.8.*sin(2*pi./365.*(1:365) + 3*pi/2);
+
 CLONO2ini = variables.CLONO2;
 %atmosphere.dummyNO2 = NO2ini-.5e9 + NO2ini./2.8.*sin(2*pi./inputs.timesteps.*(1:inputs.timesteps) + pi/2);
 atmosphere.dummyCLONO2 = CLONO2ini+.15e9 + CLONO2ini./2.5.*sin(2*pi./365.*(1:365) + 3.6.*pi/3);
@@ -74,9 +84,14 @@ HCLini = variables.HCL;
 %atmosphere.dummyNO2 = NO2ini-.5e9 + NO2ini./2.8.*sin(2*pi./inputs.timesteps.*(1:inputs.timesteps) + pi/2);
 atmosphere.dummyHCL = HCLini+.05e9 + HCLini./15.*sin(2*pi./365.*(1:365) + 3.6.*pi/3);
 
-%atmosphere.dummySAD = 
+
 SADini = 1e-8;
 atmosphere.dummySAD = SADini+1e-9 + SADini./10.*sin(2*pi./365.*(1:365) + 3.0*pi/3);
+switch inputs.runtype        
+    case 'solubility'
+        stepint = 365./inputs.timesteps;
+        atmosphere.dummySAD_sol = interp1(1:size(solancil.ancil.SAD_SULFC.vmr,2),solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,:),1:stepint:inputs.days);
+end
 % smooth temperature
 tempsmooth = movmean([atmosphere.atLevel.T(end-19:end),atmosphere.atLevel.T,atmosphere.atLevel.T(1:20)],20);
 atmosphere.atLevel.T = tempsmooth(21:end-20);
@@ -87,6 +102,15 @@ if strcmp(inputs.radius,'ancil')
 else
     atmosphere.radius = inputs.radius;
 end
+
+% initialize to fluxvars
+variables.O3 = atmosphere.dummyozone(1);
+variables.CLONO2 = atmosphere.dummyCLONO2(1);
+variables.HCL = atmosphere.dummyHCL(1);
+variables.HNO3 = atmosphere.dummyHNO3(1);
+
+
+
 %atmosphere.atLevel.SAD_SULFC
 
 % figure; plot(atmosphere.dummyNO2')

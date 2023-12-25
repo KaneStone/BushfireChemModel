@@ -1,4 +1,4 @@
-function rate = gasphaserates(atmosphere,variables,photo,timeind,step)
+function [rate,eqvars] = gasphaserates(atmosphere,variables,photo,timeind,step)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Ox
@@ -7,10 +7,10 @@ function rate = gasphaserates(atmosphere,variables,photo,timeind,step)
     % O1D equilibium ------------------------------------------------------
     kO1D_N2 = 2.15e-11.*exp(110./atmosphere.atLevel.T(step.doy));           
     kO1D_O2 = 3.30e-11.*exp(55./atmosphere.atLevel.T(step.doy));            
-    O1D = photo(2).*variables.O3(timeind)./...
+    eqvars.O1D = photo(2).*variables.O3(timeind)./...
         (kO1D_N2.*atmosphere.atLevel.N2.nd(step.doy) + kO1D_O2.*atmosphere.atLevel.O2.nd(step.doy));
     
-    variables.O1D(timeind)-O1D;
+    %variables.O1D(timeind)-eqvars.O1D;
     
     % O + O2 + M -> O3 + M ------------------------------------------------
     rate.O_O2_M = 6e-34.*(atmosphere.atLevel.T(step.doy)./300).^-2.4...
@@ -432,6 +432,10 @@ function rate = gasphaserates(atmosphere,variables,photo,timeind,step)
     rate.BRONO2_O = 1.90e-11*exp(215./atmosphere.atLevel.T(step.doy))...
         .*variables.BRONO2(timeind).*variables.O(timeind);
     
+    % BR + OCLO ->  BRO + CLO 
+    rate.BR_OCLO = 2.6e-11*exp(-1300./atmosphere.atLevel.T(step.doy))...
+        .*variables.BR(timeind).*variables.OCLO(timeind);
+    
     %ternary
     % CLO + NO2 + M ->  CLONO2 + M
     k0 = 1.80e-31*(300./atmosphere.atLevel.T(step.doy)).^3.40;                                           
@@ -548,7 +552,7 @@ function rate = gasphaserates(atmosphere,variables,photo,timeind,step)
 %             .*variables.HBR(timeind).*O1D;                                
 
               
-    
+eqvars.OCLO2 = (rate.CLO_CLOc + rate.BRO_CLOa).*variables.BR(timeind)./(photo(66) + rate.BR_OCLO)./variables.BRO(timeind);
                                                                                                                                                                                 
     
     function kout = termolecular(k0,ki)                

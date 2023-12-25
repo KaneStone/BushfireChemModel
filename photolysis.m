@@ -252,11 +252,8 @@ function [photo,photoNamlist,rates,sza] = photolysis(inputs,step,atmosphere,vari
     %destruction
     for k = 1:length(photoReaction.N2O5.dreactionID)
         rates.N2O5.destruction(k) = photo.data(photoReaction.N2O5.dreactionID(k)).*variables.N2O5(timeind);
-    end
-    
-    if i == 30
-        a = 1
-    end
+    end        
+
     % HNO3
     photoReaction.HNO3.dreactionID = 13;
     

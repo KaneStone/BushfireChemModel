@@ -155,6 +155,7 @@ rates.CLO.production(CLO_plength+4) = kout.HOCL_OH;
 rates.CLO.production(CLO_plength+5) = kout.HOCL_CL;
 rates.CLO.production(CLO_plength+6) = kout.CLONO2_O;
 rates.CLO.production(CLO_plength+7) = kout.CL2O2_M;
+rates.CLO.production(CLO_plength+8) = kout.BR_OCLO;
 
 rates.CLO.destruction(CLO_dlength+1) = kout.CLO_CLO_M.*2;
 rates.CLO.destruction(CLO_dlength+2) = kout.CLO_NO2_M;
@@ -251,6 +252,8 @@ if i == 30
 end
 
 %% OCLO
+rates.OCLO.destruction(2) = kout.BR_OCLO;
+
 rates.OCLO.production(1) = kout.CLO_CLOc;
 rates.OCLO.production(2) = kout.BRO_CLOa;
 
@@ -292,6 +295,7 @@ BRO_plength = length(rates.BRO.production);
 rates.BRO.production(BRO_plength+1) = kout.BR_O3;
 rates.BRO.production(BRO_plength+2) = kout.HOBR_O;
 rates.BRO.production(BRO_plength+3) = kout.BRONO2_O;
+rates.BRO.production(BRO_plength+4) = kout.BR_OCLO;
 
 rates.BRO.destruction(BRO_dlength+1) =  kout.BRO_O;
 rates.BRO.destruction(BRO_dlength+2) =  kout.BRO_OH;
@@ -370,6 +374,7 @@ rates.BR.production(BR_plength+7) = kout.HBR_OH;
 rates.BR.destruction(1) = kout.BR_O3;
 rates.BR.destruction(2) = kout.BR_HO2;
 rates.BR.destruction(3) = kout.BR_CH2O;
+rates.BR.destruction(4) = kout.BR_OCLO;
 
 %% NO2     
 
@@ -453,10 +458,6 @@ rates.NO.destruction(NO_dlength+5) = kout.CLO_NO;
 rates.NO.destruction(NO_dlength+6) = kout.BRO_NO;
 rates.NO.destruction(NO_dlength+7) = kout.CH3O2_NO;
 
-if i == 30
-    a = 1;
-end
-
 %rates.NO.destruction(NO_dlength+8) = kout.N_NO;
 
 dummyNO = (rates.NO2.destruction(1) + rates.NO2.destruction(2))./...
@@ -506,10 +507,10 @@ rates.N2O5.destruction(N2O5_dlength+1) = kout.N2O5_M;
 % - j7*N2O5  - j8*N2O5  - r64*M*N2O5  - r264*N2O5  - r289*N2O5  - r295*N2O5  - r300*N2O5                
 HNO3_dlength = length(rates.HNO3.destruction); 
 
-rates.HNO3.destruction(HNO3_dlength) = kout.HNO3_OH;
+rates.HNO3.destruction(HNO3_dlength+1) = kout.HNO3_OH;
 
 rates.HNO3.production(1) = kout.NO2_OH_M;
-rates.HNO3.production(2) = kout.NO3_HO2;
+rates.HNO3.production(2) = kout.NO3_CH2O;
 
 %% HO2NO2
 % d(HO2NO2)/dt = r71*M*NO2*HO2                                                                                        

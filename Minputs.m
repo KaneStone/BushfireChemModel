@@ -38,13 +38,14 @@ function [inputs] = Minputs
     
     %solver
     inputs.evolvingJ = 0;
+    inputs.eqvars = 'OCLO';
     
     % heterogeneous chemistry
-    inputs.runtype = 'control'; %'control','solubility'
+    inputs.runtype = 'solubility'; %'control','solubility'
     inputs.radius = 'ancil'; % ancil reads yearly average radius from CARMA ancil (standard is 1e-5 cm)
     
     % flux corrections
-    inputs.fluxcorrections = 0;
+    inputs.fluxcorrections = 1;
     
     % plotting
     inputs.fsize = 18;

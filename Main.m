@@ -74,6 +74,14 @@ for i = 1:inputs.timesteps
     
     [variables,flux] = fluxcorrection(inputs,variables,flux,atmosphere,step,i);
     
+    % remove zeros
+    for k = 1:length(vars)
+        variables.(vars{k}) (variables.(vars{k}) < 0) = .1;
+%         if variables.(vars{k})(i) == 0
+%             a = 1
+%         end
+    end
+    
     if i == daycount*24/inputs.hourstep        
         for k = 1:length(vars)
             dayaverage.(vars{k})(daycount) = mean(variables.(vars{k})(1+(daycount-1)*24/inputs.hourstep:daycount*24/inputs.hourstep));
@@ -81,7 +89,7 @@ for i = 1:inputs.timesteps
         daycount = daycount+1;        
     end    
 %     
-    if i == 2000
+    if i == 1000
         a = 1;        
     end
      if i ==count*1000
