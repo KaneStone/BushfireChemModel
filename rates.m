@@ -1,6 +1,6 @@
-function [rates,photo,photoout] = rates(inputs,step,atmosphere,variables,i,photoload,photoout,RN)
+function [rates,photo,photoout] = rates(inputs,step,atmosphere,variables,i,photoload,photoout,RN,vars)
     
-    [photo,~,rates,SZA] = photolysis(inputs,step,atmosphere,variables,i,photoload,RN);                
+    [photo,rates,SZA] = photolysis(inputs,step,atmosphere,variables,i,photoload,RN,vars);                
     %SZA2(i) = SZA;   
     
     if inputs.photosave

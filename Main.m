@@ -19,7 +19,10 @@ vars = {'O','O3','O1D','CLONO2','HCL','HOCL','CLO','CL2','CL2O2','OCLO','CL','BR
 %% Look at extensive OH BR reactions and CH4 reaction
 %In many cases, when the chemical lifetimes of the N chemical species (which are provided by the inverse of the eigenvalues λi of the Jacobian matrix ∂S/∂y) 
 %look over NOX
-%  Put in sine wave ozone flux
+%if doesnt converge half time step. If matrix is singular use another
+%method
+% check to see how MAM handles HNO3 in concensced phase
+% Put in HOBR reaction. Might slow things down a little
 
 %% put in OH and HO2
 %% Then put in midlatitude aerosol chemistry using SAD
@@ -59,28 +62,10 @@ for i = 1:inputs.timesteps
     if ~isempty(photoout)
         continue
     end
-    
-    
-    
-    [variables,~] = raphsonnewton(inputs,i,atmosphere,step,variables,vars,photoload);    
-    
-    [ratesout,~,~] = rates(inputs,step,atmosphere,variables,i,photoload,photoout,0);
-    
-%     variables.NO(end) = (ratesout.NO2.destruction(1) + ratesout.NO2.destruction(2))./...
-%         (ratesout.NO2.production(10) + ratesout.NO2.production(11) + ratesout.NO2.production(19) + ratesout.NO2.production(17)).*variables.NO2(end-1); 
-%             
-%     variables.NO2(end) = (ratesout.NO2.production(10) + ratesout.NO2.production(11) + ratesout.NO2.production(19) + ratesout.NO2.production(17))./...
-%        (ratesout.NO2.destruction(1) + ratesout.NO2.destruction(2)).*variables.NO(end); 
+            
+    [variables,~] = raphsonnewton(inputs,i,atmosphere,step,variables,vars,photoload);                
     
     [variables,flux] = fluxcorrection(inputs,variables,flux,atmosphere,step,i);
-    
-    % remove zeros
-    for k = 1:length(vars)
-        variables.(vars{k}) (variables.(vars{k}) < 0) = .1;
-%         if variables.(vars{k})(i) == 0
-%             a = 1
-%         end
-    end
     
     if i == daycount*24/inputs.hourstep        
         for k = 1:length(vars)
@@ -107,7 +92,7 @@ if inputs.photosave
 end
 
 %%setup save output
-save([inputs.outputdir,'data/',inputs.runtype,'_',sprintf('%.2f',inputs.hourstep),'hours.mat'],'variables','dayaverage');
+save([inputs.outputdir,'data/',inputs.runtype,'_',num2str(inputs.fluxcorrections),'_',sprintf('%.2f',inputs.hourstep),'hours.mat'],'variables','dayaverage');
 %% plot daily output
 tickout = monthtick('short',0);
 for i = 1:length(vars)
@@ -117,5 +102,5 @@ for i = 1:length(vars)
     xlabel('Month','fontsize',inputs.fsize+2);
     ylabel('Number Density (molecules cm^-^3)','fontsize',inputs.fsize+2);
     title([inputs.runtype,', ',vars{i}],'fontsize',inputs.fsize+4);    
-    savefigure([inputs.outputdir,'figures/'],[inputs.runtype,'_',vars{i},sprintf('%.2f',inputs.hourstep),'hours'],1,0,0,0);
+    savefigure([inputs.outputdir,'figures/'],[inputs.runtype,'_',inputs.fluxcorrections,'_',vars{i},sprintf('%.2f',inputs.hourstep),'hours'],1,0,0,0);
 end

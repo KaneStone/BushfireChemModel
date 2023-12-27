@@ -11,7 +11,7 @@ for i = 1:size(varsVector,2)
     end
     
     
-    [ratesout,~,~] = rates(inputs,step,atmosphere,varsIn,timestep_ind,photoload,photoout,1);
+    [ratesout,~,~] = rates(inputs,step,atmosphere,varsIn,timestep_ind,photoload,photoout,1,vars);
     
 %     varsVector_in(13) = (ratesout.NO2.destruction(1) + ratesout.NO2.destruction(2))./...
 %     (ratesout.NO.destruction(3) + ratesout.NO.destruction(2) + ratesout.NO.destruction(7) + ratesout.NO.destruction(5)).*varsVector_in(12); 
@@ -19,7 +19,8 @@ for i = 1:size(varsVector,2)
     for k = 1:length(vars)
         ratessum(i,k) = double((sum(ratesout.(vars{k}).production) - sum(ratesout.(vars{k}).destruction)));                
     end
-    G2(i,:) = varsVector_in - varsVecIni - ratessum(i,:).*inputs.secondstep; % I think varsVector initial is wrong here.
+    G2(i,:) = varsVector_in - varsVecIni - ratessum(i,:).*inputs.secondstep; 
+    %G2 (abs(G2) < 1e-10) = 1e-10;
     %G2(i,:) = varsVector_in - varsVector(2,i) - ratessum(i,:).*inputs.secondstep; % I think varsVector initial is wrong here.
     J(i,:) = (G2(i,:)-G)./(varsVector_in(i) - varsVecIni(i));
 end

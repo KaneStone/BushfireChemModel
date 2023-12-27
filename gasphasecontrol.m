@@ -502,7 +502,7 @@ rates.N2O5.production(1) = kout.NO2_NO3_M;
 rates.N2O5.destruction(N2O5_dlength+1) = kout.N2O5_M;
 
 
-%% N2O5
+%% HNO3
 % d(N2O5)/dt = r63*M*NO2*NO3                                                                                          
 % - j7*N2O5  - j8*N2O5  - r64*M*N2O5  - r264*N2O5  - r289*N2O5  - r295*N2O5  - r300*N2O5                
 HNO3_dlength = length(rates.HNO3.destruction); 

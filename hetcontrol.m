@@ -57,25 +57,36 @@ function [rates] = hetcontrol(inputs,step,variables,atmosphere,i,rates,RN)
     
     CLONO2atm = Tin./(100).*inputs.k.*variables.CLONO2(timeind)./1e-6 /1013.25;
     
+    
+     x_h2so4 = wt ./ (wt + (100 - wt) .* 98 ./ 18); % mole fraction
+
+    term1 = .094 - x_h2so4 .* (.61 - 1.2 .* x_h2so4);        
+    term2 = (8515 - 10718 .* (x_h2so4.^.7)).*Tinv;                
+    H_hcl_h2so4 = term1 .* exp( -8.68 + term2); %(mol / l / atm)         
+    M_hcl_h2so4 = H_hcl_h2so4.*HCLatm; %(mol/l/atm * atm) = mol/l        
+    molar_h2so4 = den_h2so4.*wt./9.8;
+    
     switch inputs.runtype
         case 'control'
-            x_h2so4 = wt ./ (wt + (100 - wt) .* 98 ./ 18); % mole fraction
-
-            term1 = .094 - x_h2so4 .* (.61 - 1.2 .* x_h2so4);        
-            term2 = (8515 - 10718 .* (x_h2so4.^.7)).*Tinv;                
-            H_hcl_h2so4 = term1 .* exp( -8.68 + term2); %(mol / l / atm)         
-            M_hcl_h2so4 = H_hcl_h2so4.*HCLatm; %(mol/l/atm * atm) = mol/l        
-            molar_h2so4 = den_h2so4.*wt./9.8;
+%             x_h2so4 = wt ./ (wt + (100 - wt) .* 98 ./ 18); % mole fraction
+% 
+%             term1 = .094 - x_h2so4 .* (.61 - 1.2 .* x_h2so4);        
+%             term2 = (8515 - 10718 .* (x_h2so4.^.7)).*Tinv;                
+%             H_hcl_h2so4 = term1 .* exp( -8.68 + term2); %(mol / l / atm)         
+%             M_hcl_h2so4 = H_hcl_h2so4.*HCLatm; %(mol/l/atm * atm) = mol/l        
+%             molar_h2so4 = den_h2so4.*wt./9.8;
         case 'solubility'
-            hex_smoothing_strat = exp(28.986 - 33.458./(atmosphere.atLevel.T(step.doy)/100) - 18.135 .* log(atmosphere.atLevel.T(step.doy)/100));
-            ratio_hcl = 1./(1./hex_smoothing_strat - 1);
-            Ka = 10^5.9; % test is meant to be 5.9        
-            Mm_hex = 116.16;        
-            hex_den = (-5.0083e-7 * atmosphere.atLevel.T(step.doy).^2 - 5.2309e-4 .* atmosphere.atLevel.T(step.doy) + 1.1238) .* 1000; %(from Ghatee et al. 2013 [may not be applicable]) dx.doi.org/10.1021/ie3018675
-            molarity = ratio_hcl .* 1./Mm_hex .* hex_den;
-            H_hcl_h2so4 = molarity .* Ka;
-            M_hcl_h2so4 = H_hcl_h2so4.*HCLatm; %(mol/l/atm * atm) = mol/l
-            molar_h2so4 = den_h2so4.*wt./9.8; 
+            if atmosphere.aoc_aso4_ratio(step.doy) > .7
+                hex_smoothing_strat = exp(28.986 - 33.458./(atmosphere.atLevel.T(step.doy)/100) - 18.135 .* log(atmosphere.atLevel.T(step.doy)/100));
+                ratio_hcl = 1./(1./hex_smoothing_strat - 1);
+                Ka = 10^5.9; % test is meant to be 5.9        
+                Mm_hex = 116.16;        
+                hex_den = (-5.0083e-7 * atmosphere.atLevel.T(step.doy).^2 - 5.2309e-4 .* atmosphere.atLevel.T(step.doy) + 1.1238) .* 1000; %(from Ghatee et al. 2013 [may not be applicable]) dx.doi.org/10.1021/ie3018675
+                molarity = ratio_hcl .* 1./Mm_hex .* hex_den;
+                H_hcl_h2so4 = molarity .* Ka;
+                M_hcl_h2so4 = H_hcl_h2so4.*HCLatm; %(mol/l/atm * atm) = mol/l
+                molar_h2so4 = den_h2so4.*wt./9.8; 
+            end
     end
 
     %SAD = 1e-8;% atmosphere.atLevel.SAD.vmr(step.doy);
@@ -90,7 +101,7 @@ function [rates] = hetcontrol(inputs,step,variables,atmosphere,i,rates,RN)
     % CLONO2 + H2O -> HOCL + HNO3
     rates.CLONO2.destruction(end+1) = kout.hetCLONO2_H2O;
     rates.HOCL.production(end+1) = kout.hetCLONO2_H2O;
-    rates.HNO3.destruction(end+1) = kout.hetCLONO2_H2O;    
+    rates.HNO3.production(end+1) = kout.hetCLONO2_H2O;    
 
     % CLONO2 + HCL -> CL2 + HNO3
     rates.CLONO2.destruction(end+1) = kout.hetCLONO2_HCL;
