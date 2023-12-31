@@ -114,4 +114,9 @@ function [rates] = hetcontrol(inputs,step,variables,atmosphere,i,rates,RN)
     rates.HCL.destruction(end+1) = kout.hetHOCL_HCL;
     rates.CL2.production(end+1) = kout.hetHOCL_HCL;
     
+    % HOBR + HCL -> BRCL + H2O
+    rates.HOBR.destruction(end+1) = kout.hetHOBR_HCL;
+    rates.HCL.destruction(end+1) = kout.hetHOBR_HCL;
+    rates.BRCL.production(end+1) = kout.hetHOBR_HCL;
+    
 end

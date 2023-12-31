@@ -15,6 +15,7 @@ end
 atmosphere.T = controlancil.ancil.T;
 atmosphere.P = controlancil.ancil.P;
 atmosphere.M = controlancil.ancil.M;
+atmosphere.V = controlancil.ancil.V.vmr;
 atmosphere.O3 = controlancil.ancil.O3.nd;
 atmosphere.altitude = 0:90;
 
@@ -32,14 +33,15 @@ end
 atmosphere.atLevel.T = atmosphere.T(inputs.altitude+1,:);
 atmosphere.atLevel.P = atmosphere.P(inputs.altitude+1,:);
 atmosphere.atLevel.M = atmosphere.M(inputs.altitude+1,:);
+atmosphere.atLevel.V = atmosphere.V(inputs.altitude+1,:);
 
 atmosphere.atLevel.O2.nd = atmosphere.atLevel.M.*.21;
 atmosphere.atLevel.N2.nd = atmosphere.atLevel.M.*.78;
 
 variables.O3 = atmosphere.atLevel.O3.nd(1);
 variables.O1D = atmosphere.atLevel.O1D.nd(1);
-variables.CLO = 1e1;
-variables.CLONO2 = atmosphere.atLevel.CLONO2.nd(1);
+variables.CLO = 1;
+variables.CLONO2 = atmosphere.atLevel.CLONO2.nd(1).*2;
 variables.HCL = atmosphere.atLevel.HCL.nd(1);
 variables.HOCL = atmosphere.atLevel.HOCL.nd(1);
 variables.OCLO = 1e4;
@@ -49,12 +51,13 @@ variables.CL = atmosphere.atLevel.CL.nd(1);
 variables.CL2 = atmosphere.atLevel.CL2.nd(1);
 variables.CL2O2 = atmosphere.atLevel.CL2O2.nd(1);
 variables.NO = 1e1;
-variables.NO2 = 1e9;
+variables.NO2 = 1.4e9;
 variables.NO3 = atmosphere.atLevel.NO3.nd(1);
 variables.N2O5 = atmosphere.atLevel.N2O5.nd(1);
 variables.HNO3 = atmosphere.atLevel.HNO3.nd(1);
 variables.OH = atmosphere.atLevel.OH.nd(1);
 variables.HO2 = atmosphere.atLevel.HO2.nd(1);
+variables.H2O2 = atmosphere.atLevel.H2O2.nd(1);
 variables.HO2NO2 = atmosphere.atLevel.HO2NO2.nd(1);
 variables.BRO = 1e1;%atmosphere.atLevel.BRO.nd(1);
 variables.HBR = atmosphere.atLevel.HBR.nd(1);
@@ -73,7 +76,7 @@ atmosphere.dummyNO2 = NO2ini-.5e9 + NO2ini./2.8.*sin(2*pi./365.*(1:365) + pi/2);
 
 HNO3ini = variables.HNO3;
 %atmosphere.dummyHNO3 = HNO3ini-.5e9 + HNO3ini./2.8.*sin(2*pi./inputs.timesteps.*(1:inputs.timesteps) + pi/2);
-atmosphere.dummyHNO3 = HNO3ini-.1e9 + HNO3ini./5.8.*sin(2*pi./365.*(1:365) + 3*pi/2);
+atmosphere.dummyHNO3 = HNO3ini+.8e9 + HNO3ini./5.8.*sin(2*pi./365.*(1:365) + 3*pi/2);
 
 N2O5ini = variables.N2O5;
 %atmosphere.dummyHNO3 = HNO3ini-.5e9 + HNO3ini./2.8.*sin(2*pi./inputs.timesteps.*(1:inputs.timesteps) + pi/2);
@@ -91,6 +94,11 @@ atmosphere.dummyHCL = HCLini+.05e9 + HCLini./15.*sin(2*pi./365.*(1:365) + 3.6.*p
 SADini = 1e-8;
 atmosphere.dummySAD = SADini+1e-9 + SADini./40.*sin(2*pi./365.*(1:365)+pi.*1.1);
 %atmosphere.dummySAD(1:150) = atmosphere.dummySAD(1:150) + abs((atmosphere.dummySAD(1:150)-atmosphere.dummySAD(150)))./1.7;
+
+% Surface area density
+atmosphere.dummyV = -.05 + .03.*sin(2*pi./365.*(1:365)+pi./2);
+%atmosphere.dummySAD(1:150) = atmosphere.dummySAD(1:150) + abs((atmosphere.dummySAD(1:150)-atmosphere.dummySAD(150)))./1.7;
+
 switch inputs.runtype        
     case 'solubility'
         
@@ -99,6 +107,7 @@ switch inputs.runtype
     atmosphere.dummySAD(235:250) = interp1([235,250],atmosphere.dummySAD([235,250]),235:250);
     
     atmosphere.aoc_aso4_ratio = solancil.ancil.aoc.vmr(inputs.altitude+1,:)./solancil.ancil.aso4.vmr(inputs.altitude+1,:);
+    %atmosphere.aoc_aso4_ratio(:) = .1;
     
 end
 % smooth temperature

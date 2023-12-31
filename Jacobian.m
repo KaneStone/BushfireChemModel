@@ -1,4 +1,4 @@
-function J = Jacobian(varsVector,varsVecIni,inputs,atmosphere,step,vars,photoload,G,timestep_ind)
+function J = Jacobian(varsVector,varsVecIni,inputs,atmosphere,step,vars,photoload,G,timestep_ind,climScaleFactor)
 
 photoout = [];
 
@@ -11,7 +11,7 @@ for i = 1:size(varsVector,2)
     end
     
     
-    [ratesout,~,~] = rates(inputs,step,atmosphere,varsIn,timestep_ind,photoload,photoout,1,vars);
+    [ratesout,~,~] = rates(inputs,step,atmosphere,varsIn,timestep_ind,photoload,photoout,1,vars,climScaleFactor);
     
 %     varsVector_in(13) = (ratesout.NO2.destruction(1) + ratesout.NO2.destruction(2))./...
 %     (ratesout.NO.destruction(3) + ratesout.NO.destruction(2) + ratesout.NO.destruction(7) + ratesout.NO.destruction(5)).*varsVector_in(12); 

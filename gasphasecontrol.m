@@ -1,4 +1,4 @@
-function [rates] = gasphasecontrol(step,variables,atmosphere,i,rates,photo,RN)
+function [rates] = gasphasecontrol(inputs,step,variables,atmosphere,i,rates,photo,RN,climScaleFactor)
 
     if RN
         timeind = 1;
@@ -6,10 +6,10 @@ function [rates] = gasphasecontrol(step,variables,atmosphere,i,rates,photo,RN)
         timeind = i;
     end
 
-Clfact = 1.000;    
+Clfact = 1.00;    
     
-%day = climScaleFactor(round(step.hour.*1./inputs.hourstep+1)); % rounding to strip stray 0 decimals    
-kout = gasphaserates(atmosphere,variables,photo,timeind,step);    
+day = climScaleFactor(round(step.hour.*1./inputs.hourstep+1)); % rounding to strip stray 0 decimals    
+kout = gasphaserates(atmosphere,variables,photo,timeind,step,day);    
     
 %   first need to calculate atomic oxygen
 %    rates.O.production
@@ -148,7 +148,7 @@ CLO_plength = length(rates.CLO.production);
 CLO_dlength = length(rates.CLO.destruction);
 
 
-rates.CLO.production(CLO_plength+1) = kout.CL_O3;
+rates.CLO.production(CLO_plength+1) = kout.CL_O3.*Clfact;
 rates.CLO.production(CLO_plength+2) = kout.CL_HO2b;
 rates.CLO.production(CLO_plength+3) = kout.HOCL_O;
 rates.CLO.production(CLO_plength+4) = kout.HOCL_OH;
@@ -395,15 +395,15 @@ rates.BR.destruction(4) = kout.BR_OCLO;
 NO2_dlength = length(rates.NO2.destruction); 
 NO2_plength = length(rates.NO2.production); 
 
-rates.NO2.production(NO2_plength+1) = kout.N2O5_M;
-rates.NO2.production(NO2_plength+2) = kout.HO2NO2_M;
-rates.NO2.production(NO2_plength+3) = kout.NO_O_M;
-rates.NO2.production(NO2_plength+4) = kout.NO_HO2;
-rates.NO2.production(NO2_plength+5) = kout.NO_O3;% + variables.NO2(timeind)./16750; % The 1.0037 term is to make NOx cycle stable at reasonable concentrations. (only works for 25 km)
-rates.NO2.production(NO2_plength+6) = kout.NO3_NO.*2;
-rates.NO2.production(NO2_plength+7) = kout.NO3_O;
-rates.NO2.production(NO2_plength+8) = kout.NO3_OH;
-rates.NO2.production(NO2_plength+9) = kout.NO3_HO2;
+rates.NO2.production(NO2_plength+1) = kout.N2O5_M; %fine
+rates.NO2.production(NO2_plength+2) = kout.HO2NO2_M; %fine
+rates.NO2.production(NO2_plength+3) = kout.NO_O_M; % fine
+rates.NO2.production(NO2_plength+4) = kout.NO_HO2; % fine
+rates.NO2.production(NO2_plength+5) = kout.NO_O3; % fine % + variables.NO2(timeind)./16750; % The 1.0037 term is to make NOx cycle stable at reasonable concentrations. (only works for 25 km)
+rates.NO2.production(NO2_plength+6) = kout.NO3_NO.*2; %fine
+rates.NO2.production(NO2_plength+7) = kout.NO3_O; %fine
+rates.NO2.production(NO2_plength+8) = kout.NO3_OH; %fine
+rates.NO2.production(NO2_plength+9) = kout.NO3_HO2; %fine
 rates.NO2.production(NO2_plength+10) = kout.HO2NO2_OH;
 rates.NO2.production(NO2_plength+11) = kout.CLO_NO;
 rates.NO2.production(NO2_plength+12) = kout.BRO_NO;
@@ -562,6 +562,7 @@ rates.OH.destruction(7) = kout.OH_OH_M.*2;
 rates.OH.destruction(8) = kout.OH_CO_Ma;
 rates.OH.destruction(9) = kout.OH_CO_Mb;
 rates.OH.destruction(10) = kout.CH4_OH;
+rates.OH.destruction(11) = kout.HO2NO2_OH;
 %rates.OH.destruction(10) = kout.CH3BR_OH;
 
 rates.OH.production(OH_plength+1) = kout.H2O_O1D.*2;
@@ -589,19 +590,32 @@ rates.HO2.destruction(HO2_dlength+2) = kout.HO2_O;
 rates.HO2.destruction(HO2_dlength+3) = kout.NO_HO2;
 rates.HO2.destruction(HO2_dlength+4) = kout.OH_HO2;
 rates.HO2.destruction(HO2_dlength+5) = kout.CLO_HO2;
-rates.HO2.destruction(HO2_dlength+6) = kout.HO2_HO2;
+rates.HO2.destruction(HO2_dlength+6) = kout.HO2_HO2.*2;
 rates.HO2.destruction(HO2_dlength+7) = kout.NO2_HO2_M;
 rates.HO2.destruction(HO2_dlength+8) = kout.NO3_HO2;
 
-% rates.HO2.destruction(HO2_dlength+7) = kout.H_HO2a;
-% rates.HO2.destruction(HO2_dlength+8) = kout.H_HO2b;
-% rates.HO2.destruction(HO2_dlength+9) = kout.H_HO2c;
+% rates.HO2.destruction(HO2_dlength+9) = kout.H_HO2a;
+% rates.HO2.destruction(HO2_dlength+10) = kout.H_HO2b;
+% rates.HO2.destruction(HO2_dlength+11) = kout.H_HO2c;
 
 rates.HO2.production(HO2_plength+1) = kout.H_O2_M;
 rates.HO2.production(HO2_plength+2) = kout.OH_O3;
 rates.HO2.production(HO2_plength+3) = kout.OH_H2O2;
+rates.HO2.production(HO2_plength+4) = kout.H2O2_O;
+rates.HO2.production(HO2_plength+5) = kout.CH3O2_NO;
 % rates.HO2.production(HO2_plength+4) = kout.H2O2_O;
 % rates.HO2.production(HO2_dlength+5) = kout.CH3BR_OH;
 % rates.HO2.production(HO2_dlength+6) = kout.CH3BR_CL;
+
+
+%% H2O2
+H2O2_dlength = length(rates.H2O2.destruction);
+
+rates.H2O2.destruction(H2O2_dlength+1) = kout.OH_H2O2;
+rates.H2O2.destruction(H2O2_dlength+2) = kout.H2O2_O;
+
+rates.H2O2.production(1) = kout.HO2_HO2;
+rates.H2O2.production(2) = kout.OH_OH_M;
+
 
 end

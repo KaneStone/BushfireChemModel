@@ -1,6 +1,6 @@
-function [rates,photo,photoout] = rates(inputs,step,atmosphere,variables,i,photoload,photoout,RN,vars)
+function [rate,photo,photoout] = rates(inputs,step,atmosphere,variables,i,photoload,photoout,RN,vars,climScaleFactor)
     
-    [photo,rates,SZA] = photolysis(inputs,step,atmosphere,variables,i,photoload,RN,vars);                
+    [photo,rate,SZA] = photolysis(inputs,step,atmosphere,variables,i,photoload,RN,vars);                
     %SZA2(i) = SZA;   
     
     if inputs.photosave
@@ -11,10 +11,10 @@ function [rates,photo,photoout] = rates(inputs,step,atmosphere,variables,i,photo
     end
     
     % gas phase rates
-    [rates] = gasphasecontrol(step,variables,atmosphere,i,rates,photo.data,RN);
+    [rate] = gasphasecontrol(inputs,step,variables,atmosphere,i,rate,photo.data,RN,climScaleFactor);
     
     % heterogeneous rates
-    [rates] = hetcontrol(inputs,step,variables,atmosphere,i,rates,RN);
+    [rate] = hetcontrol(inputs,step,variables,atmosphere,i,rate,RN);
     
     
     

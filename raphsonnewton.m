@@ -1,4 +1,4 @@
-function [variables_be,ratesout] = raphsonnewton(inputs,i,atmosphere,step,variables_be,vars,photoload)
+function [variables_be,ratesout] = raphsonnewton(inputs,i,atmosphere,step,variables_be,vars,photoload,climScaleFactor)
 
 photoout = [];
 
@@ -23,26 +23,26 @@ function [varsIteration,ratesout] = backwards(i,varsIteration,vars) % varsVector
     count = 1;
     varsIteration(count+1,:) = varsIteration(count,:);
     convergence = 0;
-    eps = .001; %percent
+    eps = 1e-5;%1e-5; %percent
     while ~convergence
 
         for k = 1:length(vars)
             varsIn.(vars{k}) = varsIteration(count+1,k);
         end
         
-        [ratesout,~,~] = rates(inputs,step,atmosphere,varsIn,i,photoload,photoout,1,vars);
-%             
+        [ratesout,~,~] = rates(inputs,step,atmosphere,varsIn,i,photoload,photoout,1,vars,climScaleFactor);
+        %ratesout.CL.destruction(1)     
         for k = 1:length(vars)
             ratessum(k) = double((sum(ratesout.(vars{k}).production) - sum(ratesout.(vars{k}).destruction)));                
         end
         
         % convert from struct to array
         
-        G = varsIteration(count+1,:) - varsIteration(count,:) - ratessum.*inputs.secondstep;
+        G = varsIteration(count+1,:) - varsIteration(1,:) - ratessum.*inputs.secondstep;
         if count == 1
-            J = Jacobian(varsIteration(count:count+1,:),varsIteration(count,:),inputs,atmosphere,step,vars,photoload,G,i);
+            J = Jacobian(varsIteration(count:count+1,:),varsIteration(1,:),inputs,atmosphere,step,vars,photoload,G,i,climScaleFactor);
         elseif count > 1 && inputs.evolvingJ
-            J = Jacobian(varsIteration(count:count+1,:),varsIteration(count,:),inputs,atmosphere,step,vars,photoload,G,i);
+            J = Jacobian(varsIteration(count:count+1,:),varsIteration(1,:),inputs,atmosphere,step,vars,photoload,G,i,climScaleFactor);
         end
         
         %removing very small J values
@@ -60,7 +60,7 @@ function [varsIteration,ratesout] = backwards(i,varsIteration,vars) % varsVector
             convergence = 1;
             
             %making sure variables don't go below zero.
-            varsIteration (varsIteration < 0) = .001;
+            varsIteration (varsIteration < 0) = .001;                   
         else
             count = count+1;
         end

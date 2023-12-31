@@ -10,7 +10,7 @@ clear variables
 inputs = Minputs;
 
 vars = {'O','O3','O1D','CLONO2','HCL','HOCL','CLO','CL2','CL2O2','OCLO','CL','BRCL'...
-    ,'NO2','NO','NO3','N2O5','HO2NO2','OH','HO2','HNO3','BRO','HOBR','HBR','BRONO2','BR'}; %BRO, BRONO2, HOBR, HBR, BR
+    ,'NO2','NO','NO3','N2O5','HO2NO2','OH','HO2','H2O2','HNO3','BRO','HOBR','HBR','BRONO2','BR'}; %BRO, BRONO2, HOBR, HBR, BR
 
 %% Initial concentrations
 % Read in profiles then select by layer
@@ -22,8 +22,13 @@ vars = {'O','O3','O1D','CLONO2','HCL','HOCL','CLO','CL2','CL2O2','OCLO','CL','BR
 %if doesnt converge half time step. If matrix is singular use another
 %method
 % check to see how MAM handles HNO3 in concensced phase
-% Put in HOBR reaction. Might slow things down a little
 
+% NOx is too low at 20 km. OK at 25 km. and too high at 30 km??
+
+% How can I force NOy to be converved to NOy seasonal cycle
+
+%HOBR, BRONO2, HNO3, N2O5, HO2NO2. Figure out how to deal with HO2NO2
+%photolysis and quantu, yields
 %% put in OH and HO2
 %% Then put in midlatitude aerosol chemistry using SAD
 %% initiate time step
@@ -62,10 +67,19 @@ for i = 1:inputs.timesteps
     if ~isempty(photoout)
         continue
     end
-            
-    [variables,~] = raphsonnewton(inputs,i,atmosphere,step,variables,vars,photoload);                
+    
+    test = transport(inputs,step,atmosphere,variables,i);
+    
+    [variables,~] = raphsonnewton(inputs,i,atmosphere,step,variables,vars,photoload,climScaleFactor);                
+    
     
     [variables,flux] = fluxcorrection(inputs,variables,flux,atmosphere,step,i);
+    
+%      variables.O3(i+1) = variables.O3(i+1) + test.O3;
+%     variables.CLONO2(i+1) = variables.CLONO2(i+1) + test.CLONO2;
+%     variables.HCL(i+1) = variables.HCL(i+1) + test.HCL;
+%     variables.HNO3(i+1) = variables.HNO3(i+1) + test.HNO3;
+%     variables.N2O5(i+1) = variables.N2O5(i+1) + test.N2O5;
     
     if i == daycount*24/inputs.hourstep        
         for k = 1:length(vars)
@@ -91,7 +105,17 @@ if inputs.photosave
     end
 end
 
-%%setup save output
+%% diagnostic plots
+vartoplot = 'HO2NO2';
+figure;
+plot(variables.(vartoplot));
+
+figure;
+plot(dayaverage.(vartoplot));
+hold on;
+plot(atmosphere.atLevel.(vartoplot).nd)
+
+%% setup save output
 save([inputs.outputdir,'data/',inputs.runtype,'_',num2str(inputs.fluxcorrections),'_',sprintf('%.2f',inputs.hourstep),'hours.mat'],'variables','dayaverage');
 %% plot daily output
 tickout = monthtick('short',0);

@@ -1,12 +1,12 @@
 % create time series averaged over level and latitudes from model data
 clear variables
 
-runcase = 'Solubility';
+runcase = 'control';
 %vars = {'O3','HCL','CLONO2','CLO','CL2O2','HOCL','HNO3','O'};
 %vars = {'H2', 'H2O2', 'HO2','CHO2','CL','OH','CH4','CLO','HOCL','CH3CL','CH3BR','CH2BR2','CHBR3'};
 vars = {'T','O','N2O','OH','HO2','CL','BR','NO','NO2','O1D','H','NO3','N2O5','CLO','CLONO2','HCL','HOCL','CL2','H2','CH3CL','CH4','H2O2','OCLO','CL2O2',...
     'CH3O2','BRO','BRCL','CH2O','HNO3','HO2NO2','H2O','HBR',...
-    'BRONO2','HOBR','CO','SULFRE','aoc','aso4','SAD_SULFC'};
+    'BRONO2','HOBR','CO','SULFRE','aoc','aso4','V','SAD_SULFC'};
 tic;
 switch runcase
     case 'Solubility'

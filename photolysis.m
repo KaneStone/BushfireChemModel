@@ -1,5 +1,8 @@
 function [photo,rates,sza] = photolysis(inputs,step,atmosphere,variables,i,photoload,RN,vars)
 
+
+
+
     if RN
         timeind = 1;
     else
@@ -27,6 +30,9 @@ function [photo,rates,sza] = photolysis(inputs,step,atmosphere,variables,i,photo
             
     end
 
+    %photo.data(10) = photo.data(11).*.3
+    %photo.data(11) = photo.data(11).*0;
+    
 %     % TUV code first
 %     createTUVinput(inputs,atmosphere,step)
 %     
@@ -40,7 +46,7 @@ function [photo,rates,sza] = photolysis(inputs,step,atmosphere,variables,i,photo
     
 
     % createTUV namelist for separate molecules.
-    %photoNamlist = TUVnamelist;
+    photoNamlist = TUVnamelist;
     if inputs.photosave
         return
     end
@@ -224,8 +230,8 @@ function [photo,rates,sza] = photolysis(inputs,step,atmosphere,variables,i,photo
     
     % NO3
     photoReaction.NO3.dreactionID = [7,8];
-    photoReaction.NO3.preactionID = [11,14,73];
-    photoReaction.NO3.vars = {'N2O5','HO2NO2','CLONO2'};
+    photoReaction.NO3.preactionID = [11,73,102,14]; %using HO2NO2 -> NO2 becuase dont have NO3 data here.
+    photoReaction.NO3.vars = {'N2O5','CLONO2','BRONO2','HO2NO2'};
     
     %production
     for k = 1:length(photoReaction.NO3.preactionID)        
@@ -233,8 +239,9 @@ function [photo,rates,sza] = photolysis(inputs,step,atmosphere,variables,i,photo
             rates.NO3.production(k) = photo.data(photoReaction.NO3.preactionID(k)).*variables.(photoReaction.NO3.vars{k})(timeind);
         else
             rates.NO3.production(k) = photo.data(photoReaction.NO3.preactionID(k)).*atmosphere.atLevel.(photoReaction.NO3.vars{k}).nd(step.doy);
-        end
+        end        
     end   
+    rates.NO3.production(end) = rates.NO3.production(end)./2;
     
     %destruction
     for k = 1:length(photoReaction.NO3.dreactionID)
@@ -242,7 +249,7 @@ function [photo,rates,sza] = photolysis(inputs,step,atmosphere,variables,i,photo
     end
     
     % N2O5
-    photoReaction.N2O5.dreactionID = [10,11];
+    photoReaction.N2O5.dreactionID = 11;
     
     %destruction
     for k = 1:length(photoReaction.N2O5.dreactionID)
@@ -262,7 +269,7 @@ function [photo,rates,sza] = photolysis(inputs,step,atmosphere,variables,i,photo
     
     %destruction
     for k = 1:length(photoReaction.HO2NO2.dreactionID)
-        rates.HO2NO2.destruction(k) = photo.data(photoReaction.HO2NO2.dreactionID(k)).*variables.HO2NO2(timeind);
+        rates.HO2NO2.destruction(k) = photo.data(photoReaction.HO2NO2.dreactionID(k)).*variables.HO2NO2(timeind).*1.5;
     end
     
     % OH
@@ -277,9 +284,9 @@ function [photo,rates,sza] = photolysis(inputs,step,atmosphere,variables,i,photo
             rates.OH.production(k) = photo.data(photoReaction.OH.preactionID(k)).*variables.(photoReaction.OH.vars{k})(timeind);
         else
             rates.OH.production(k) = photo.data(photoReaction.OH.preactionID(k)).*atmosphere.atLevel.(photoReaction.OH.vars{k}).nd(step.doy);
-        end
-        rates.OH.production(end) = rates.OH.production(end)./2;
+        end        
     end
+    rates.OH.production(end) = rates.OH.production(end)./2;
     
     % HO2        
     photoReaction.HO2.preactionID = [14];
@@ -295,9 +302,19 @@ function [photo,rates,sza] = photolysis(inputs,step,atmosphere,variables,i,photo
     end
     
     %destruction
-    for k = 1:length(photoReaction.HO2.preactionID)
+    for k = 1:length(photoReaction.HO2.dreactionID)
         rates.HO2.destruction(k) = photo.data(photoReaction.HO2.dreactionID(k)).*variables.HO2(timeind);
     end
+    %rates.HO2.destruction(end) = rates.HO2.destruction(end)./2;
+    
+    
+    % H2O2        
+    photoReaction.H2O2.dreactionID = [5];            
+    %destruction
+    for k = 1:length(photoReaction.H2O2.dreactionID)
+        rates.H2O2.destruction(k) = photo.data(photoReaction.H2O2.dreactionID(k)).*variables.H2O2(timeind);
+    end
+    
 end
 
     

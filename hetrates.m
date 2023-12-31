@@ -115,41 +115,35 @@ kout.hetHOCL_HCL = wrk.*av_hocl.*gprob_hocl_hcl.*variables.HOCL(timeind);
 % %figure; plot(nanmean(gprob_hocl_hcl)), title('gprob_hocl_hcl')
 % %figure; plot(nanmean(gprob_cnt_hcl)), title('gprob_cnt_hcl')
 % %% HOBr + HCl
-% C_hobr          = 1477.*sqrt(T_limit);
-% D_hobr          = 9.e-9;
-% k_wasch         = .125.*exp(.542.*wt - 6440.*T_limiti + 10.3);
-% 
-% H_hobr          = exp( -9.86 + 5427.*T_limiti );
-% k_dl            = 7.5e14.*D_hobr.*2;                       
-% 
-% k_hobr_hcl = NaN(size(k_wasch));
-% k_hobr_hcl(k_wasch >= k_dl) = k_dl .* M_hcl_h2so4(k_wasch >= k_dl);
-% k_hobr_hcl(k_wasch < k_dl) = k_wasch(k_wasch < k_dl) .* M_hcl_h2so4(k_wasch < k_dl);
-% 
-% term1           = 4.*H_hobr.*.082.*T_limit;
-% term2           = sqrt(D_hobr.*k_hobr_hcl);
-% tmp             = rad_sulf./term2;
-% Gamma_hobr_rxn  = term1.*term2./C_hobr;
-% rdl_hobr        = sqrt(D_hobr./k_hobr_hcl);
-% if tmp < 1e2 
-%     term1           = 1./tanh(rad_sulf./rdl_hobr);
-% else
-%     term1           = 1;
-% end
-% term2           = rdl_hobr./rad_sulf;
-% f_hobr          = term1 - term2;
-% if(f_hobr > 0)
-%     term1            = 1 ./ (f_hobr.*Gamma_hobr_rxn);
-%     gprob_hobr_hcl   = 1 ./ (1 + term1);
-% else
-%     gprob_hobr_hcl  = 0;
-% end
-% 
-% % if ( hclvmr > hobrvmr ) then
-% rxt.hobr_hcl = wrk.*av_hobr.*gprob_hobr_hcl.*1./level.HCL;
-% %figure; plot(nanmean(gprob_hobr_hcl)); title('gprob_hobr_hcl');
-% % else
-% % rxt(i,k,rid_het6) = max( 0.,wrk*av_hobr*gprob_hobr_hcl(i,k) )*hobrdeni
-% % end if
+C_hobr          = 1477.*sqrt(T_limit);
+D_hobr          = 9.e-9;
+k_wasch         = .125.*exp(.542.*wt - 6440.*T_limiti + 10.3);
 
+H_hobr          = exp( -9.86 + 5427.*T_limiti );
+k_dl            = 7.5e14.*D_hobr.*2;                       
+
+k_hobr_hcl = NaN(size(k_wasch));
+k_hobr_hcl(k_wasch >= k_dl) = k_dl .* M_hcl_h2so4(k_wasch >= k_dl);
+k_hobr_hcl(k_wasch < k_dl) = k_wasch(k_wasch < k_dl) .* M_hcl_h2so4(k_wasch < k_dl);
+
+term1           = 4.*H_hobr.*.082.*T_limit;
+term2           = sqrt(D_hobr.*k_hobr_hcl);
+tmp             = rad_sulf./term2;
+Gamma_hobr_rxn  = term1.*term2./C_hobr;
+rdl_hobr        = sqrt(D_hobr./k_hobr_hcl);
+if tmp < 1e2 
+    term1           = 1./tanh(rad_sulf./rdl_hobr);
+else
+    term1           = 1;
+end
+term2           = rdl_hobr./rad_sulf;
+f_hobr          = term1 - term2;
+if(f_hobr > 0)
+    term1            = 1 ./ (f_hobr.*Gamma_hobr_rxn);
+    gprob_hobr_hcl   = 1 ./ (1 + term1);
+else
+    gprob_hobr_hcl  = 0;
+end
+
+kout.hetHOBR_HCL = wrk.*av_hobr.*gprob_hobr_hcl.*1.*variables.HOBR(timeind);
 end
