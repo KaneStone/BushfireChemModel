@@ -89,7 +89,7 @@ rates.O1D.destruction(2) = kout.O2_O1D;
 rates.O1D.destruction(3) = kout.H2O_O1D;
 rates.O1D.destruction(4) = kout.O1D_N2Oa;
 rates.O1D.destruction(5) = kout.O1D_N2Ob;
-rates.O1D.destruction(5) = kout.HCL_O1D;
+rates.O1D.destruction(6) = kout.HCL_O1D;
 if i == 25
     a = 1;
 end
@@ -133,9 +133,7 @@ rates.HCL.production(7) = kout.HOCL_CL;
 %destruction
 rates.HCL.destruction(HCL_dlength+1) = kout.HCL_O1D;
 rates.HCL.destruction(HCL_dlength+2) = kout.HCL_OH;
-%rates.HCL.destruction(HCL_dlength+3) = kout.HCL_O;
-
-
+rates.HCL.destruction(HCL_dlength+3) = kout.HCL_O;
 
 %% CLO
 % j23*OCLO  + j28*CLONO2  + r92*M*CL2O2  + r92*M*CL2O2  + r74*CL*O3  + r78*CL*HO2  + r95*HOCL*O
@@ -148,7 +146,7 @@ CLO_plength = length(rates.CLO.production);
 CLO_dlength = length(rates.CLO.destruction);
 
 
-rates.CLO.production(CLO_plength+1) = kout.CL_O3.*Clfact;
+rates.CLO.production(CLO_plength+1) = kout.CL_O3;
 rates.CLO.production(CLO_plength+2) = kout.CL_HO2b;
 rates.CLO.production(CLO_plength+3) = kout.HOCL_O;
 rates.CLO.production(CLO_plength+4) = kout.HOCL_OH;
@@ -212,9 +210,7 @@ CL_dlength = 0;
 
 rates.CL.production(CL_plength+1) = kout.CLO_O;
 rates.CL.production(CL_plength+2) = kout.CLO_OHa;
-
 rates.CL.production(CL_plength+3) = kout.CLO_NO;
-
 rates.CL.production(CL_plength+4) = kout.HCL_OH;
 rates.CL.production(CL_plength+5) = kout.BRO_CLOb;
 % rates.CL.production(CL_plength+6) = kout.CH3CL_OH;
@@ -228,7 +224,7 @@ rates.CL.production(CL_plength+5) = kout.BRO_CLOb;
 
 %reaction_namelist.CL.production{end+1:}
 
-rates.CL.destruction(CL_dlength+1) = kout.CL_O3.*Clfact; % This term to make temporarily stable (only works at 25 km)
+rates.CL.destruction(CL_dlength+1) = kout.CL_O3; % This term to make temporarily stable (only works at 25 km)
 rates.CL.destruction(CL_dlength+2) = kout.CL_H2;
 rates.CL.destruction(CL_dlength+3) = kout.CL_H2O2;
 rates.CL.destruction(CL_dlength+4) = kout.CL_HO2a;
@@ -246,10 +242,6 @@ rates.CL.destruction(CL_dlength+9) = kout.CLONO2_CL;
 % rates.CL.destruction(CL_dlength+12) = kout.CH2BR2_CL;
 % rates.CL.destruction(CL_dlength+13) = kout.CHBR3_CL;
 % rates.CL.destruction(CL_dlength+14) = kout.C2H6_CL;
-
-if i == 30
-    a = 1;
-end
 
 %% OCLO
 rates.OCLO.destruction(2) = kout.BR_OCLO;
@@ -305,8 +297,8 @@ rates.BRO.destruction(BRO_dlength+5) =  kout.BRO_NO2_M;
 rates.BRO.destruction(BRO_dlength+6) =  kout.BRO_CLOa;
 rates.BRO.destruction(BRO_dlength+7) =  kout.BRO_CLOb;
 rates.BRO.destruction(BRO_dlength+8) =  kout.BRO_CLOc;
-rates.BRO.destruction(BRO_dlength+8) =  kout.BRO_BRO.*2;
-
+rates.BRO.destruction(BRO_dlength+9) =  kout.BRO_BRO.*2;
+%length(unique(rates.BRO.destruction)) == length(rates.BRO.destruction)
 %% HOBR
 % d(HOBR)/dt = r291*BRONO2  + r299*BRONO2  + r302*BRONO2  + r106*BRO*HO2                                              
 % - j31*HOBR  - r115*O*HOBR  - r294*HCL*HOBR  - r305*HCL*HOBR   
@@ -325,7 +317,7 @@ rates.HBR.production(1) = kout.BR_HO2;
 rates.HBR.production(2) = kout.BR_CH2O;
 
 rates.HBR.destruction(1) =  kout.HBR_OH;
-%rates.HBR.destruction(2) =  kout.HBR_O1D;
+rates.HBR.destruction(2) =  kout.HBR_O1D;
 %rates.HBR.destruction(3) =  kout.HBR_O;
 
 %% BRONO2
@@ -420,6 +412,7 @@ rates.NO2.destruction(NO2_dlength+5) = kout.NO2_HO2_M;
 rates.NO2.destruction(NO2_dlength+6) = kout.CLO_NO2_M;
 rates.NO2.destruction(NO2_dlength+7) = kout.BRO_NO2_M;
 rates.NO2.destruction(NO2_dlength+8) = kout.NO2_OH_M;
+
 %rates.NO2.destruction(NO2_dlength+9) = kout.N_NO2a;
 %rates.NO2.destruction(NO2_dlength+10) = kout.N_NO2b;
 
@@ -445,9 +438,9 @@ NO_plength = length(rates.NO.production);
 rates.NO.production(NO_plength+1) = kout.NO2_O;
 %rates.NO.production(1) = 0;
 
-% rates.NO.production(NO_plength+2) = kout.N_O2;
+%rates.NO.production(NO_plength+2) = kout.N_O2;
 rates.NO.production(NO_plength+2) = kout.O1D_N2Oa.*2;
-% rates.NO.production(NO_plength+4) = kout.N_NO2b.*2;
+%rates.NO.production(NO_plength+4) = kout.N_NO2b.*2;
 % rates.NO.production(NO_plength+5) = kout.NO2_SO;
 
 rates.NO.destruction(NO_dlength+1) = kout.NO_O_M;
@@ -559,10 +552,22 @@ rates.OH.destruction(4) = kout.OH_HO2;
 rates.OH.destruction(5) = kout.OH_H2;
 rates.OH.destruction(6) = kout.OH_H2O2;
 rates.OH.destruction(7) = kout.OH_OH_M.*2;
-rates.OH.destruction(8) = kout.OH_CO_Ma;
-rates.OH.destruction(9) = kout.OH_CO_Mb;
-rates.OH.destruction(10) = kout.CH4_OH;
-rates.OH.destruction(11) = kout.HO2NO2_OH;
+rates.OH.destruction(8) = kout.CH4_OH;
+rates.OH.destruction(9) = kout.HO2NO2_OH;
+rates.OH.destruction(10) = kout.CLO_OHa;
+rates.OH.destruction(11) = kout.CLO_OHb;
+rates.OH.destruction(12) = kout.HNO3_OH;
+rates.OH.destruction(13) = kout.HCL_OH;
+rates.OH.destruction(14) = kout.HOCL_OH;
+rates.OH.destruction(15) = kout.CLONO2_OH;
+rates.OH.destruction(16) = kout.BRO_OH;
+rates.OH.destruction(17) = kout.HBR_OH;
+rates.OH.destruction(18) = kout.OH_CH2O;
+rates.OH.destruction(19) = kout.NO3_OH;
+rates.OH.destruction(20) = kout.NO2_OH_M;
+rates.OH.destruction(21) = kout.OH_CO_Ma;
+rates.OH.destruction(22) = kout.OH_CO_Mb;
+%rates.OH.destruction(21) = kout.OH_CO_Mb;
 %rates.OH.destruction(10) = kout.CH3BR_OH;
 
 rates.OH.production(OH_plength+1) = kout.H2O_O1D.*2;
@@ -572,6 +577,11 @@ rates.OH.production(OH_plength+4) = kout.HO2_O;
 rates.OH.production(OH_plength+5) = kout.NO_HO2;
 rates.OH.production(OH_plength+6) = kout.H2_O1D;
 rates.OH.production(OH_plength+7) = kout.CH4_O1D;
+rates.OH.production(OH_plength+8) = kout.CL_HO2b;
+rates.OH.production(OH_plength+9) = kout.H2O2_O;
+rates.OH.production(OH_plength+10) = kout.NO3_HO2;
+rates.OH.production(OH_plength+11) = kout.HCL_O1D; % not important
+rates.OH.production(OH_plength+12) = kout.HBR_O1D; % not important
 % rates.OH.production(OH_plength+8) = kout.H2O2_O;
 % rates.OH.production(OH_plength+9) = kout.H2_O;
 % rates.OH.production(OH_plength+10) = kout.H_HO2a*2;
@@ -593,6 +603,11 @@ rates.HO2.destruction(HO2_dlength+5) = kout.CLO_HO2;
 rates.HO2.destruction(HO2_dlength+6) = kout.HO2_HO2.*2;
 rates.HO2.destruction(HO2_dlength+7) = kout.NO2_HO2_M;
 rates.HO2.destruction(HO2_dlength+8) = kout.NO3_HO2;
+rates.HO2.destruction(HO2_dlength+9) = kout.BRO_HO2;
+rates.HO2.destruction(HO2_dlength+10) = kout.CL_HO2a;
+rates.HO2.destruction(HO2_dlength+11) = kout.CL_HO2b;
+rates.HO2.destruction(HO2_dlength+12) = kout.HO2_CH2O;
+rates.HO2.destruction(HO2_dlength+13) = kout.BR_HO2;
 
 % rates.HO2.destruction(HO2_dlength+9) = kout.H_HO2a;
 % rates.HO2.destruction(HO2_dlength+10) = kout.H_HO2b;
@@ -602,7 +617,16 @@ rates.HO2.production(HO2_plength+1) = kout.H_O2_M;
 rates.HO2.production(HO2_plength+2) = kout.OH_O3;
 rates.HO2.production(HO2_plength+3) = kout.OH_H2O2;
 rates.HO2.production(HO2_plength+4) = kout.H2O2_O;
-rates.HO2.production(HO2_plength+5) = kout.CH3O2_NO;
+rates.HO2.production(HO2_plength+5) = kout.CLO_OHa;
+rates.HO2.production(HO2_plength+6) = kout.CH4_O1D;
+rates.HO2.production(HO2_plength+7) = kout.NO3_OH;
+rates.HO2.production(HO2_plength+8) = kout.CL_H2O2;
+rates.HO2.production(HO2_plength+9) = kout.CL_CH2O;
+rates.HO2.production(HO2_plength+10) = kout.BR_CH2O;
+rates.HO2.production(HO2_plength+11) = kout.BRO_OH;
+rates.HO2.production(HO2_plength+12) = kout.OH_CO_Ma; %only add in r131
+%rates.HO2.production(HO2_plength+5) = kout.CH3O2_NO;
+%rates.HO2.production(HO2_plength+12) = kout.BRO_OH;
 % rates.HO2.production(HO2_plength+4) = kout.H2O2_O;
 % rates.HO2.production(HO2_dlength+5) = kout.CH3BR_OH;
 % rates.HO2.production(HO2_dlength+6) = kout.CH3BR_CL;

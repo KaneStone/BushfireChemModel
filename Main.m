@@ -27,6 +27,8 @@ vars = {'O','O3','O1D','CLONO2','HCL','HOCL','CLO','CL2','CL2O2','OCLO','CL','BR
 
 % How can I force NOy to be converved to NOy seasonal cycle
 
+% BRO and BR are not increasing fast enough at dawn.
+
 %HOBR, BRONO2, HNO3, N2O5, HO2NO2. Figure out how to deal with HO2NO2
 %photolysis and quantu, yields
 %% put in OH and HO2
@@ -88,7 +90,7 @@ for i = 1:inputs.timesteps
         daycount = daycount+1;        
     end    
 %     
-    if i == 1000
+    if i == 30
         a = 1;        
     end
      if i ==count*1000
@@ -106,14 +108,16 @@ if inputs.photosave
 end
 
 %% diagnostic plots
-vartoplot = 'HO2NO2';
+vartoplot = 'N2O5';
 figure;
 plot(variables.(vartoplot));
 
+%%
+vartoplot = 'NO3';
 figure;
 plot(dayaverage.(vartoplot));
 hold on;
-plot(atmosphere.atLevel.(vartoplot).nd)
+plot(atmosphere.atLevel.(vartoplot).nd(1:length(dayaverage.(vartoplot))))
 
 %% setup save output
 save([inputs.outputdir,'data/',inputs.runtype,'_',num2str(inputs.fluxcorrections),'_',sprintf('%.2f',inputs.hourstep),'hours.mat'],'variables','dayaverage');

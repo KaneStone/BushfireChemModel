@@ -41,6 +41,7 @@ atmosphere.atLevel.N2.nd = atmosphere.atLevel.M.*.78;
 variables.O3 = atmosphere.atLevel.O3.nd(1);
 variables.O1D = atmosphere.atLevel.O1D.nd(1);
 variables.CLO = 1;
+variables.BRO = 1;
 variables.CLONO2 = atmosphere.atLevel.CLONO2.nd(1).*2;
 variables.HCL = atmosphere.atLevel.HCL.nd(1);
 variables.HOCL = atmosphere.atLevel.HOCL.nd(1);
@@ -52,7 +53,7 @@ variables.CL2 = atmosphere.atLevel.CL2.nd(1);
 variables.CL2O2 = atmosphere.atLevel.CL2O2.nd(1);
 variables.NO = 1e1;
 variables.NO2 = 1.4e9;
-variables.NO3 = atmosphere.atLevel.NO3.nd(1);
+variables.NO3 = 1e8;
 variables.N2O5 = atmosphere.atLevel.N2O5.nd(1);
 variables.HNO3 = atmosphere.atLevel.HNO3.nd(1);
 variables.OH = atmosphere.atLevel.OH.nd(1);
@@ -66,32 +67,32 @@ variables.BRONO2 = atmosphere.atLevel.BRONO2.nd(1);
 variables.BR = atmosphere.atLevel.BR.nd(1);
 
 %% creating dummy variables for flux correction
-O3ini = variables.O3;
+O3ini = atmosphere.atLevel.O3.nd(1);
 %atmosphere.dummyozone = O3ini+.45e12 + O3ini./5.*sin(2*pi./inputs.timesteps.*(1:inputs.timesteps) + 3.6*pi/3);
 atmosphere.dummyO3 = O3ini+.45e12 + O3ini./5.*sin(2*pi./365.*(1:365) + 3.6*pi/3);
 
-NO2ini = variables.NO2;
+NO2ini = 2.5e9;
 %atmosphere.dummyNO2 = NO2ini-.5e9 + NO2ini./2.8.*sin(2*pi./inputs.timesteps.*(1:inputs.timesteps) + pi/2);
 atmosphere.dummyNO2 = NO2ini-.5e9 + NO2ini./2.8.*sin(2*pi./365.*(1:365) + pi/2);
 
-HNO3ini = variables.HNO3;
+HNO3ini = atmosphere.atLevel.HNO3.nd(1);
 %atmosphere.dummyHNO3 = HNO3ini-.5e9 + HNO3ini./2.8.*sin(2*pi./inputs.timesteps.*(1:inputs.timesteps) + pi/2);
 atmosphere.dummyHNO3 = HNO3ini+.8e9 + HNO3ini./5.8.*sin(2*pi./365.*(1:365) + 3*pi/2);
 
-N2O5ini = variables.N2O5;
+N2O5ini = atmosphere.atLevel.N2O5.nd(1);
 %atmosphere.dummyHNO3 = HNO3ini-.5e9 + HNO3ini./2.8.*sin(2*pi./inputs.timesteps.*(1:inputs.timesteps) + pi/2);
 atmosphere.dummyN2O5 = N2O5ini + N2O5ini./5.8.*sin(4*pi./365.*(1:365) + 3*pi/2);
 
-CLONO2ini = variables.CLONO2;
+CLONO2ini = atmosphere.atLevel.CLONO2.nd(1).*2;
 %atmosphere.dummyNO2 = NO2ini-.5e9 + NO2ini./2.8.*sin(2*pi./inputs.timesteps.*(1:inputs.timesteps) + pi/2);
-atmosphere.dummyCLONO2 = CLONO2ini+.15e9 + CLONO2ini./2.5.*sin(2*pi./365.*(1:365) + 3.6.*pi/3);
+atmosphere.dummyCLONO2 = CLONO2ini-.5e9 + CLONO2ini./6.5.*sin(2*pi./365.*(1:365) + 3.6.*pi/3);
 
-HCLini = variables.HCL;
+HCLini = atmosphere.atLevel.HCL.nd(1);
 %atmosphere.dummyNO2 = NO2ini-.5e9 + NO2ini./2.8.*sin(2*pi./inputs.timesteps.*(1:inputs.timesteps) + pi/2);
-atmosphere.dummyHCL = HCLini+.05e9 + HCLini./15.*sin(2*pi./365.*(1:365) + 3.6.*pi/3);
+atmosphere.dummyHCL = HCLini-.15e9 + HCLini./15.*sin(2*pi./365.*(1:365) + 3.6.*pi/3);
 
 % Surface area density
-SADini = 1e-8;
+SADini = .7e-8;
 atmosphere.dummySAD = SADini+1e-9 + SADini./40.*sin(2*pi./365.*(1:365)+pi.*1.1);
 %atmosphere.dummySAD(1:150) = atmosphere.dummySAD(1:150) + abs((atmosphere.dummySAD(1:150)-atmosphere.dummySAD(150)))./1.7;
 
@@ -125,5 +126,36 @@ variables.O3 = atmosphere.dummyO3(1);
 variables.CLONO2 = atmosphere.dummyCLONO2(1);
 variables.HCL = atmosphere.dummyHCL(1);
 variables.HNO3 = atmosphere.dummyHNO3(1);
+
+
+%% initialize to end of control run
+% variables.O3 = atmosphere.dummyO3(1);
+% variables.CLONO2 = atmosphere.dummyCLONO2(1);
+% variables.HCL = 2.02e9;
+% variables.O1D = 1e-10;
+% variables.CLO = 6.5e4;
+% variables.BRO = 212;
+% variables.HOCL = 3.06e6;
+% variables.OCLO = 5.65e3;
+% variables.BRCL = 7.4e3;
+% variables.O = 1e-5;
+% variables.CL = 4;
+% variables.CL2 = 4e2;
+% variables.CL2O2 = .1;
+% variables.NO = .005;
+% variables.NO2 = 2.5e9;
+% variables.NO3 = 6.47e6;
+% variables.N2O5 = 2.74e8;
+% variables.HNO3 = 1e10;
+% variables.OH = 1.2e5;
+% variables.HO2 = 3.38e6;
+% variables.H2O2 = 1.2e7;
+% variables.HO2NO2 = 3.17e8;
+% variables.HBR = 5.5e5;
+% variables.HOBR = 5.34e6;
+% variables.BRONO2 = 1.62e6;
+% variables.BR = .5;
+
+
 
 end

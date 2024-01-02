@@ -30,6 +30,7 @@ wrk = .25.*SAD;
 R = 8.31; % J K-1 mol-1
 
 av_clono2 = (8.*R.*T_limit.*1000./(pi*98)).^.5 * 100; % (kg m2 s-2) (K-1) (kg-1) (K) (mol-1 kg) (kg m2 s-2 mol-1
+av_brono2 = (8.*R.*T_limit.*1000./(pi*141.9)).^.5 * 100; % (kg m2 s-2) (K-1) (kg-1) (K) (mol-1 kg) (kg m2 s-2 mol-1
 av_hocl = (8.*R.*T_limit.*1000./(pi*52.5)).^.5 * 100; %(kg m2 s-2) (K-1) (mol-1) (K) (mol-
 av_hobr = (8.*R.*T_limit.*1000./(pi*96.9)).^.5 * 100; %(kg m2 s-2) (K-1) (mol-1) (K) (mol-
 av_n2o5 = (8.*R.*T_limit.*1000./(pi*108)).^.5 * 100; %(kg m2 s-2) (K-1) (mol-1) (K) (mol-
@@ -146,4 +147,16 @@ else
 end
 
 kout.hetHOBR_HCL = wrk.*av_hobr.*gprob_hobr_hcl.*1.*variables.HOBR(timeind);
+
+h1    = 29.24;
+h2    = -.396;
+h3    = .114;
+alpha = .805;
+gprob_rxn = exp(h1 + h2.*wt) + h3;
+term1     = 1./alpha;
+term2     = 1./gprob_rxn;
+gprob_bnt_h2o = 1./(term1 + term2);
+kout.hetBRONO2_H2O  = wrk*av_brono2.*gprob_bnt_h2o.*variables.BRONO2(timeind);
+
+
 end

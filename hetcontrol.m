@@ -19,7 +19,7 @@ function [rates] = hetcontrol(inputs,step,variables,atmosphere,i,rates,RN)
     wt_e2 = 330918.55082;
     wt_e3 = 12725068.262;
 
-    Tinv = 1./atmosphere.atLevel.T(step.doy);
+    Tinv = 1./Tin;
 
     pzero_h2o = exp(wt_e0 - Tinv .* (wt_e1 + Tinv .* (wt_e2 - Tinv .* wt_e3)));
 
@@ -118,5 +118,10 @@ function [rates] = hetcontrol(inputs,step,variables,atmosphere,i,rates,RN)
     rates.HOBR.destruction(end+1) = kout.hetHOBR_HCL;
     rates.HCL.destruction(end+1) = kout.hetHOBR_HCL;
     rates.BRCL.production(end+1) = kout.hetHOBR_HCL;
+    
+    % BRONO2 + H2O -> HNO3 + HOBR
+    rates.BRONO2.destruction(end+1) = kout.hetBRONO2_H2O;
+    rates.HOBR.production(end+1) = kout.hetBRONO2_H2O;
+    rates.HNO3.production(end+1) = kout.hetBRONO2_H2O;
     
 end
