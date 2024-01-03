@@ -1,41 +1,22 @@
-function J = Jacobian(varsVector,varsVecIni,inputs,atmosphere,step,vars,photoload,G,timestep_ind,climScaleFactor)
+function J = Jacobian(varsIteration,varsInitial,inputs,atmosphere,step,varNames,photoload,G,kout)
 
-photoout = [];
-
-for i = 1:size(varsVector,2)
-    varsVector_in = varsVector(2,:);
-    varsVector_in(i) = varsVector_in(i)+varsVector_in(i)./100;
+G2 = zeros(size(varsIteration,2));
+J = zeros(size(varsIteration,2));
+for i = 1:size(varsIteration,2)
+    varsIterationIn = varsIteration;
+    varsIterationIn(i) = varsIterationIn(i) + varsIterationIn(i)./100;
     
-    for k = 1:length(vars)
-        varsIn.(vars{k}) = varsVector_in(k);
+    for k = 1:length(varNames)
+        varsIn.(varNames{k}) = varsIterationIn(k);
     end
+        
+    ratesout = ratesControl(inputs,step,atmosphere,varsIn,photoload,kout);    
     
-    
-    [ratesout,~,~] = rates(inputs,step,atmosphere,varsIn,timestep_ind,photoload,photoout,1,vars,climScaleFactor);
-    
-%     varsVector_in(13) = (ratesout.NO2.destruction(1) + ratesout.NO2.destruction(2))./...
-%     (ratesout.NO.destruction(3) + ratesout.NO.destruction(2) + ratesout.NO.destruction(7) + ratesout.NO.destruction(5)).*varsVector_in(12); 
-    
-    for k = 1:length(vars)
-        ratessum(i,k) = double((sum(ratesout.(vars{k}).production) - sum(ratesout.(vars{k}).destruction)));                
+    for k = 1:length(varNames)
+        ratessum(i,k) = double((sum(ratesout.(varNames{k}).production) - sum(ratesout.(varNames{k}).destruction)));                
     end
-    G2(i,:) = varsVector_in - varsVecIni - ratessum(i,:).*inputs.secondstep; 
-    %G2 (abs(G2) < 1e-10) = 1e-10;
-    %G2(i,:) = varsVector_in - varsVector(2,i) - ratessum(i,:).*inputs.secondstep; % I think varsVector initial is wrong here.
-    J(i,:) = (G2(i,:)-G)./(varsVector_in(i) - varsVecIni(i));
+    G2(i,:) = varsIterationIn - varsInitial - ratessum(i,:).*inputs.secondstep;     
+    J(i,:) = (G2(i,:)-G)./(varsIterationIn(i) - varsInitial(i));
 end
-
-%J_ij = %dayGi/dayyj
-% G = yn+1 - yn - dt*S(tn+1,yn+1)
-
-% steps
-% Change each variable in the y vector by a small amount (say 1%)
-% calculate rates
-% calculate the change in G
-% produce square jacobian
-
-
-
-
 
 end

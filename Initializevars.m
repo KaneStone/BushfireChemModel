@@ -83,9 +83,9 @@ N2O5ini = atmosphere.atLevel.N2O5.nd(1);
 %atmosphere.dummyHNO3 = HNO3ini-.5e9 + HNO3ini./2.8.*sin(2*pi./inputs.timesteps.*(1:inputs.timesteps) + pi/2);
 atmosphere.dummyN2O5 = N2O5ini + N2O5ini./5.8.*sin(4*pi./365.*(1:365) + 3*pi/2);
 
-CLONO2ini = atmosphere.atLevel.CLONO2.nd(1).*2;
+CLONO2ini = atmosphere.atLevel.CLONO2.nd(1);
 %atmosphere.dummyNO2 = NO2ini-.5e9 + NO2ini./2.8.*sin(2*pi./inputs.timesteps.*(1:inputs.timesteps) + pi/2);
-atmosphere.dummyCLONO2 = CLONO2ini-.5e9 + CLONO2ini./6.5.*sin(2*pi./365.*(1:365) + 3.6.*pi/3);
+atmosphere.dummyCLONO2 = CLONO2ini+.8e8 + CLONO2ini./3.*sin(2*pi./365.*(1:365) + 3.6.*pi/3);
 
 HCLini = atmosphere.atLevel.HCL.nd(1);
 %atmosphere.dummyNO2 = NO2ini-.5e9 + NO2ini./2.8.*sin(2*pi./inputs.timesteps.*(1:inputs.timesteps) + pi/2);
@@ -103,7 +103,7 @@ atmosphere.dummyV = -.05 + .03.*sin(2*pi./365.*(1:365)+pi./2);
 switch inputs.runtype        
     case 'solubility'
         
-    atmosphere.dummySAD(11:end) = atmosphere.dummySAD(11:end) + solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,11:365)+.5e-8;    
+    atmosphere.dummySAD(11:end) = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,11:365)./1.5;    
     atmosphere.dummySAD(10:18) = interp1([10,18],atmosphere.dummySAD([10,18]),10:18);
     atmosphere.dummySAD(235:250) = interp1([235,250],atmosphere.dummySAD([235,250]),235:250);
     

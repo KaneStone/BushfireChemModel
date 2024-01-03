@@ -1,10 +1,6 @@
-function [rates] = gasphasecontrol(inputs,step,variables,atmosphere,i,rates,photo,RN,climScaleFactor)
+function [rates] = gasphasecontrol(inputs,step,variables,atmosphere,i,rates,photo,climScaleFactor)
 
-    if RN
-        timeind = 1;
-    else
-        timeind = i;
-    end
+timeind = 1;
 
 Clfact = 1.00;    
     
@@ -51,6 +47,7 @@ rates.O.destruction(15) = kout.OH_O;
 %rates.O.destruction(18) = kout.HCL_O;
 %rates.O.destruction(19) = kout.HBR_O;
 
+rates.O.production
 %% O3 RATES
 O3_dlength = length(rates.O3.destruction);
 %production
@@ -72,7 +69,8 @@ rates.O3.destruction(O3_dlength+9) = kout.BR_O3;
 % else
 %     rates.O3.destruction(end+1) = O3dyn;
 % end
-
+a2 = sum(rates.O3.destruction)
+b2 = sum(rates.O3.production)
 %% O1D
 % j2*O3  + j4*N2O  + j18*H2O                                                                              
 %  - r4*N2*O1D  - r5*O2*O1D  - r6*H2O*O1D  - r7*N2O*O1D  - r8*N2O*O1D  - r9*O3*O1D  - r10*CFC11*O1D       
@@ -90,9 +88,14 @@ rates.O1D.destruction(3) = kout.H2O_O1D;
 rates.O1D.destruction(4) = kout.O1D_N2Oa;
 rates.O1D.destruction(5) = kout.O1D_N2Ob;
 rates.O1D.destruction(6) = kout.HCL_O1D;
+rates.O1D.destruction(7) = kout.O1D_O3;
 if i == 25
     a = 1;
 end
+
+a = sum(rates.O1D.destruction)
+
+
 %% CLONO2 rates
 
 CLONO2_dlength = length(rates.CLONO2.destruction);
@@ -105,7 +108,8 @@ rates.CLONO2.destruction(CLONO2_dlength+1) = kout.CLONO2_O;
 rates.CLONO2.destruction(CLONO2_dlength+2) = kout.CLONO2_OH;
 rates.CLONO2.destruction(CLONO2_dlength+3) = kout.CLONO2_CL;
 
-    
+a1 = sum(rates.CLONO2.destruction)
+b1 = sum(rates.CLONO2.production)    
 
 %% HCL
 %  r75*CL*H2  + r76*CL*H2O2  + r77*CL*HO2  + r79*CL*CH2O  + r80*CL*CH4  + r83*CLO*OH  + r96*HOCL*CL
@@ -451,6 +455,7 @@ rates.NO.destruction(NO_dlength+5) = kout.CLO_NO;
 rates.NO.destruction(NO_dlength+6) = kout.BRO_NO;
 rates.NO.destruction(NO_dlength+7) = kout.CH3O2_NO;
 
+
 %rates.NO.destruction(NO_dlength+8) = kout.N_NO;
 
 dummyNO = (rates.NO2.destruction(1) + rates.NO2.destruction(2))./...
@@ -484,6 +489,7 @@ rates.NO3.destruction(NO3_dlength+3) = kout.NO3_O;
 rates.NO3.destruction(NO3_dlength+4) = kout.NO3_OH;
 rates.NO3.destruction(NO3_dlength+5) = kout.NO3_HO2;
 rates.NO3.destruction(NO3_dlength+6) = kout.NO3_CH2O;
+
 
 %% N2O5
 % d(N2O5)/dt = r63*M*NO2*NO3                                                                                          
@@ -567,6 +573,7 @@ rates.OH.destruction(19) = kout.NO3_OH;
 rates.OH.destruction(20) = kout.NO2_OH_M;
 rates.OH.destruction(21) = kout.OH_CO_Ma;
 rates.OH.destruction(22) = kout.OH_CO_Mb;
+
 %rates.OH.destruction(21) = kout.OH_CO_Mb;
 %rates.OH.destruction(10) = kout.CH3BR_OH;
 
@@ -582,6 +589,8 @@ rates.OH.production(OH_plength+9) = kout.H2O2_O;
 rates.OH.production(OH_plength+10) = kout.NO3_HO2;
 rates.OH.production(OH_plength+11) = kout.HCL_O1D; % not important
 rates.OH.production(OH_plength+12) = kout.HBR_O1D; % not important
+
+
 % rates.OH.production(OH_plength+8) = kout.H2O2_O;
 % rates.OH.production(OH_plength+9) = kout.H2_O;
 % rates.OH.production(OH_plength+10) = kout.H_HO2a*2;
@@ -630,7 +639,6 @@ rates.HO2.production(HO2_plength+12) = kout.OH_CO_Ma; %only add in r131
 % rates.HO2.production(HO2_plength+4) = kout.H2O2_O;
 % rates.HO2.production(HO2_dlength+5) = kout.CH3BR_OH;
 % rates.HO2.production(HO2_dlength+6) = kout.CH3BR_CL;
-
 
 %% H2O2
 H2O2_dlength = length(rates.H2O2.destruction);

@@ -1,10 +1,6 @@
-function [rates] = hetcontrol(inputs,step,variables,atmosphere,i,rates,RN)
+function [rates] = hetcontrol(inputs,step,variables,atmosphere,rates)
 
-    if RN 
-        timeind = 1;
-    else
-        timeind = i;
-    end
+    timeind = 1;
 
     % Shi et al
     % calculate water in partial pressure hPa

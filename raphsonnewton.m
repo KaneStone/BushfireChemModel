@@ -1,18 +1,18 @@
-function [variables_be,ratesout] = raphsonnewton(inputs,i,atmosphere,step,variables_be,vars,photoload,climScaleFactor)
+function [variables,ratesout] = raphsonnewton(inputs,i,atmosphere,step,variables,varNames,photoload,kout,climScaleFactor)
 
 photoout = [];
 
-for j = 1:length(vars)
-    varsVector(j) = variables_be.(vars{j})(i);
+for j = 1:length(varNames)
+    varsVector(j) = variables.(varNames{j})(i);
 end
 
-[varsOut,ratesout] = backwards(i,varsVector,vars);
+[varsOut,ratesout] = backwards(i,varsVector,varNames);
 
-for k = 1:length(vars)
-    variables_be.(vars{k})(i+1) = varsOut(end,k);
+for k = 1:length(varNames)
+    variables.(varNames{k})(i+1) = varsOut(end,k);
 end 
 
-function [varsIteration,ratesout] = backwards(i,varsIteration,vars) % varsVector = yb, % ratessum = dy
+function [varsIteration,ratesout] = backwards(i,varsInitial,vars) % varsVector = yb, % ratessum = dy
 
     % backwards euler
     % initial guess be previous time step
@@ -21,28 +21,29 @@ function [varsIteration,ratesout] = backwards(i,varsIteration,vars) % varsVector
     %  dy/dt = S(t,y)        
     
     count = 1;
-    varsIteration(count+1,:) = varsIteration(count,:);
+    varsIteration(count,:) = varsInitial; % first guess
     convergence = 0;
-    eps = 1e-5;%1e-5; %percent
+    eps = 1e-5; %percent
+    %ratessum = zeros(1,length(vars));
     while ~convergence
 
         for k = 1:length(vars)
-            varsIn.(vars{k}) = varsIteration(count+1,k);
+            varsIn.(vars{k}) = varsIteration(count,k);
         end
         
-        [ratesout,~,~] = rates(inputs,step,atmosphere,varsIn,i,photoload,photoout,1,vars,climScaleFactor);
+        ratesout = ratesControl(inputs,step,atmosphere,varsIn,photoload,kout);
         %ratesout.CL.destruction(1)     
-        for k = 1:length(vars)
+        for k = 1:length(varNames)
             ratessum(k) = double((sum(ratesout.(vars{k}).production) - sum(ratesout.(vars{k}).destruction)));                
         end
         
         % convert from struct to array
         
-        G = varsIteration(count+1,:) - varsIteration(1,:) - ratessum.*inputs.secondstep;
+        G = varsIteration(count,:) - varsInitial - ratessum.*inputs.secondstep;
         if count == 1
-            J = Jacobian(varsIteration(count:count+1,:),varsIteration(1,:),inputs,atmosphere,step,vars,photoload,G,i,climScaleFactor);
+            J = Jacobian(varsIteration(count,:),varsInitial,inputs,atmosphere,step,varNames,photoload,G,kout);
         elseif count > 1 && inputs.evolvingJ
-            J = Jacobian(varsIteration(count:count+1,:),varsIteration(1,:),inputs,atmosphere,step,vars,photoload,G,i,climScaleFactor);
+            J = Jacobian(varsIteration(count,:),varsInitial,inputs,atmosphere,step,varNames,photoload,G,kout);
         end
         
         %removing very small J values
@@ -50,11 +51,11 @@ function [varsIteration,ratesout] = backwards(i,varsIteration,vars) % varsVector
         
         % calculating iteration solution
         JG = J'\G';       
-        varsIteration(count+2,:) = varsIteration(count+1,:)' - JG;                
+        varsIteration(count+1,:) = varsIteration(count,:)' - JG;                
                                 
         % testing for convergence
-        err(count,:) = (varsIteration(count+2,:) - varsIteration(count+1,:));
-        convtest(count) = abs(sum(err(count,:))./sum(varsIteration(count+2,:))*100);
+        err(count,:) = (varsIteration(count+1,:) - varsIteration(count,:));
+        convtest(count) = abs(sum(err(count,:))./sum(varsIteration(count+1,:))*100);
                 
         if convtest(count) < eps
             convergence = 1;

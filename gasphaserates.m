@@ -87,8 +87,8 @@ function [rate,eqvars] = gasphaserates(atmosphere,variables,photo,timeind,step,d
     k0 = 2.4e-14.*exp(460./atmosphere.atLevel.T(step.doy));
     k2 = 2.7e-17.*exp(2199./atmosphere.atLevel.T(step.doy));
     k3 = 6.5e-34.*exp(1335./atmosphere.atLevel.T(step.doy));
-    rate.HNO3_OH = k0 + k3.*atmosphere.atLevel.M(step.doy)./...
-        (1 + k3.*atmosphere.atLevel.M(step.doy)./k2)...
+    rate.HNO3_OH = (k0 + k3.*atmosphere.atLevel.M(step.doy)./...
+        (1 + k3.*atmosphere.atLevel.M(step.doy)./k2))...
         .*variables.HNO3(timeind).*variables.OH(timeind);                         
     
     %ternary
@@ -207,7 +207,7 @@ function [rate,eqvars] = gasphaserates(atmosphere,variables,photo,timeind,step,d
     
     %O1D + H2 ->  H + OH
     rate.H2_O1D = 1.2e-10...
-        .*atmosphere.atLevel.H2O.nd(step.doy).*variables.O1D(timeind);   
+        .*atmosphere.atLevel.H2.nd(step.doy).*variables.O1D(timeind);   
     
     %O1D + CH4 ->  CH3O2 + OH
     rate.CH4_O1D = 1.31e-10...

@@ -1,14 +1,9 @@
-function [photo,rates,sza] = photolysis(inputs,step,atmosphere,variables,i,photoload,RN,vars)
+function [photo,rates,sza] = photolysis(inputs,step,atmosphere,variables,photoload)
+
+timeind = 1;
 
     % HO2NO2 pathway factor
     HO2NO2pwf = .3/.7;
-
-
-    if RN
-        timeind = 1;
-    else
-        timeind = i;
-    end
 
     switch inputs.whichphoto
         case 'inter'
@@ -22,8 +17,8 @@ function [photo,rates,sza] = photolysis(inputs,step,atmosphere,variables,i,photo
             [TUVtemp,sza] = readinTUVoutput('/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/TUV5.4/output/output.txt',118,208);
             photo.altitude = TUVtemp(:,1);
             photo.data = TUVtemp(inputs.altitude+1,2:end);
-            photo.dataall = TUVtemp(:,1:end)';
-    
+            photo.dataall = TUVtemp(:,1:end)';                
+            
         case 'load'                        
             
             photo.data = photoload.pout(step.photoInd,2:end); % remove first column which is altitude data

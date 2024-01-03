@@ -1,6 +1,8 @@
-function SZA = calcSZA(inputs,step,i)
+function SZA = calcSZA(inputs,step)
 %Calculates the heliocentric position of the Earth. Begins at noon 
-%Used for calculating seasons for power values.
+
+% Need to add in an altitude correction
+
 ecliptic = 23.44;
 
 N = step.stephour/24;
