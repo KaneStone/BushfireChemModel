@@ -25,7 +25,7 @@ function [inputs] = Minputs
     end   
     
     % physics
-    inputs.k = 1.38066e-23; % boltzmann's
+    inputs.k = 1.38065e-23; % boltzmann's
     inputs.earthradius = 6371e3;
     inputs.temperature_surface = 288.15; 
     inputs.pressure_surface = 1013.25; 
@@ -40,11 +40,11 @@ function [inputs] = Minputs
     inputs.evolvingJ = 0;    
     
     % heterogeneous chemistry
-    inputs.runtype = 'control'; %'control','solubility'
+    inputs.runtype = 'control'; %'control','solubility','double linear'
     inputs.radius = 'ancil'; % ancil reads yearly average radius from CARMA ancil (standard is 1e-5 cm)
     
     % flux corrections
-    inputs.fluxcorrections = 1;
+    inputs.fluxcorrections = 0;
     
     % plotting
     inputs.fsize = 18;

@@ -1,4 +1,4 @@
-function [rates] = gasphasecontrol_opt(step,variables,atmosphere,rates,k)
+function [rates,kv] = gasphasecontrol_opt(step,variables,atmosphere,rates,k)
 
     
 % calculate all the rates here first
@@ -81,7 +81,7 @@ kv.BR_HO2 = k.BR_HO2.*variables.BR.*variables.HO2;
 kv.BR_CH2O = k.BR_CH2O.*variables.BR.*atmosphere.atLevel.CH2O.nd(step.doy);
 
 kv.HBR_OH = k.HBR_OH.*variables.HBR.*variables.OH;
-kv.HBR_O1D = k.HBR_O1D.*variables.HBR.*variables.O1D;
+%kv.HBR_O1D = k.HBR_O1D.*variables.HBR.*variables.O1D;
 
 kv.N2O5_M = k.N2O5_M.*variables.N2O5;
 kv.HO2NO2_M = k.HO2NO2_M.*variables.HO2NO2;
@@ -143,12 +143,15 @@ rates.O.destruction(15) = kv.OH_O;
 %% O1D
 
 rates.O1D.destruction(1) = kv.N2_O1D;
-rates.O1D.destruction(2) = kv.O2_O1D;
-rates.O1D.destruction(3) = kv.H2O_O1D;
-rates.O1D.destruction(4) = kv.O1D_N2Oa;
-rates.O1D.destruction(5) = kv.O1D_N2Ob;
-rates.O1D.destruction(6) = kv.HCL_O1D;
-rates.O1D.destruction(7) = kv.O1D_O3;
+rates.O1D.destruction(end+1) = kv.O2_O1D;
+rates.O1D.destruction(end+1) = kv.H2O_O1D;
+rates.O1D.destruction(end+1) = kv.O1D_N2Oa;
+rates.O1D.destruction(end+1) = kv.O1D_N2Ob;
+rates.O1D.destruction(end+1) = kv.HCL_O1D;
+rates.O1D.destruction(end+1) = kv.O1D_O3;
+%rates.O1D.destruction(8) = kv.HBR_O1D;
+rates.O1D.destruction(end+1) = kv.H2_O1D;
+rates.O1D.destruction(end+1) = kv.CH4_O1D;
 
 %% O3 RATES
 
@@ -200,7 +203,7 @@ rates.CLO.production(end+1) = kv.HOCL_O;
 rates.CLO.production(end+1) = kv.HOCL_OH;
 rates.CLO.production(end+1) = kv.HOCL_CL;
 rates.CLO.production(end+1) = kv.CLONO2_O;
-rates.CLO.production(end+1) = kv.CL2O2_M;
+rates.CLO.production(end+1) = kv.CL2O2_M.*2;
 rates.CLO.production(end+1) = kv.BR_OCLO;
 
 rates.CLO.destruction(end+1) = kv.CLO_CLO_M.*2;
@@ -218,6 +221,7 @@ rates.CLO.destruction(end+1) = kv.BRO_CLOb;
 rates.CLO.destruction(end+1) = kv.BRO_CLOc;
 rates.CLO.destruction(end+1) = kv.CLO_CH3O2;
 
+
 %% CL2
 rates.CL2.production(1) = kv.CLO_CLOb;
 rates.CL2.production(2) = kv.CLONO2_CL;
@@ -229,6 +233,11 @@ rates.CL.production(end+1) = kv.CLO_OHa;
 rates.CL.production(end+1) = kv.CLO_NO;
 rates.CL.production(end+1) = kv.HCL_OH;
 rates.CL.production(end+1) = kv.BRO_CLOb;
+rates.CL.production(end+1) = kv.CLO_CLOa.*2;
+rates.CL.production(end+1) = kv.CLO_CLOc;
+rates.CL.production(end+1) = kv.CLO_CH3O2;
+rates.CL.production(end+1) = kv.HCL_O1D;
+rates.CL.production(end+1) = kv.HCL_O;
 
 rates.CL.destruction(1) = kv.CL_O3;
 rates.CL.destruction(2) = kv.CL_H2;
@@ -295,7 +304,7 @@ rates.HBR.production(1) = kv.BR_HO2;
 rates.HBR.production(2) = kv.BR_CH2O;
 
 rates.HBR.destruction(1) =  kv.HBR_OH;
-rates.HBR.destruction(2) =  kv.HBR_O1D;
+%rates.HBR.destruction(2) =  kv.HBR_O1D;
 
 %% BRONO2
 
@@ -312,6 +321,7 @@ rates.BR.production(end+1) = kv.BRO_CLOa;
 rates.BR.production(end+1) = kv.BRO_CLOb;
 rates.BR.production(end+1) = kv.BRO_BRO.*2;
 rates.BR.production(end+1) = kv.HBR_OH;
+%rates.BR.production(end+1) = kv.HBR_O1D;
 
 rates.BR.destruction(1) = kv.BR_O3;
 rates.BR.destruction(2) = kv.BR_HO2;
@@ -430,7 +440,10 @@ rates.OH.production(end+1) = kv.CL_HO2b;
 rates.OH.production(end+1) = kv.H2O2_O;
 rates.OH.production(end+1) = kv.NO3_HO2;
 rates.OH.production(end+1) = kv.HCL_O1D;
-rates.OH.production(end+1) = kv.HBR_O1D;
+%rates.OH.production(end+1) = kv.HBR_O1D;
+rates.OH.production(end+1) = kv.HOCL_O;
+rates.OH.production(end+1) = kv.HCL_O;
+rates.OH.production(end+1) = kv.HOBR_O;
 
 %% HO2
 
@@ -460,6 +473,9 @@ rates.HO2.production(end+1) = kv.CL_CH2O;
 rates.HO2.production(end+1) = kv.BR_CH2O;
 rates.HO2.production(end+1) = kv.BRO_OH;
 rates.HO2.production(end+1) = kv.OH_CO_Ma;
+rates.HO2.production(end+1) = kv.CLO_CH3O2;
+rates.HO2.production(end+1) = kv.HO2NO2_M;
+
 
 % HO2psum = sum(rates.OH.production)
 % HO2dsum = sum(rates.OH.destruction)

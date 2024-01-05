@@ -1,4 +1,4 @@
-function [variables,ratesout] = raphsonnewton(inputs,i,atmosphere,step,variables,varNames,photoload,kout,climScaleFactor)
+function [variables,kv] = raphsonnewton(inputs,i,atmosphere,step,variables,varNames,photoload,kout,climScaleFactor)
 
 photoout = [];
 
@@ -6,19 +6,18 @@ for j = 1:length(varNames)
     varsVector(j) = variables.(varNames{j})(i);
 end
 
-[varsOut,ratesout] = backwards(i,varsVector,varNames);
+[varsOut,ratesout] = backwards(varsVector,varNames);
 
 for k = 1:length(varNames)
     variables.(varNames{k})(i+1) = varsOut(end,k);
 end 
 
-function [varsIteration,ratesout] = backwards(i,varsInitial,vars) % varsVector = yb, % ratessum = dy
+function [varsIteration,ratesout] = backwards(varsInitial,vars) % varsVector = yb, % ratessum = dy
 
     % backwards euler
-    % initial guess be previous time step
+    % initial guess is previous time step.
     
-    %chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://personal.math.ubc.ca/~anstee/math104/newtonmethod.pdf
-    %  dy/dt = S(t,y)        
+    %chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://personal.math.ubc.ca/~anstee/math104/newtonmethod.pdf   
     
     count = 1;
     varsIteration(count,:) = varsInitial; % first guess
@@ -31,7 +30,7 @@ function [varsIteration,ratesout] = backwards(i,varsInitial,vars) % varsVector =
             varsIn.(vars{k}) = varsIteration(count,k);
         end
         
-        ratesout = ratesControl(inputs,step,atmosphere,varsIn,photoload,kout);
+        [ratesout,kv] = ratesControl(inputs,step,atmosphere,varsIn,photoload,kout);
         %ratesout.CL.destruction(1)     
         for k = 1:length(varNames)
             ratessum(k) = double((sum(ratesout.(vars{k}).production) - sum(ratesout.(vars{k}).destruction)));                
@@ -47,7 +46,7 @@ function [varsIteration,ratesout] = backwards(i,varsInitial,vars) % varsVector =
         end
         
         %removing very small J values
-        J (abs(J) < 1e-5) = 1e-5;
+        J (abs(J) < 1e-9) = 1e-9; % not an ideal way of handling near zero derivatives, but easy and doesn't seem to cause problems
         
         % calculating iteration solution
         JG = J'\G';       
@@ -69,7 +68,8 @@ function [varsIteration,ratesout] = backwards(i,varsInitial,vars) % varsVector =
         if count == 50
             error('Not converging')
             % If this becomes a problem at some point will need to half
-            % current time step and repeat solver. 
+            % current time step and repeat solver. Sould converge in less
+            % than 5 iterations though.
         end
     end          
 end

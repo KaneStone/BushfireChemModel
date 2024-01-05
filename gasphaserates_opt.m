@@ -219,6 +219,10 @@ function [rate] = gasphaserates_opt(atmosphere,step)
     ki=2.10e9*(300./atmosphere.atLevel.T(step.doy)).^6.1;  %            
     rate.OH_CO_Mb = chemicalactivation(k0,ki);
     
+    % OH + SO2 + M -> HSO3 + M
+    k0=3.30e-31*(300./atmosphere.atLevel.T(step.doy)).^4.3;            
+    ki=1.6e-12;  %                                                         
+    rate.SO2_OH_M = termolecular(k0,ki);
 %     % OH + CO = M -> HO2 + CO2 (combined branches)
 %     rate.OH_CO_M = 1.5e-13.*(1+6e-8.*1e7.*1.38e-23.*atmosphere.atLevel.M(step.doy)).*...
 %         atmosphere.atLevel.T(step.doy);        
@@ -307,7 +311,7 @@ function [rate] = gasphaserates_opt(atmosphere,step)
     % HCL + O1D -> CL + OH
     rate.HCL_O1D = 1.5e-10;
     
-    %     %HCL + O ->  CL + OH 
+    % HCL + O ->  CL + OH 
     rate.HCL_O = 1.00e-11*exp(-3300./atmosphere.atLevel.T(step.doy));
     
     % HOCL + O ->  CLO + OH

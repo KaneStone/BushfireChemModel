@@ -10,7 +10,7 @@ for i = 1:size(varsIteration,2)
         varsIn.(varNames{k}) = varsIterationIn(k);
     end
         
-    ratesout = ratesControl(inputs,step,atmosphere,varsIn,photoload,kout);    
+    [ratesout,~] = ratesControl(inputs,step,atmosphere,varsIn,photoload,kout);    
     
     for k = 1:length(varNames)
         ratessum(i,k) = double((sum(ratesout.(varNames{k}).production) - sum(ratesout.(varNames{k}).destruction)));                

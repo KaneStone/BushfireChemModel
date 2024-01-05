@@ -7,6 +7,9 @@ clear variables
 % lowerCamelCase = variables
 % Capitalize = structures
 
+% Need to make dummy variables for all atmospheric variables that I use. 
+% Check NO reactions and HO reactions
+
 inputs = Minputs;
 
 vars = {'O','O3','O1D','CLONO2','HCL','HOCL','CLO','CL2','CL2O2','OCLO','CL','BRCL'...
@@ -60,8 +63,21 @@ for i = 1:inputs.timesteps
         
     end
     
-    [variables,~] = raphsonnewton(inputs,i,atmosphere,step,variables,vars,photoload,kout,climScaleFactor);                    
+    [variables,ratesout] = raphsonnewton(inputs,i,atmosphere,step,variables,vars,photoload,kout,climScaleFactor);                    
+    %test(i) = ratesout.CLO_NO2_M;
+    CLY(i) = variables.CLONO2(i) + variables.HCL(i) + variables.CL(i) +...
+        variables.CL2(i).*2 + variables.CL2O2(i).*2 + variables.HOCL(i) + ...
+        variables.BRCL(i) + variables.CLO(i) + variables.OCLO(i);
+
+    BRY(i) = variables.BRONO2(i) + variables.HBR(i) + variables.BR(i) +...
+        variables.BRCL(i) + variables.HOBR(i) + variables.BRO(i);
     
+    NOY(i) = variables.BRONO2(i) + variables.CLONO2(i) + variables.HO2NO2(i) +...
+        variables.NO3(i) + variables.NO(i) + variables.NO2(i) + variables.HNO3(i) + variables.N2O5(i).*2;
+    
+    HOY(i) = variables.HO2(i) + variables.OH(i) + variables.H2O2(i).*2 +...
+        variables.HO2NO2(i) + variables.HNO3(i) + variables.HOBR(i) + variables.HOCL(i) + variables.HCL(i) + variables.HBR(i);
+
     [variables,flux] = fluxcorrection(inputs,variables,flux,atmosphere,step,i);    
     
     if i == daycount*24/inputs.hourstep        
@@ -71,7 +87,7 @@ for i = 1:inputs.timesteps
         daycount = daycount+1;        
     end    
 %     
-    if i == 1001
+    if i == 1000
         a = 1;        
     end
      if i ==count*1000
@@ -95,14 +111,14 @@ figure;
 plot(variables.(vartoplot));
 
 %%
-vartoplot = 'CLO';
+vartoplot = 'BRONO2';
 figure;
 plot(dayaverage.(vartoplot));
 hold on;
 plot(atmosphere.atLevel.(vartoplot).nd(1:length(dayaverage.(vartoplot))))
 
 %% setup save output
-save([inputs.outputdir,'data/',inputs.runtype,'_',num2str(inputs.fluxcorrections),'_',sprintf('%.2f',inputs.hourstep),'hours.mat'],'variables','dayaverage');
+save([inputs.outputdir,'data/',inputs.runtype,'_',num2str(inputs.fluxcorrections),'_',sprintf('%.2f',inputs.hourstep),'hours_5xSAD.mat'],'variables','dayaverage');
 %% plot daily output
 tickout = monthtick('short',0);
 for i = 1:length(vars)

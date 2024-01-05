@@ -6,7 +6,7 @@ function [atmosphere,variables] = Initializevars(inputs,vars)
 controlancil = load([inputs.ancildir,'variables/','climInControl.mat']);
 
 switch inputs.runtype
-    case 'solubility'
+    case {'solubility','doublelinear'}
         solancil = load([inputs.ancildir,'variables/','climInSolubility.mat']);        
     otherwise
 end
@@ -53,7 +53,7 @@ variables.CL2 = atmosphere.atLevel.CL2.nd(1);
 variables.CL2O2 = atmosphere.atLevel.CL2O2.nd(1);
 variables.NO = 1e1;
 variables.NO2 = 1.4e9;
-variables.NO3 = 1e8;
+variables.NO3 = 1e6;
 variables.N2O5 = atmosphere.atLevel.N2O5.nd(1);
 variables.HNO3 = atmosphere.atLevel.HNO3.nd(1);
 variables.OH = atmosphere.atLevel.OH.nd(1);
@@ -71,6 +71,59 @@ O3ini = atmosphere.atLevel.O3.nd(1);
 %atmosphere.dummyozone = O3ini+.45e12 + O3ini./5.*sin(2*pi./inputs.timesteps.*(1:inputs.timesteps) + 3.6*pi/3);
 atmosphere.dummyO3 = O3ini+.45e12 + O3ini./5.*sin(2*pi./365.*(1:365) + 3.6*pi/3);
 
+% CH2O
+CH2Oini = atmosphere.atLevel.CH2O.nd(1);
+CH2Omin = min(atmosphere.atLevel.CH2O.nd);
+atmosphere.dummyCH2O = CH2Oini + (CH2Oini-CH2Omin)./2.*sin(2*pi./365.*(1:365) + pi/2);
+CH2Ostartdiff = (atmosphere.dummyCH2O(1) - CH2Oini);
+atmosphere.dummyCH2O = atmosphere.dummyCH2O - CH2Ostartdiff;
+
+% CH3O2
+
+wts = ones(1,366); wts(2:end-1) = .001;
+f=fit([1:366]',[atmosphere.atLevel.CH3O2.nd(1:end-1),atmosphere.atLevel.CH3O2.nd(1)]','poly3','Weights',wts);
+atmosphere.dummyCH3O2 = f(1:366);
+
+%M
+
+wts = ones(1,366); wts(2:end-1) = .1;
+f=fit([1:366]',[atmosphere.atLevel.M(1:end-1),atmosphere.atLevel.M(1)]','poly3','Weights',wts);
+atmosphere.dummyM = f(1:366);
+
+atmosphere.dummyO2 = atmosphere.dummyM.*21;
+atmosphere.dummyN2 = atmosphere.dummyM.*78;
+
+% H
+Hini = atmosphere.atLevel.H.nd(1);
+Hmin = min(atmosphere.atLevel.H.nd);
+atmosphere.dummyH = Hini + (Hini-Hmin)./2.*sin(2*pi./365.*(1:365) + pi/2);
+Hstartdiff = (atmosphere.dummyH(1) - Hini);
+atmosphere.dummyH = atmosphere.dummyH - Hstartdiff;
+
+% H2
+wts = ones(1,366); wts(2:end-1) = .001;
+f=fit([1:366]',[atmosphere.atLevel.H2.nd(1:end-1),atmosphere.atLevel.H2.nd(1)]','poly3','Weights',wts);
+atmosphere.dummyH2 = f(1:366);
+
+% These two won't work for other levels or locations.
+% N2O
+N2Omin = min(atmosphere.atLevel.N2O.nd);
+N2Omax = max(atmosphere.atLevel.N2O.nd);
+
+atmosphere.dummyN2O = atmosphere.dummyM./(max(atmosphere.dummyM)./((N2Omin+N2Omax)./2));
+
+% CH4
+CH4min = min(atmosphere.atLevel.CH4.nd);
+CH4max = max(atmosphere.atLevel.CH4.nd);
+
+atmosphere.dummyCH4 = atmosphere.dummyM./(max(atmosphere.dummyM)./((CH4min+CH4max)./2));
+
+% CO
+wts = ones(1,366); wts(2:end-1) = .001;
+f=fit([1:366]',[atmosphere.atLevel.CO.nd(1:end-1),atmosphere.atLevel.CO.nd(1)]','poly3','Weights',wts);
+atmosphere.dummyCO = f(1:366);
+
+%% NO2
 NO2ini = 2.5e9;
 %atmosphere.dummyNO2 = NO2ini-.5e9 + NO2ini./2.8.*sin(2*pi./inputs.timesteps.*(1:inputs.timesteps) + pi/2);
 atmosphere.dummyNO2 = NO2ini-.5e9 + NO2ini./2.8.*sin(2*pi./365.*(1:365) + pi/2);
@@ -89,7 +142,7 @@ atmosphere.dummyCLONO2 = CLONO2ini+.8e8 + CLONO2ini./3.*sin(2*pi./365.*(1:365) +
 
 HCLini = atmosphere.atLevel.HCL.nd(1);
 %atmosphere.dummyNO2 = NO2ini-.5e9 + NO2ini./2.8.*sin(2*pi./inputs.timesteps.*(1:inputs.timesteps) + pi/2);
-atmosphere.dummyHCL = HCLini-.15e9 + HCLini./15.*sin(2*pi./365.*(1:365) + 3.6.*pi/3);
+atmosphere.dummyHCL = HCLini-.025e9 + HCLini./40.*sin(2*pi./365.*(1:365) + 3.6.*pi/3);
 
 % Surface area density
 SADini = .7e-8;
@@ -103,24 +156,48 @@ atmosphere.dummyV = -.05 + .03.*sin(2*pi./365.*(1:365)+pi./2);
 switch inputs.runtype        
     case 'solubility'
         
-    atmosphere.dummySAD(11:end) = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,11:365)./1.5;    
-    atmosphere.dummySAD(10:18) = interp1([10,18],atmosphere.dummySAD([10,18]),10:18);
-    atmosphere.dummySAD(235:250) = interp1([235,250],atmosphere.dummySAD([235,250]),235:250);
-    
-    atmosphere.aoc_aso4_ratio = solancil.ancil.aoc.vmr(inputs.altitude+1,:)./solancil.ancil.aso4.vmr(inputs.altitude+1,:);
+        atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:inputs.days);   % 1.5 is arbitrary 
+%         atmosphere.dummySAD(11:end) = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,11:inputs.days)./1.5;   % 1.5 is arbitrary 
+%         atmosphere.dummySAD(10:18) = interp1([10,18],atmosphere.dummySAD([10,18]),10:18);
+%         atmosphere.dummySAD(235:250) = interp1([235,250],atmosphere.dummySAD([235,250]),235:250);
+
+        atmosphere.aoc_aso4_ratio = solancil.ancil.aoc.vmr(inputs.altitude+1,1:inputs.days)./solancil.ancil.aso4.vmr(inputs.altitude+1,1:inputs.days);
+        
+        atmosphere.radius = solancil.ancil.SULFRE.vmr(inputs.altitude+1,1:inputs.days).*1e-4;
+        
     %atmosphere.aoc_aso4_ratio(:) = .1;
+    case 'doublelinear'
+        atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:inputs.days).*5;   % 1.5 is arbitrary 
+                
+        atmosphere.mixsulffrac = solancil.ancil.mixsulffrac.vmr(inputs.altitude+1,1:inputs.days);
+        atmosphere.so4pure = solancil.ancil.so4pure.vmr(inputs.altitude+1,1:inputs.days);
+        
+        atmosphere.radius = solancil.ancil.SULFRE.vmr(inputs.altitude+1,1:inputs.days).*1e-4;
+        
+    case 'control'
+        if strcmp(inputs.radius,'ancil')
+            atmosphere.radius = controlancil.SULFRE.vmr(inputs.altitude+1,:).*1e-4; % cm; 
+        else
+            atmosphere.radius = inputs.radius;
+        end
     
 end
 % smooth temperature
 tempsmooth = movmean([atmosphere.atLevel.T(end-19:end),atmosphere.atLevel.T,atmosphere.atLevel.T(1:20)],20);
 atmosphere.atLevel.T = tempsmooth(21:end-20);
 
-if strcmp(inputs.radius,'ancil')
-    atmosphere.radius = mean(controlancil.SULFRE.vmr(inputs.altitude+1,:),2).*1e-4; % cm; 
-else
-    atmosphere.radius = inputs.radius;
-end
+% smooth pressure
+psmooth = movmean([atmosphere.atLevel.P(end-19:end),atmosphere.atLevel.P,atmosphere.atLevel.P(1:20)],20);
+atmosphere.atLevel.P = psmooth(21:end-20);
 
+% H2O
+H2Oini = atmosphere.atLevel.H2O.nd(1);
+H2Omax = max(atmosphere.atLevel.H2O.nd);
+atmosphere.dummyH2O = H2Oini + (H2Omax - H2Oini)./2.*sin(2*pi./365.*(1:365) + 3.*pi/2);
+H2Ostartdiff = (atmosphere.dummyH2O(1) - H2Oini);
+atmosphere.dummyH2O = atmosphere.dummyH2O - H2Ostartdiff;
+
+atmosphere.dummyH2Ovmr = atmosphere.dummyH2O.*inputs.k.*1e6./(atmosphere.atLevel.P(1:365).*100).*atmosphere.atLevel.T(1:365);
 % initialize to fluxvars
 variables.O3 = atmosphere.dummyO3(1);
 variables.CLONO2 = atmosphere.dummyCLONO2(1);

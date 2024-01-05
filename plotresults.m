@@ -1,0 +1,31 @@
+% plotting 1D model
+inputs = Minputs;
+
+d.control = load([inputs.outputdir,'data/','control','_',num2str(inputs.fluxcorrections),'_',sprintf('%.2f',inputs.hourstep),'hours.mat']);
+d.solubility = load([inputs.outputdir,'data/','solubility','_',num2str(inputs.fluxcorrections),'_',sprintf('%.2f',inputs.hourstep),'hours.mat']);
+d.SAD5 = load([inputs.outputdir,'data/','doublelinear','_',num2str(inputs.fluxcorrections),'_',sprintf('%.2f',inputs.hourstep),'hours_5xSAD.mat']);
+% doublelinear2 = load([inputs.outputdir,'data/','doublelinear','_',num2str(inputs.fluxcorrections),'_',sprintf('%.2f',inputs.hourstep),'hours_nohclfluxcorrection.mat']);
+% doublelinear3 = load([inputs.outputdir,'data/','doublelinear','_',num2str(inputs.fluxcorrections),'_',sprintf('%.2f',inputs.hourstep),'hours_nohno3fluxcorrection.mat']);
+% doublelinear4 = load([inputs.outputdir,'data/','doublelinear','_',num2str(inputs.fluxcorrections),'_',sprintf('%.2f',inputs.hourstep),'hours_fluxtodummy.mat']);
+
+%%
+df = fields(d);
+createfig('medium','on')
+tickout = monthtick('short',0);
+vars = {'OH'};
+for i = 1:length(vars)
+    createfig('medium','on')
+    for j = 1:length(df)
+        
+        ph(j) = plot(1:365,d.(df{j}).dayaverage.(vars{i}),'LineWidth',2);
+        hold on                
+    end
+    
+    set(gca,'xtick',tickout.tick,'xticklabels',tickout.monthnames,'fontsize',inputs.fsize);
+    xlabel('Month','fontsize',inputs.fsize+2);
+    ylabel('Number Density (molecules cm^-^3)','fontsize',inputs.fsize+2);
+    title([inputs.runtype,', ',vars{i}],'fontsize',inputs.fsize+4);    
+    lh = legend(ph,df);
+    set(gca,'Yscale','log')
+  %  savefigure([inputs.outputdir,'figures/'],[inputs.runtype,'_',inputs.fluxcorrections,'_',vars{i},sprintf('%.2f',inputs.hourstep),'hours'],1,0,0,0);
+end

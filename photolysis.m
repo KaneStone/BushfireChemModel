@@ -197,6 +197,7 @@ timeind = 1;
     rates.CL.production(4) = rates.HOCL.destruction(1); %photo.data(69).*variables.HOCL(timeind);
     rates.CL.production(5) = rates.CLONO2.destruction(1); %photo.data(73).*variables.CLONO2(timeind);
     rates.CL.production(6) = rates.BRCL.destruction(1); %photo.data(103).*variables.BRCL(timeind);        
+    rates.CL.production(7) = rates.HCL.destruction(1); %photo.data(103).*variables.BRCL(timeind);        
     %toc;
           
     
