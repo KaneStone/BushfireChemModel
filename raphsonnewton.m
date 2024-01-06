@@ -46,7 +46,7 @@ function [varsIteration,ratesout] = backwards(varsInitial,vars) % varsVector = y
         end
         
         %removing very small J values
-        J (abs(J) < 1e-9) = 1e-9; % not an ideal way of handling near zero derivatives, but easy and doesn't seem to cause problems
+        J (abs(J) < 1e-8) = 1e-8; % not an ideal way of handling near zero derivatives, but easy and doesn't seem to cause problems
         
         % calculating iteration solution
         JG = J'\G';       
@@ -65,7 +65,7 @@ function [varsIteration,ratesout] = backwards(varsInitial,vars) % varsVector = y
             count = count+1;
         end
         
-        if count == 50
+        if count == inputs.maxiterations
             error('Not converging')
             % If this becomes a problem at some point will need to half
             % current time step and repeat solver. Sould converge in less

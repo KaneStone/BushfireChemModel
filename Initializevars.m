@@ -40,30 +40,30 @@ atmosphere.atLevel.N2.nd = atmosphere.atLevel.M.*.78;
 
 variables.O3 = atmosphere.atLevel.O3.nd(1);
 variables.O1D = atmosphere.atLevel.O1D.nd(1);
-variables.CLO = 1;
-variables.BRO = 1;
-variables.CLONO2 = atmosphere.atLevel.CLONO2.nd(1).*2;
+variables.CLO = 1e5;
+%variables.BRO = 3;
+variables.CLONO2 = atmosphere.atLevel.CLONO2.nd(1);
 variables.HCL = atmosphere.atLevel.HCL.nd(1);
 variables.HOCL = atmosphere.atLevel.HOCL.nd(1);
 variables.OCLO = 1e4;
-variables.BRCL = 1e1;
+variables.BRCL = 1e4;
 variables.O = 1e1;
 variables.CL = atmosphere.atLevel.CL.nd(1);
 variables.CL2 = atmosphere.atLevel.CL2.nd(1);
 variables.CL2O2 = atmosphere.atLevel.CL2O2.nd(1);
 variables.NO = 1e1;
-variables.NO2 = 1.4e9;
+variables.NO2 = 1e9;
 variables.NO3 = 1e6;
-variables.N2O5 = atmosphere.atLevel.N2O5.nd(1);
+variables.N2O5 = atmosphere.atLevel.N2O5.nd(1)+6e8; % 1e8 to account for diurnal cycle
 variables.HNO3 = atmosphere.atLevel.HNO3.nd(1);
 variables.OH = atmosphere.atLevel.OH.nd(1);
 variables.HO2 = atmosphere.atLevel.HO2.nd(1);
 variables.H2O2 = atmosphere.atLevel.H2O2.nd(1);
 variables.HO2NO2 = atmosphere.atLevel.HO2NO2.nd(1);
-variables.BRO = 1e1;%atmosphere.atLevel.BRO.nd(1);
+variables.BRO = 1e7;%atmosphere.atLevel.BRO.nd(1);
 variables.HBR = atmosphere.atLevel.HBR.nd(1);
 variables.HOBR = atmosphere.atLevel.HOBR.nd(1);
-variables.BRONO2 = atmosphere.atLevel.BRONO2.nd(1);
+variables.BRONO2 = atmosphere.atLevel.BRONO2.nd(1)-.8e6;
 variables.BR = atmosphere.atLevel.BR.nd(1);
 
 %% creating dummy variables for flux correction
@@ -90,8 +90,8 @@ wts = ones(1,366); wts(2:end-1) = .1;
 f=fit([1:366]',[atmosphere.atLevel.M(1:end-1),atmosphere.atLevel.M(1)]','poly3','Weights',wts);
 atmosphere.dummyM = f(1:366);
 
-atmosphere.dummyO2 = atmosphere.dummyM.*21;
-atmosphere.dummyN2 = atmosphere.dummyM.*78;
+atmosphere.dummyO2 = atmosphere.dummyM.*.21;
+atmosphere.dummyN2 = atmosphere.dummyM.*.78;
 
 % H
 Hini = atmosphere.atLevel.H.nd(1);
@@ -130,7 +130,7 @@ atmosphere.dummyNO2 = NO2ini-.5e9 + NO2ini./2.8.*sin(2*pi./365.*(1:365) + pi/2);
 
 HNO3ini = atmosphere.atLevel.HNO3.nd(1);
 %atmosphere.dummyHNO3 = HNO3ini-.5e9 + HNO3ini./2.8.*sin(2*pi./inputs.timesteps.*(1:inputs.timesteps) + pi/2);
-atmosphere.dummyHNO3 = HNO3ini+.8e9 + HNO3ini./5.8.*sin(2*pi./365.*(1:365) + 3*pi/2);
+atmosphere.dummyHNO3 = HNO3ini+1.2e9 + HNO3ini./5.8.*sin(2*pi./365.*(1:365) + 3*pi/2);
 
 N2O5ini = atmosphere.atLevel.N2O5.nd(1);
 %atmosphere.dummyHNO3 = HNO3ini-.5e9 + HNO3ini./2.8.*sin(2*pi./inputs.timesteps.*(1:inputs.timesteps) + pi/2);
@@ -138,11 +138,11 @@ atmosphere.dummyN2O5 = N2O5ini + N2O5ini./5.8.*sin(4*pi./365.*(1:365) + 3*pi/2);
 
 CLONO2ini = atmosphere.atLevel.CLONO2.nd(1);
 %atmosphere.dummyNO2 = NO2ini-.5e9 + NO2ini./2.8.*sin(2*pi./inputs.timesteps.*(1:inputs.timesteps) + pi/2);
-atmosphere.dummyCLONO2 = CLONO2ini+.8e8 + CLONO2ini./3.*sin(2*pi./365.*(1:365) + 3.6.*pi/3);
+atmosphere.dummyCLONO2 = CLONO2ini+2e8 + CLONO2ini./3.*sin(2*pi./365.*(1:365) + 3.6.*pi/3);
 
 HCLini = atmosphere.atLevel.HCL.nd(1);
 %atmosphere.dummyNO2 = NO2ini-.5e9 + NO2ini./2.8.*sin(2*pi./inputs.timesteps.*(1:inputs.timesteps) + pi/2);
-atmosphere.dummyHCL = HCLini-.025e9 + HCLini./40.*sin(2*pi./365.*(1:365) + 3.6.*pi/3);
+atmosphere.dummyHCL = HCLini + HCLini./40.*sin(2*pi./365.*(1:365) + 3.6.*pi/3);
 
 % Surface area density
 SADini = .7e-8;
@@ -167,7 +167,7 @@ switch inputs.runtype
         
     %atmosphere.aoc_aso4_ratio(:) = .1;
     case 'doublelinear'
-        atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:inputs.days).*5;   % 1.5 is arbitrary 
+        atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:inputs.days);   % 1.5 is arbitrary 
                 
         atmosphere.mixsulffrac = solancil.ancil.mixsulffrac.vmr(inputs.altitude+1,1:inputs.days);
         atmosphere.so4pure = solancil.ancil.so4pure.vmr(inputs.altitude+1,1:inputs.days);
@@ -197,7 +197,12 @@ atmosphere.dummyH2O = H2Oini + (H2Omax - H2Oini)./2.*sin(2*pi./365.*(1:365) + 3.
 H2Ostartdiff = (atmosphere.dummyH2O(1) - H2Oini);
 atmosphere.dummyH2O = atmosphere.dummyH2O - H2Ostartdiff;
 
+% There is a difference here becuase when I created the ancillary files I
+% did it for each latitude separately. Now doing it for the latitude
+% average causes problems as temperature and pressure dont scale linearly.
+% (I think)
 atmosphere.dummyH2Ovmr = atmosphere.dummyH2O.*inputs.k.*1e6./(atmosphere.atLevel.P(1:365).*100).*atmosphere.atLevel.T(1:365);
+atmosphere.dummyH2Ovmr = atmosphere.dummyH2Ovmr - (atmosphere.dummyH2Ovmr(1) - atmosphere.atLevel.H2O.vmr(1));
 % initialize to fluxvars
 variables.O3 = atmosphere.dummyO3(1);
 variables.CLONO2 = atmosphere.dummyCLONO2(1);
@@ -205,6 +210,33 @@ variables.HCL = atmosphere.dummyHCL(1);
 variables.HNO3 = atmosphere.dummyHNO3(1);
 
 
+ancilCLY =  atmosphere.atLevel.CL.nd(1) + atmosphere.atLevel.CL2.nd(1).*2 + ...
+    atmosphere.atLevel.CLONO2.nd(1) + atmosphere.atLevel.HOCL.nd(1) + atmosphere.atLevel.CLO.nd(1) + ...
+    atmosphere.atLevel.HCL.nd(1) + atmosphere.atLevel.OCLO.nd(1) + atmosphere.atLevel.BRCL.nd(1) + atmosphere.atLevel.CL2O2.nd(1).*2;
+
+initCLY = variables.CL(1) + variables.CL2(1).*2 + ...
+    variables.CLONO2(1) + variables.HOCL(1) + variables.CLO(1) + ...
+    variables.HCL(1) + variables.OCLO(1) + variables.BRCL(1) + variables.CL2O2(1).*2;
+
+ancilNO2 =  atmosphere.atLevel.BRONO2.nd(1) + atmosphere.atLevel.CLONO2.nd(1) + atmosphere.atLevel.HO2NO2.nd(1) +...
+        atmosphere.atLevel.NO3.nd(1) + atmosphere.atLevel.NO.nd(1) + atmosphere.atLevel.NO2.nd(1) + atmosphere.atLevel.HNO3.nd(1) + atmosphere.atLevel.N2O5.nd(1).*2;
+
+initNO2 = variables.BRONO2(1) + variables.CLONO2(1) + variables.HO2NO2(1) +...
+        variables.NO3(1) + variables.NO(1) + variables.NO2(1) + variables.HNO3(1) + variables.N2O5(1).*2;
+    
+ancilHOY = atmosphere.atLevel.HO2.nd(1) + atmosphere.atLevel.OH.nd(1) + atmosphere.atLevel.H2O2.nd(1).*2 +...
+        atmosphere.atLevel.HO2NO2.nd(1) + atmosphere.atLevel.HNO3.nd(1) + atmosphere.atLevel.HOBR.nd(1) + atmosphere.atLevel.HOCL.nd(1) + atmosphere.atLevel.HCL.nd(1) + atmosphere.atLevel.HBR.nd(1);        
+    
+initHOY = variables.HO2(1) + variables.OH(1) + variables.H2O2(1).*2 +...
+        variables.HO2NO2(1) + variables.HNO3(1) + variables.HOBR(1) + variables.HOCL(1) + variables.HCL(1) + variables.HBR(1);    
+    
+ancilBRY = atmosphere.atLevel.BRONO2.nd(1) + atmosphere.atLevel.HBR.nd(1) + atmosphere.atLevel.BR.nd(1) +...
+        atmosphere.atLevel.BRCL.nd(1) + atmosphere.atLevel.HOBR.nd(1) + atmosphere.atLevel.BRO.nd(1);    
+    
+initBRY = variables.BRONO2(1) + variables.HBR(1) + variables.BR(1) +...
+        variables.BRCL(1) + variables.HOBR(1) + variables.BRO(1);
+        
+    
 %% initialize to end of control run
 % variables.O3 = atmosphere.dummyO3(1);
 % variables.CLONO2 = atmosphere.dummyCLONO2(1);

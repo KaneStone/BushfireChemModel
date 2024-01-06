@@ -29,7 +29,7 @@ switch inputs.whichphoto
     case 'inter'
         photoload = [];
         photolength = 1;
-        photoout = zeros(length(vars),inputs.timesteps,114); %#ok<PREALL>
+        photoout = zeros(length(vars),inputs.timesteps,114);
 end
 count = 1;
 daycount = 1;
@@ -40,6 +40,7 @@ flux = [];
 newday = 1;
 kout = [];
 climScaleFactor = [];
+photoNamlist = TUVnamelist;
 for i = 1:inputs.timesteps
     
     % initialize step components
@@ -52,33 +53,40 @@ for i = 1:inputs.timesteps
 % %     
     if inputs.photosave
         [photo,~,~] = photolysis(inputs,step,atmosphere,[],[]);
-        photoout(i,:,:) = photo.dataall; %#ok<SAGROW>
+        photoout(i,:,:) = photo.dataall;
         continue
     end
     
     % run gasphaserates once per day
     if step.doy == newday
         newday = newday+1;
+        %kout = gasphaserates_opt2(atmosphere,step);
         kout = gasphaserates_opt(atmosphere,step);
         
     end
     
     [variables,ratesout] = raphsonnewton(inputs,i,atmosphere,step,variables,vars,photoload,kout,climScaleFactor);                    
-    %test(i) = ratesout.CLO_NO2_M;
+    %test(i) = ratesout.CLO_NO2_M;   
+
+    [variables,flux] = fluxcorrection(inputs,variables,flux,atmosphere,step,i);    
+    
+    % CLY is continuous
     CLY(i) = variables.CLONO2(i) + variables.HCL(i) + variables.CL(i) +...
         variables.CL2(i).*2 + variables.CL2O2(i).*2 + variables.HOCL(i) + ...
         variables.BRCL(i) + variables.CLO(i) + variables.OCLO(i);
-
+    
+    % BRY is continuous
     BRY(i) = variables.BRONO2(i) + variables.HBR(i) + variables.BR(i) +...
         variables.BRCL(i) + variables.HOBR(i) + variables.BRO(i);
     
+    % I have N2O sto will get a slight increase over time in NOy
     NOY(i) = variables.BRONO2(i) + variables.CLONO2(i) + variables.HO2NO2(i) +...
         variables.NO3(i) + variables.NO(i) + variables.NO2(i) + variables.HNO3(i) + variables.N2O5(i).*2;
     
+    % I dont have all H species in so there wont be continuity here.
     HOY(i) = variables.HO2(i) + variables.OH(i) + variables.H2O2(i).*2 +...
         variables.HO2NO2(i) + variables.HNO3(i) + variables.HOBR(i) + variables.HOCL(i) + variables.HCL(i) + variables.HBR(i);
-
-    [variables,flux] = fluxcorrection(inputs,variables,flux,atmosphere,step,i);    
+    
     
     if i == daycount*24/inputs.hourstep        
         for k = 1:length(vars)
@@ -87,7 +95,7 @@ for i = 1:inputs.timesteps
         daycount = daycount+1;        
     end    
 %     
-    if i == 1000
+    if i == 1001
         a = 1;        
     end
      if i ==count*1000
@@ -111,14 +119,14 @@ figure;
 plot(variables.(vartoplot));
 
 %%
-vartoplot = 'BRONO2';
+vartoplot = 'NO2';
 figure;
 plot(dayaverage.(vartoplot));
 hold on;
 plot(atmosphere.atLevel.(vartoplot).nd(1:length(dayaverage.(vartoplot))))
 
 %% setup save output
-save([inputs.outputdir,'data/',inputs.runtype,'_',num2str(inputs.fluxcorrections),'_',sprintf('%.2f',inputs.hourstep),'hours_5xSAD.mat'],'variables','dayaverage');
+save([inputs.outputdir,'data/',inputs.runtype,'_',num2str(inputs.fluxcorrections),'_',sprintf('%.2f',inputs.hourstep),'hours_nohclflux.mat'],'variables','dayaverage');
 %% plot daily output
 tickout = monthtick('short',0);
 for i = 1:length(vars)

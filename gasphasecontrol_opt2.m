@@ -1,119 +1,119 @@
-function [rates,kv] = gasphasecontrol_opt(step,variables,atmosphere,rates,k)
+function [rates,kv] = gasphasecontrol_opt2(step,variables,atmosphere,rates,k)
 
     
 % calculate all the rates here first
 
-kv.N2_O1D = k.N2_O1D.*variables.O1D.*atmosphere.dummyN2(step.doy);
-kv.O2_O1D = k.O2_O1D.*variables.O1D.*atmosphere.dummyO2(step.doy);
-kv.OH_OH = k.OH_OH.*variables.OH.^2;
-kv.O_O2_M = k.O_O2_M.*variables.O.*atmosphere.dummyO2(step.doy);
-kv.O3_O = k.O3_O.*variables.O.*variables.O3;
-kv.O_O_M = k.O_O_M.*variables.O.^2;
-kv.HO2_O = k.HO2_O.*variables.O.*variables.HO2;
-kv.NO_O_M = k.NO_O_M.*variables.O.*variables.NO;
-kv.NO2_O = k.NO2_O.*variables.O.*variables.NO2;
-kv.NO2_O_M = k.NO2_O_M.*variables.O.*variables.NO2;
-kv.NO3_O = k.NO3_O.*variables.O.*variables.NO3;
-kv.CLO_O = k.CLO_O.*variables.O.*variables.CLO;
-kv.HOBR_O = k.HOBR_O.*variables.O.*variables.HOBR;
-kv.HOCL_O = k.HOCL_O.*variables.O.*variables.HOCL;
-kv.CLONO2_O = k.CLONO2_O.*variables.O.*variables.CLONO2;
-kv.BRO_O = k.BRO_O.*variables.O.*variables.BRO;
-kv.BRONO2_O = k.BRONO2_O.*variables.O.*variables.BRONO2;
-kv.OH_O = k.OH_O.*variables.O.*variables.OH;
+kv.N2_O1D = k(1).*variables.O1D.*atmosphere.dummyN2(step.doy);
+kv.O2_O1D = k(2).*variables.O1D.*atmosphere.dummyO2(step.doy);
+kv.OH_OH = k(30).*variables.OH.^2;
+kv.O_O2_M = k(3).*variables.O.*atmosphere.dummyO2(step.doy);
+kv.O3_O = k(4).*variables.O.*variables.O3;
+kv.O_O_M = k(6).*variables.O.^2;
+kv.HO2_O = k(35).*variables.O.*variables.HO2;
+kv.NO_O_M = k(21).*variables.O.*variables.NO;
+kv.NO2_O = k(9).*variables.O.*variables.NO2;
+kv.NO2_O_M = k(23).*variables.O.*variables.NO2;
+kv.NO3_O = k(12).*variables.O.*variables.NO3;
+kv.CLO_O = k(57).*variables.O.*variables.CLO;
+kv.HOBR_O = k(88).*variables.O.*variables.HOBR;
+kv.HOCL_O = k(69).*variables.O.*variables.HOCL;
+kv.CLONO2_O = k(72).*variables.O.*variables.CLONO2;
+kv.BRO_O = k(78).*variables.O.*variables.BRO;
+kv.BRONO2_O = k(89).*variables.O.*variables.BRONO2;
+kv.OH_O = k(27).*variables.O.*variables.OH;
 
-kv.H2O_O1D = k.H2O_O1D.*variables.O1D.*atmosphere.atLevel.H2O.nd(step.doy);
-kv.O1D_N2Oa = k.O1D_N2Oa.*variables.O1D.*atmosphere.dummyN2O(step.doy);
-kv.O1D_N2Ob = k.O1D_N2Ob.*variables.O1D.*atmosphere.dummyN2O(step.doy);
-kv.HCL_O1D = k.HCL_O1D.*variables.O1D.*variables.HCL;
-kv.O1D_O3 = k.O1D_O3.*variables.O1D.*variables.O3;
+kv.H2O_O1D = k(37).*variables.O1D.*atmosphere.atLevel.H2O.nd(step.doy);
+kv.O1D_N2Oa = k(15).*variables.O1D.*atmosphere.dummyN2O(step.doy);
+kv.O1D_N2Ob = k(16).*variables.O1D.*atmosphere.dummyN2O(step.doy);
+kv.HCL_O1D = k(67).*variables.O1D.*variables.HCL;
+kv.O1D_O3 = k(5).*variables.O1D.*variables.O3;
 
-kv.H_O3 = k.H_O3.*variables.O3.*atmosphere.dummyH(step.doy);
-kv.OH_O3 = k.OH_O3.*variables.O3.*variables.OH;
-kv.HO2_O3 = k.HO2_O3.*variables.O3.*variables.HO2;
-kv.NO_O3 = k.NO_O3.*variables.O3.*variables.NO;
-kv.NO2_O3 = k.NO2_O3.*variables.O3.*variables.NO2;
-kv.CL_O3 = k.CL_O3.*variables.O3.*variables.CL;
-kv.BR_O3 = k.BR_O3.*variables.O3.*variables.BR;
+kv.H_O3 = k(26).*variables.O3.*atmosphere.dummyH(step.doy);
+kv.OH_O3 = k(28).*variables.O3.*variables.OH;
+kv.HO2_O3 = k(36).*variables.O3.*variables.HO2;
+kv.NO_O3 = k(8).*variables.O3.*variables.NO;
+kv.NO2_O3 = k(10).*variables.O3.*variables.NO2;
+kv.CL_O3 = k(50).*variables.O3.*variables.CL;
+kv.BR_O3 = k(75).*variables.O3.*variables.BR;
 
-kv.CLO_NO2_M = k.CLO_NO2_M.*variables.CLO.*variables.NO2;
+kv.CLO_NO2_M = k(91).*variables.CLO.*variables.NO2;
 
-kv.CLONO2_OH = k.CLONO2_OH.*variables.CLONO2.*variables.OH;
-kv.CLONO2_CL  = k.CLONO2_CL.*variables.CLONO2.*variables.CL;    
+kv.CLONO2_OH = k(73).*variables.CLONO2.*variables.OH;
+kv.CLONO2_CL  = k(74).*variables.CLONO2.*variables.CL;    
 
-kv.CL_H2 = k.CL_H2.*variables.CL.*atmosphere.dummyH2(step.doy);
-kv.CL_H2O2 = k.CL_H2O2.*variables.CL.*variables.H2O2;
-kv.CL_HO2a = k.CL_HO2a.*variables.CL.*variables.HO2;
-kv.CL_HO2b = k.CL_HO2b.*variables.CL.*variables.HO2;
-kv.CL_CH2O = k.CL_CH2O.*variables.CL.*atmosphere.dummyCH2O(step.doy);
-kv.CL_CH4 = k.CL_CH4.*variables.CL.*atmosphere.dummyCH4(step.doy);
-kv.CLO_OHb = k.CLO_OHb.*variables.CLO.*variables.OH;
-kv.CLO_OHa = k.CLO_OHa.*variables.CLO.*variables.OH;
-kv.HOCL_CL = k.HOCL_CL.*variables.CL.*variables.HOCL;
+kv.CL_H2 = k(51).*variables.CL.*atmosphere.dummyH2(step.doy);
+kv.CL_H2O2 = k(52).*variables.CL.*variables.H2O2;
+kv.CL_HO2a = k(53).*variables.CL.*variables.HO2;
+kv.CL_HO2b = k(54).*variables.CL.*variables.HO2;
+kv.CL_CH2O = k(55).*variables.CL.*atmosphere.dummyCH2O(step.doy);
+kv.CL_CH4 = k(56).*variables.CL.*atmosphere.dummyCH4(step.doy);
+kv.CLO_OHb = k(58).*variables.CLO.*variables.OH;
+kv.CLO_OHa = k(59).*variables.CLO.*variables.OH;
+kv.HOCL_CL = k(70).*variables.CL.*variables.HOCL;
 
-kv.HCL_OH = k.HCL_OH.*variables.HCL.*variables.OH;
-kv.HCL_O = k.HCL_O.*variables.HCL.*variables.O;
+kv.HCL_OH = k(66).*variables.HCL.*variables.OH;
+kv.HCL_O = k(68).*variables.HCL.*variables.O;
 
-kv.HOCL_OH = k.HOCL_OH.*variables.HOCL.*variables.OH;
-kv.CL2O2_M = k.CL2O2_M.*variables.CL2O2;
-kv.BR_OCLO = k.BR_OCLO.*variables.BR.*variables.OCLO;
+kv.HOCL_OH = k(71).*variables.HOCL.*variables.OH;
+kv.CL2O2_M = k(93).*variables.CL2O2;
+kv.BR_OCLO = k(90).*variables.BR.*variables.OCLO;
 
-kv.CLO_CLO_M = k.CLO_CLO_M.*variables.CLO.^2;
+kv.CLO_CLO_M = k(92).*variables.CLO.^2;
 
-kv.CLO_HO2 = k.CLO_HO2.*variables.CLO.*variables.HO2;
-kv.CLO_NO = k.CLO_NO.*variables.CLO.*variables.NO;
-kv.CLO_CLOa = k.CLO_CLOa.*variables.CLO.^2;
-kv.CLO_CLOb = k.CLO_CLOb.*variables.CLO.^2;
-kv.CLO_CLOc = k.CLO_CLOc.*variables.CLO.^2;
-kv.BRO_CLOa = k.BRO_CLOa.*variables.CLO.*variables.BRO;
-kv.BRO_CLOb = k.BRO_CLOb.*variables.CLO.*variables.BRO;
-kv.BRO_CLOc = k.BRO_CLOc.*variables.CLO.*variables.BRO;
-kv.CLO_CH3O2 = k.CLO_CH3O2.*variables.CLO.*atmosphere.dummyCH3O2(step.doy);
+kv.CLO_HO2 = k(60).*variables.CLO.*variables.HO2;
+kv.CLO_NO = k(62).*variables.CLO.*variables.NO;
+kv.CLO_CLOa = k(63).*variables.CLO.^2;
+kv.CLO_CLOb = k(64).*variables.CLO.^2;
+kv.CLO_CLOc = k(65).*variables.CLO.^2;
+kv.BRO_CLOa = k(82).*variables.CLO.*variables.BRO;
+kv.BRO_CLOb = k(83).*variables.CLO.*variables.BRO;
+kv.BRO_CLOc = k(84).*variables.CLO.*variables.BRO;
+kv.CLO_CH3O2 = k(61).*variables.CLO.*atmosphere.dummyCH3O2(step.doy);
 
-kv.BRO_OH = k.BRO_OH.*variables.BRO.*variables.OH;
-kv.BRO_HO2 = k.BRO_HO2.*variables.BRO.*variables.HO2;
-kv.BRO_NO = k.BRO_NO.*variables.BRO.*variables.NO;
-kv.BRO_NO2_M = k.BRO_NO2_M.*variables.BRO.*variables.NO2;
-kv.BRO_BRO = k.BRO_BRO.*variables.BRO.^2;
+kv.BRO_OH = k(79).*variables.BRO.*variables.OH;
+kv.BRO_HO2 = k(80).*variables.BRO.*variables.HO2;
+kv.BRO_NO = k(81).*variables.BRO.*variables.NO;
+kv.BRO_NO2_M = k(94).*variables.BRO.*variables.NO2;
+kv.BRO_BRO = k(85).*variables.BRO.^2;
 
-kv.BR_HO2 = k.BR_HO2.*variables.BR.*variables.HO2;
-kv.BR_CH2O = k.BR_CH2O.*variables.BR.*atmosphere.dummyCH2O(step.doy);
+kv.BR_HO2 = k(76).*variables.BR.*variables.HO2;
+kv.BR_CH2O = k(77).*variables.BR.*atmosphere.dummyCH2O(step.doy);
 
-kv.HBR_OH = k.HBR_OH.*variables.HBR.*variables.OH;
+kv.HBR_OH = k(86).*variables.HBR.*variables.OH;
 %kv.HBR_O1D = k.HBR_O1D.*variables.HBR.*variables.O1D;
 
-kv.N2O5_M = k.N2O5_M.*variables.N2O5;
-kv.HO2NO2_M = k.HO2NO2_M.*variables.HO2NO2;
-kv.NO_HO2 = k.NO_HO2.*variables.NO.*variables.HO2;
-kv.NO3_NO = k.NO3_NO.*variables.NO3.*variables.NO;
-kv.NO3_OH = k.NO3_OH.*variables.NO3.*variables.OH;
-kv.NO3_HO2 = k.NO3_HO2.*variables.NO3.*variables.HO2;
-kv.HO2NO2_OH = k.HO2NO2_OH.*variables.OH.*variables.HO2NO2;
-kv.CH3O2_NO = k.CH3O2_NO.*variables.NO.*atmosphere.dummyCH3O2(step.doy);
+kv.N2O5_M = k(25).*variables.N2O5;
+kv.HO2NO2_M = k(42).*variables.HO2NO2;
+kv.NO_HO2 = k(7).*variables.NO.*variables.HO2;
+kv.NO3_NO = k(11).*variables.NO3.*variables.NO;
+kv.NO3_OH = k(13).*variables.NO3.*variables.OH;
+kv.NO3_HO2 = k(14).*variables.NO3.*variables.HO2;
+kv.HO2NO2_OH = k(41).*variables.OH.*variables.HO2NO2;
+kv.CH3O2_NO = k(17).*variables.NO.*atmosphere.dummyCH3O2(step.doy);
 
-kv.NO2_NO3_M = k.NO2_NO3_M.*variables.NO2.*variables.NO3;
-kv.NO2_HO2_M = k.NO2_HO2_M.*variables.NO2.*variables.HO2;
-kv.NO2_OH_M = k.NO2_OH_M.*variables.NO2.*variables.OH;
-kv.HNO3_OH = k.HNO3_OH.*variables.HNO3.*variables.OH;
-kv.NO3_CH2O = k.NO3_CH2O.*variables.NO3.*atmosphere.dummyCH2O(step.doy);
+kv.NO2_NO3_M = k(22).*variables.NO2.*variables.NO3;
+kv.NO2_HO2_M = k(20).*variables.NO2.*variables.HO2;
+kv.NO2_OH_M = k(24).*variables.NO2.*variables.OH;
+kv.HNO3_OH = k(19).*variables.HNO3.*variables.OH;
+kv.NO3_CH2O = k(18).*variables.NO3.*atmosphere.dummyCH2O(step.doy);
 
-kv.OH_HO2 = k.OH_HO2.*variables.OH.*variables.HO2;
-kv.OH_H2 = k.OH_H2.*variables.OH.*atmosphere.dummyH2(step.doy);
-kv.OH_H2O2 = k.OH_H2O2.*variables.OH.*variables.H2O2;
-kv.OH_OH_M = k.OH_OH_M.*variables.OH.^2;
-kv.CH4_OH = k.CH4_OH.*variables.OH.*atmosphere.dummyCH4(step.doy);
+kv.OH_HO2 = k(29).*variables.OH.*variables.HO2;
+kv.OH_H2 = k(31).*variables.OH.*atmosphere.dummyH2(step.doy);
+kv.OH_H2O2 = k(32).*variables.OH.*variables.H2O2;
+kv.OH_OH_M = k(46).*variables.OH.^2;
+kv.CH4_OH = k(43).*variables.OH.*atmosphere.dummyCH4(step.doy);
 
-kv.OH_CH2O = k.OH_CH2O.*variables.OH.*atmosphere.dummyCH2O(step.doy);
-kv.OH_CO_Ma = k.OH_CO_Ma.*variables.OH.*atmosphere.dummyCO(step.doy);
-kv.OH_CO_Mb = k.OH_CO_Mb.*variables.OH.*atmosphere.dummyCO(step.doy);
+kv.OH_CH2O = k(33).*variables.OH.*atmosphere.dummyCH2O(step.doy);
+kv.OH_CO_Ma = k(47).*variables.OH.*atmosphere.dummyCO(step.doy);
+kv.OH_CO_Mb = k(48).*variables.OH.*atmosphere.dummyCO(step.doy);
 
-kv.H2_O1D = k.H2_O1D.*variables.O1D.*atmosphere.dummyH2(step.doy);
-kv.CH4_O1D = k.CH4_O1D.*variables.O1D.*atmosphere.dummyCH4(step.doy);
-kv.H2O2_O = k.H2O2_O.*variables.H2O2.*variables.O;
-kv.HO2_HO2 = k.HO2_HO2.*variables.HO2.^2;
-kv.HO2_CH2O = k.HO2_CH2O.*variables.HO2.*atmosphere.dummyCH2O(step.doy);
+kv.H2_O1D = k(38).*variables.O1D.*atmosphere.dummyH2(step.doy);
+kv.CH4_O1D = k(39).*variables.O1D.*atmosphere.dummyCH4(step.doy);
+kv.H2O2_O = k(44).*variables.H2O2.*variables.O;
+kv.HO2_HO2 = k(40).*variables.HO2.^2;
+kv.HO2_CH2O = k(34).*variables.HO2.*atmosphere.dummyCH2O(step.doy);
 
-kv.H_O2_M = k.H_O2_M.*atmosphere.dummyH(step.doy).*atmosphere.dummyO2(step.doy); %no way this is important in lower stratopshere
+kv.H_O2_M = k(45).*atmosphere.dummyH(step.doy).*atmosphere.dummyO2(step.doy); %no way this is important in lower stratopshere
 
 %% Begin gas phase continuity
 
@@ -400,7 +400,7 @@ rates.HNO3.production(2) = kv.NO3_CH2O;
 %% HO2NO2
 
 rates.HO2NO2.destruction(end+1) = kv.HO2NO2_M;
-rates.HO2NO2.destruction(end+1) = kv.HO2NO2_OH;
+rates.HO2NO2.destruction(end+2) = kv.HO2NO2_OH;
 
 rates.HO2NO2.production(1) = kv.NO2_HO2_M;
 

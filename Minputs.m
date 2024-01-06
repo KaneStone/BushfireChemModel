@@ -2,7 +2,7 @@ function [inputs] = Minputs
 
     % time
     inputs.year = 2020;
-    inputs.hourstep = 15/60; %1/60;            %2 hour time step .015625
+    inputs.hourstep = 15/60;           
     inputs.secondstep = inputs.hourstep.*60.*60;    
     %inputs.secondstep = 24.*60.*60;    
     inputs.runlength = 1;%25/365;           %years
@@ -26,11 +26,6 @@ function [inputs] = Minputs
     
     % physics
     inputs.k = 1.38065e-23; % boltzmann's
-    inputs.earthradius = 6371e3;
-    inputs.temperature_surface = 288.15; 
-    inputs.pressure_surface = 1013.25; 
-    inputs.Rd = 287; 
-    inputs.g0 = 9.8066;
     
     % photolysis only and save
     inputs.photosave = 0;
@@ -38,6 +33,7 @@ function [inputs] = Minputs
     
     %solver
     inputs.evolvingJ = 0;    
+    inputs.maxiterations = 50; % solver will throw if more than max
     
     % heterogeneous chemistry
     inputs.runtype = 'control'; %'control','solubility','double linear'

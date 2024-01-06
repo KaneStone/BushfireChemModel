@@ -18,10 +18,10 @@ if inputs.fluxcorrections
                 load([inputs.ancildir,'fluxcorrection/',sprintf('%.2f',inputs.hourstep),'hourstep_',inputs.region,'.mat'])
             end
     end
-%     variables.O3(end) = variables.O3(end) - flux.O3(i).*variables.O3(end);
-%     variables.HNO3(end) = variables.HNO3(end) - flux.HNO3(i).*variables.HNO3(end);
-%     variables.CLONO2(end) = variables.CLONO2(end) - flux.CLONO2(i).*variables.CLONO2(end);
-    variables.HCL(end) = variables.HCL(end) - flux.HCL(i).*variables.HCL(end);
+    variables.O3(end) = variables.O3(end) - flux.O3(i).*variables.O3(end);
+    variables.HNO3(end) = variables.HNO3(end) - flux.HNO3(i).*variables.HNO3(end);
+    variables.CLONO2(end) = variables.CLONO2(end) - flux.CLONO2(i).*variables.CLONO2(end);
+    %variables.HCL(end) = variables.HCL(end) - flux.HCL(i).*variables.HCL(end);
 %     variables.N2O5(end) = variables.N2O5(end) - flux.N2O5(i).*variables.N2O5(end);
     
 %     variables.O3(end) = variables.O3(end) - flux.O3(i).*atmosphere.dummyO3(step.doy);

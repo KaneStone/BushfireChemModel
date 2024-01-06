@@ -1,29 +1,29 @@
-function [rate] = gasphaserates_opt(atmosphere,step)
+function [rate] = gasphaserates_opt2(atmosphere,step)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Ox
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     
     % O1D + N2 -> O + N2 --------------------------------------------------
-    rate.N2_O1D = 2.15e-11.*exp(110./atmosphere.atLevel.T(step.doy));           
+    rate(1) = 2.15e-11.*exp(110./atmosphere.atLevel.T(step.doy));           
     
     % O1D + O2 -> O + O2 --------------------------------------------------
-    rate.O2_O1D = 3.30e-11.*exp(55./atmosphere.atLevel.T(step.doy));                
+    rate(2) = 3.30e-11.*exp(55./atmosphere.atLevel.T(step.doy));                
     
     %variables.O1D(timeind)-eqvars.O1D;
     
     % O + O2 + M -> O3 + M ------------------------------------------------
-    rate.O_O2_M = 6e-34.*(atmosphere.atLevel.T(step.doy)./300).^-2.4...
+    rate(3) = 6e-34.*(atmosphere.atLevel.T(step.doy)./300).^-2.4...
         .*atmosphere.atLevel.M(step.doy);         
      
     % O3 + O -> 2*O2 ------------------------------------------------------    
-    rate.O3_O = 8e-12.*exp(-2060./atmosphere.atLevel.T(step.doy));
+    rate(4) = 8e-12.*exp(-2060./atmosphere.atLevel.T(step.doy));
     
     % O1D + O3 -> O2 + O2 -------------------------------------------------
-    rate.O1D_O3 = 1.2e-10;
+    rate(5) = 1.2e-10;
     
     %O + O + M ->  O2 + M -------------------------------------------------
-    rate.O_O_M = 2.76e-34*exp(720./atmosphere.atLevel.T(step.doy))...
+    rate(6) = 2.76e-34*exp(720./atmosphere.atLevel.T(step.doy))...
         .*atmosphere.atLevel.M(step.doy);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -31,85 +31,81 @@ function [rate] = gasphaserates_opt(atmosphere,step)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % binary              
     % NO + HO2 ->  NO2 + OH         
-    rate.NO_HO2 = 3.30e-12*exp(270./atmosphere.atLevel.T(step.doy));       
+    rate(7) = 3.30e-12*exp(270./atmosphere.atLevel.T(step.doy));       
     
     % NO + O3 ->  NO2 + O2     
-    rate.NO_O3 = 3.00e-12*exp(-1500./atmosphere.atLevel.T(step.doy));                       
+    rate(8) = 3.00e-12*exp(-1500./atmosphere.atLevel.T(step.doy));                       
     
      % NO2 + O ->  NO + O2    
-    rate.NO2_O = 5.10e-12*exp(210./atmosphere.atLevel.T(step.doy));
+    rate(9) = 5.10e-12*exp(210./atmosphere.atLevel.T(step.doy));
                                             
     % NO2 + O3 ->  NO3 + O2 
-    rate.NO2_O3 = 1.20e-13*exp(-2450./atmosphere.atLevel.T(step.doy));
+    rate(10) = 1.20e-13*exp(-2450./atmosphere.atLevel.T(step.doy));
         
     
     % NO3 + NO ->  2*NO2 
-    rate.NO3_NO = 1.50e-11*exp(170./atmosphere.atLevel.T(step.doy));
+    rate(11) = 1.50e-11*exp(170./atmosphere.atLevel.T(step.doy));
         
     
     % NO3 + O ->  NO2 + O2  
-    rate.NO3_O = 1.00e-11;
+    rate(12) = 1.00e-11;
     
     % NO3 + OH ->  HO2 + NO2  
-    rate.NO3_OH = 2.20e-11;
+    rate(13) = 2.20e-11;
     
     % NO3 + HO2 ->  OH + NO2 + O2  
-    rate.NO3_HO2 = 3.50e-12;
+    rate(14) = 3.50e-12;
     
     % O1D + N2O ->  2*NO
-    rate.O1D_N2Oa = 7.25E-11*exp(20./atmosphere.atLevel.T(step.doy));
+    rate(15) = 7.25E-11*exp(20./atmosphere.atLevel.T(step.doy));
     
     % O1D + N2O ->  N2+O2
-    rate.O1D_N2Ob = 4.63E-11*exp(110./atmosphere.atLevel.T(step.doy));
+    rate(16) = 4.63E-11*exp(110./atmosphere.atLevel.T(step.doy));
     
     % CH3O2 + NO ->  CH3O + NO2
-    rate.CH3O2_NO = 2.80e-12*exp(300./atmosphere.atLevel.T(step.doy));
+    rate(17) = 2.80e-12*exp(300./atmosphere.atLevel.T(step.doy));
     
     % CH2O + NO3 ->  CO + HO2 + HNO3
-    rate.NO3_CH2O = 6.00e-13*exp(-2058./atmosphere.atLevel.T(step.doy));
+    rate(18) = 6.00e-13*exp(-2058./atmosphere.atLevel.T(step.doy));
     
     % HNO3 + OH ->  NO3 + H2O 
     k0 = 2.4e-14.*exp(460./atmosphere.atLevel.T(step.doy));
     k2 = 2.7e-17.*exp(2199./atmosphere.atLevel.T(step.doy));
     k3 = 6.5e-34.*exp(1335./atmosphere.atLevel.T(step.doy));
-    rate.HNO3_OH = k0 + k3.*atmosphere.atLevel.M(step.doy)./...
+    rate(19) = k0 + k3.*atmosphere.atLevel.M(step.doy)./...
         (1 + k3.*atmosphere.atLevel.M(step.doy)./k2);        
     
     %ternary
     %NO2 + HO2 + M ->  HO2NO2 + M  
-%     k0 = 2.00e-31*(300./atmosphere.atLevel.T(step.doy)).^3.40;           
-%     ki = 2.90e-12*(300./atmosphere.atLevel.T(step.doy)).^1.10;  
-    k0 = 1.90e-31*(300./atmosphere.atLevel.T(step.doy)).^3.40;           
-    ki = 4e-12*(300./atmosphere.atLevel.T(step.doy)).^.3;  
+    k0 = 2.00e-31*(300./atmosphere.atLevel.T(step.doy)).^3.40;           
+    ki = 2.90e-12*(300./atmosphere.atLevel.T(step.doy)).^1.10;  
     kNO2HO2 = termolecular(k0,ki);
-    rate.NO2_HO2_M = kNO2HO2;
+    rate(20) = kNO2HO2;
 
     % NO + O + M ->  NO2 + M  
     k0 = 9.00e-32*(300./atmosphere.atLevel.T(step.doy)).^1.50;                 
     ki = 3.00e-11;                                                                 
-    rate.NO_O_M = termolecular(k0,ki);
+    rate(21) = termolecular(k0,ki);
     
      % NO2 + NO3 + M ->  N2O5 + M 
-    k0 = 2.0e-30*(300./atmosphere.atLevel.T(step.doy)).^4.4;             
-    ki = 1.40e-12*(300./atmosphere.atLevel.T(step.doy)).^0.7;   
-%     k0 = 2.4e-30*(300./atmosphere.atLevel.T(step.doy)).^3;             
-%     ki = 1.60e-12*(300./atmosphere.atLevel.T(step.doy)).^-.1;   
+    k0 = 2.4e-30*(300./atmosphere.atLevel.T(step.doy)).^3;             
+    ki = 1.60e-12*(300./atmosphere.atLevel.T(step.doy)).^-0.1;   
     kNO2NO3 = termolecular(k0,ki);
-    rate.NO2_NO3_M = kNO2NO3;
+    rate(22) = kNO2NO3;
     
     % NO2 + O + M ->  NO3 + M  
     k0 = 2.50e-31*(300./atmosphere.atLevel.T(step.doy)).^1.80;                
     ki = 2.20e-11*(300./atmosphere.atLevel.T(step.doy)).^0.70;                           
-    rate.NO2_O_M = termolecular(k0,ki);
+    rate(23) = termolecular(k0,ki);
     
     % NO2 + OH + M ->  HNO3 + M  
     k0 = 1.80e-30*(300./atmosphere.atLevel.T(step.doy)).^3.00;              
     ki = 2.80e-11;  
-    rate.NO2_OH_M = termolecular(k0,ki);
+    rate(24) = termolecular(k0,ki);
         
     % N2O5 + M ->  NO2 + NO3 + M  
     N2O5_KO = (5.8e-27.*exp(10840./atmosphere.atLevel.T(step.doy)));
-    rate.N2O5_M = kNO2NO3./N2O5_KO;
+    rate(25) = kNO2NO3./N2O5_KO;
     
 % NOx unused:
 
@@ -140,46 +136,46 @@ function [rate] = gasphaserates_opt(atmosphere,step)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
    
     % H + O3 ->  OH + O2      
-    rate.H_O3 = 1.40e-10*exp(-470./atmosphere.atLevel.T(step.doy));
+    rate(26) = 1.40e-10*exp(-470./atmosphere.atLevel.T(step.doy));
     
      % OH + O ->  H + O2 
-    rate.OH_O = 1.80e-11*exp(180./atmosphere.atLevel.T(step.doy));
+    rate(27) = 1.80e-11*exp(180./atmosphere.atLevel.T(step.doy));
     
      % OH + O3 ->  HO2 + O2
-    rate.OH_O3 = 1.70e-12*exp(-940./atmosphere.atLevel.T(step.doy));
+    rate(28) = 1.70e-12*exp(-940./atmosphere.atLevel.T(step.doy));
     
     % OH + HO2 ->  H2O + O2
-    rate.OH_HO2 = 4.80e-11*exp(250./atmosphere.atLevel.T(step.doy));
+    rate(29) = 4.80e-11*exp(250./atmosphere.atLevel.T(step.doy));
     
     % OH + OH ->  H2O + O 
-    rate.OH_OH = 1.80e-12;
+    rate(30) = 1.80e-12;
     
     % OH + H2 ->  H2O + H
-    rate.OH_H2 = 2.80e-12*exp(-1800./atmosphere.atLevel.T(step.doy));
+    rate(31) = 2.80e-12*exp(-1800./atmosphere.atLevel.T(step.doy));
     
     % OH + H2O2 ->  H2O + HO2  
-    rate.OH_H2O2 = 1.80e-12;
+    rate(32) = 1.80e-12;
     
     % OH + CH2O ->  CO + H2O + H 
-    rate.OH_CH2O = 5.5e-12*exp(125./atmosphere.atLevel.T(step.doy));
+    rate(33) = 5.5e-12*exp(125./atmosphere.atLevel.T(step.doy));
     
     % HO2 + CH2O ->  HOCH2OO
-    rate.HO2_CH2O = 9.7e-15*exp(625./atmosphere.atLevel.T(step.doy));
+    rate(34) = 9.7e-15*exp(625./atmosphere.atLevel.T(step.doy));
     
     % HO2 + O ->  OH + O2
-    rate.HO2_O = 3.00e-11*exp(200./atmosphere.atLevel.T(step.doy));
+    rate(35) = 3.00e-11*exp(200./atmosphere.atLevel.T(step.doy));
     
     % HO2 + O3 ->  OH + 2*O2  
-    rate.HO2_O3 = 1.00e-14*exp(-490./atmosphere.atLevel.T(step.doy));
+    rate(36) = 1.00e-14*exp(-490./atmosphere.atLevel.T(step.doy));
     
     %O1D + H2O ->  2*OH 
-    rate.H2O_O1D = 1.63e-10.*exp(60./atmosphere.atLevel.T(step.doy));
+    rate(37) = 1.63e-10.*exp(60./atmosphere.atLevel.T(step.doy));
     
     %O1D + H2 ->  H + OH
-    rate.H2_O1D = 1.2e-10;        
+    rate(38) = 1.2e-10;        
     
     %O1D + CH4 ->  CH3O2 + OH
-    rate.CH4_O1D = 1.31e-10;
+    rate(39) = 1.31e-10;
     
     % HO2 + HO2 ->  H2O2 + O2 
     ko = 3e-13.*exp(460./atmosphere.atLevel.T(step.doy));
@@ -187,46 +183,46 @@ function [rate] = gasphaserates_opt(atmosphere,step)
         exp(920./atmosphere.atLevel.T(step.doy));
     fc = 1 + 1.4e-21.*atmosphere.dummyH2Ovmr(step.doy).*...
         exp(2200./atmosphere.atLevel.T(step.doy));        
-    rate.HO2_HO2 = (ko + kinf).*fc;
+    rate(40) = (ko + kinf).*fc;
     
     % HO2NO2 + OH ->  H2O + NO2 + O2
-    rate.HO2NO2_OH = 1.30e-12*exp(380./atmosphere.atLevel.T(step.doy));
+    rate(41) = 1.30e-12*exp(380./atmosphere.atLevel.T(step.doy));
                          
-    % HO2NO2 + M ->  HO2 + NO2 + M    
-    HO2NO2_KO = 2.1e-27.*exp(10900./atmosphere.atLevel.T(step.doy));
-    rate.HO2NO2_M = kNO2HO2./HO2NO2_KO;            
+    % HO2NO2 + M ->  HO2 + NO2 + M
+    HO2NO2_KO = 2.1e-27.*exp(10135./atmosphere.atLevel.T(step.doy));
+    rate(42) = kNO2HO2./HO2NO2_KO;
          
     % CH4 + OH ->  CH3O2 + H2O
-    rate.CH4_OH = 2.45e-12*exp(-1775./atmosphere.atLevel.T(step.doy));
+    rate(43) = 2.45e-12*exp(-1775./atmosphere.atLevel.T(step.doy));
     
     % H2O2 + O ->  OH + HO2
-    rate.H2O2_O = 1.40e-12*exp(-2000./atmosphere.atLevel.T(step.doy));
+    rate(44) = 1.40e-12*exp(-2000./atmosphere.atLevel.T(step.doy));
     
     %ternary        
     % H + O2 + M ->  HO2 + M 
     k0 = 4.40e-32*(300./atmosphere.atLevel.T(step.doy)).^1.30;                
     ki = 7.50e-11*(300./atmosphere.atLevel.T(step.doy)).^-0.20;                             
-    rate.H_O2_M = termolecular(k0,ki);
+    rate(45) = termolecular(k0,ki);
     
     % OH + OH + M ->  H2O2 + M
     k0 = 6.90e-31*(300./atmosphere.atLevel.T(step.doy)).^1.00;            
     ki = 2.60e-11;      
-    rate.OH_OH_M = termolecular(k0,ki);
+    rate(46) = termolecular(k0,ki);
     
     % OH + CO + M ->  CO2 + HO2
     k0=5.90e-33*(300./atmosphere.atLevel.T(step.doy)).^1.4;            
     ki=1.10e-12*(300./atmosphere.atLevel.T(step.doy)).^1.3;  %                                                         
-    rate.OH_CO_Ma = termolecular(k0,ki);
+    rate(47) = termolecular(k0,ki);
     
     % OH + CO + M ->  H + CO2 + M
     k0=1.50e-13*(300./atmosphere.atLevel.T(step.doy)).^0;           
     ki=2.10e9*(300./atmosphere.atLevel.T(step.doy)).^6.1;  %            
-    rate.OH_CO_Mb = chemicalactivation(k0,ki);
+    rate(48) = chemicalactivation(k0,ki);
     
     % OH + SO2 + M -> HSO3 + M
     k0=3.30e-31*(300./atmosphere.atLevel.T(step.doy)).^4.3;            
     ki=1.6e-12;  %                                                         
-    rate.SO2_OH_M = termolecular(k0,ki);
+    rate(49) = termolecular(k0,ki);
 %     % OH + CO = M -> HO2 + CO2 (combined branches)
 %     rate.OH_CO_M = 1.5e-13.*(1+6e-8.*1e7.*1.38e-23.*atmosphere.atLevel.M(step.doy)).*...
 %         atmosphere.atLevel.T(step.doy);        
@@ -262,148 +258,148 @@ function [rate] = gasphaserates_opt(atmosphere,step)
 % CLOx/BROx
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
     % CL + O3 ->  CLO + O2
-    rate.CL_O3 = 2.30e-11*exp(-200./(atmosphere.atLevel.T(step.doy)));
+    rate(50) = 2.30e-11*exp(-200./(atmosphere.atLevel.T(step.doy)));
      
     % CL + H2 ->  HCL + H
-    rate.CL_H2 = 3.05e-11*exp(-2270./atmosphere.atLevel.T(step.doy));
+    rate(51) = 3.05e-11*exp(-2270./atmosphere.atLevel.T(step.doy));
     
     % CL + H2O2 ->  HCL + HO2
-    rate.CL_H2O2 = 1.10e-11*exp(-980./atmosphere.atLevel.T(step.doy));
+    rate(52) = 1.10e-11*exp(-980./atmosphere.atLevel.T(step.doy));
     
     % CL + HO2 ->  HCL + O2
-    rate.CL_HO2a = 1.40e-11*exp(270./atmosphere.atLevel.T(step.doy));
+    rate(53) = 1.40e-11*exp(270./atmosphere.atLevel.T(step.doy));
     
     % CL + HO2 ->  OH + CLO
-    rate.CL_HO2b = 3.60e-11*exp(-375./atmosphere.atLevel.T(step.doy));
+    rate(54) = 3.60e-11*exp(-375./atmosphere.atLevel.T(step.doy));
     
     % CL + CH2O ->  HCL + HO2 + CO
-    rate.CL_CH2O = 8.10e-11*exp(-30./atmosphere.atLevel.T(step.doy));
+    rate(55) = 8.10e-11*exp(-30./atmosphere.atLevel.T(step.doy));
     
      % CL + CH4 ->  CH3O2 + HCL
-    rate.CL_CH4 = 7.30e-12*exp(-1280./atmosphere.atLevel.T(step.doy));
+    rate(56) = 7.30e-12*exp(-1280./atmosphere.atLevel.T(step.doy));
     
     % CLO + O ->  CL + O2
-    rate.CLO_O = 2.80e-11*exp(85./atmosphere.atLevel.T(step.doy));
+    rate(57) = 2.80e-11*exp(85./atmosphere.atLevel.T(step.doy));
     
     % CLO + OH ->  CL + HO2
-    rate.CLO_OHa = 7.40e-12*exp(270./atmosphere.atLevel.T(step.doy));
+    rate(58) = 7.40e-12*exp(270./atmosphere.atLevel.T(step.doy));
     
     % CLO + OH ->  HCL + O2
-    rate.CLO_OHb = 6.00e-13*exp(230./atmosphere.atLevel.T(step.doy));
+    rate(59) = 6.00e-13*exp(230./atmosphere.atLevel.T(step.doy));
     
     % CLO + HO2 ->  O2 + HOCL
-    rate.CLO_HO2 = 2.60e-12*exp(290./atmosphere.atLevel.T(step.doy));
+    rate(60) = 2.60e-12*exp(290./atmosphere.atLevel.T(step.doy));
     
     % CLO + CH3O2 ->  CL + HO2 + CH2O
-    rate.CLO_CH3O2 = 3.30e-12*exp(-115./atmosphere.atLevel.T(step.doy));
+    rate(61) = 3.30e-12*exp(-115./atmosphere.atLevel.T(step.doy));
     
     % CLO + NO ->  NO2 + CL
-    rate.CLO_NO = 6.40e-12*exp(290./atmosphere.atLevel.T(step.doy));
+    rate(62) = 6.40e-12*exp(290./atmosphere.atLevel.T(step.doy));
     
     % CLO + CLO ->  2*CL + O2 
-    rate.CLO_CLOa = 3.00e-11*exp(-2450./atmosphere.atLevel.T(step.doy));
+    rate(63) = 3.00e-11*exp(-2450./atmosphere.atLevel.T(step.doy));
     
     % CLO + CLO ->  CL2 + O2 
-    rate.CLO_CLOb = 1.00e-12*exp(-1590./atmosphere.atLevel.T(step.doy));
+    rate(64) = 1.00e-12*exp(-1590./atmosphere.atLevel.T(step.doy));
     
     % CLO + CLO ->  CL + OCLO
-    rate.CLO_CLOc = 3.50e-13*exp(-1370./atmosphere.atLevel.T(step.doy));
+    rate(65) = 3.50e-13*exp(-1370./atmosphere.atLevel.T(step.doy));
     
     % HCL + OH ->  H2O + CL
-    rate.HCL_OH = 1.80e-12*exp(-250./atmosphere.atLevel.T(step.doy));
+    rate(66) = 1.80e-12*exp(-250./atmosphere.atLevel.T(step.doy));
     
     % HCL + O1D -> CL + OH
-    rate.HCL_O1D = 1.5e-10;
+    rate(67) = 1.5e-10;
     
     % HCL + O ->  CL + OH 
-    rate.HCL_O = 1.00e-11*exp(-3300./atmosphere.atLevel.T(step.doy));
+    rate(68) = 1.00e-11*exp(-3300./atmosphere.atLevel.T(step.doy));
     
     % HOCL + O ->  CLO + OH
-    rate.HOCL_O = 1.70e-13;
+    rate(69) = 1.70e-13;
     
     % HOCL + CL ->  HCL + CLO 
-    rate.HOCL_CL = 3.40e-12*exp(-130./atmosphere.atLevel.T(step.doy));
+    rate(70) = 3.40e-12*exp(-130./atmosphere.atLevel.T(step.doy));
     
     % HOCL + OH ->  H2O + CLO 
-    rate.HOCL_OH = 3.00e-12*exp(-500./atmosphere.atLevel.T(step.doy));
+    rate(71) = 3.00e-12*exp(-500./atmosphere.atLevel.T(step.doy));
     
     % CLONO2 + O ->  CLO + NO3
-    rate.CLONO2_O = 3.60e-12*exp(-840./atmosphere.atLevel.T(step.doy));
+    rate(72) = 3.60e-12*exp(-840./atmosphere.atLevel.T(step.doy));
     
     % CLONO2 + OH ->  HOCL + NO3
-    rate.CLONO2_OH = 1.20e-12*exp(-330./atmosphere.atLevel.T(step.doy));
+    rate(73) = 1.20e-12*exp(-330./atmosphere.atLevel.T(step.doy));
     
     % CLONO2 + CL ->  CL2 + NO3
-    rate.CLONO2_CL = 6.50e-12*exp(135./atmosphere.atLevel.T(step.doy));
+    rate(74) = 6.50e-12*exp(135./atmosphere.atLevel.T(step.doy));
     
     % BR + O3 ->  BRO + O2                                    
-    rate.BR_O3 = 1.60e-11*exp(-780./atmosphere.atLevel.T(step.doy));
+    rate(75) = 1.60e-11*exp(-780./atmosphere.atLevel.T(step.doy));
     
     % BR + HO2 ->  HBR + O2
-    rate.BR_HO2 = 4.80e-12*exp(-310./atmosphere.atLevel.T(step.doy));
+    rate(76) = 4.80e-12*exp(-310./atmosphere.atLevel.T(step.doy));
     
     % BR + CH2O ->  HBR + HO2 + CO
-    rate.BR_CH2O = 1.70e-11*exp(-800./atmosphere.atLevel.T(step.doy));
+    rate(77) = 1.70e-11*exp(-800./atmosphere.atLevel.T(step.doy));
     
     % BRO + O ->  BR + O2
-    rate.BRO_O = 1.90e-11*exp(230./atmosphere.atLevel.T(step.doy));
+    rate(78) = 1.90e-11*exp(230./atmosphere.atLevel.T(step.doy));
     
     % BRO + OH ->  BR + HO2
-    rate.BRO_OH = 1.70e-11*exp(250./atmosphere.atLevel.T(step.doy));
+    rate(79) = 1.70e-11*exp(250./atmosphere.atLevel.T(step.doy));
     
     % BRO + HO2 ->  HOBR + O2
-    rate.BRO_HO2 = 4.50e-12*exp(460./atmosphere.atLevel.T(step.doy));
+    rate(80) = 4.50e-12*exp(460./atmosphere.atLevel.T(step.doy));
     
     % BRO + NO ->  BR + NO2  
-    rate.BRO_NO = 8.80e-12*exp(260./atmosphere.atLevel.T(step.doy));
+    rate(81) = 8.80e-12*exp(260./atmosphere.atLevel.T(step.doy));
     
     % BRO + CLO ->  BR + OCLO
-    rate.BRO_CLOa = 9.50e-13*exp(550./atmosphere.atLevel.T(step.doy));
+    rate(82) = 9.50e-13*exp(550./atmosphere.atLevel.T(step.doy));
     
     % BRO + CLO ->  BR + CL + O2
-    rate.BRO_CLOb = 2.30e-12*exp(260./atmosphere.atLevel.T(step.doy));
+    rate(83) = 2.30e-12*exp(260./atmosphere.atLevel.T(step.doy));
     
     % BRO + CLO ->  BRCL + O2 
-    rate.BRO_CLOc = 4.10e-13*exp(290./atmosphere.atLevel.T(step.doy));
+    rate(84) = 4.10e-13*exp(290./atmosphere.atLevel.T(step.doy));
     
      % BRO + BRO ->  2*BR + O2
-    rate.BRO_BRO = 1.50e-12*exp(230./atmosphere.atLevel.T(step.doy));
+    rate(85) = 1.50e-12*exp(230./atmosphere.atLevel.T(step.doy));
     
      % HBR + OH ->  BR + H2O 
-    rate.HBR_OH = 5.50e-12*exp(200./atmosphere.atLevel.T(step.doy));
+    rate(86) = 5.50e-12*exp(200./atmosphere.atLevel.T(step.doy));
     
     % HBR + O1D ->  BR + OH
-    rate.HBR_O1D = 1.2e-10;
+    rate(87) = 1.2e-10;
     
      % HOBR + O ->  BRO + OH   
-    rate.HOBR_O = 1.20e-10*exp(-430./atmosphere.atLevel.T(step.doy));
+    rate(88) = 1.20e-10*exp(-430./atmosphere.atLevel.T(step.doy));
     
     % BRONO2 + O ->  BRO + NO3 
-    rate.BRONO2_O = 1.90e-11*exp(215./atmosphere.atLevel.T(step.doy));
+    rate(89) = 1.90e-11*exp(215./atmosphere.atLevel.T(step.doy));
     
     % BR + OCLO ->  BRO + CLO 
-    rate.BR_OCLO = 2.6e-11*exp(-1300./atmosphere.atLevel.T(step.doy));
+    rate(90) = 2.6e-11*exp(-1300./atmosphere.atLevel.T(step.doy));
     
     %ternary
     % CLO + NO2 + M ->  CLONO2 + M
     k0 = 1.80e-31*(300./atmosphere.atLevel.T(step.doy)).^3.40;                                           
     ki = 1.50e-11*(300./atmosphere.atLevel.T(step.doy)).^1.90;  %                                                            
     kCLO_NO2_M = termolecular(k0,ki);
-    rate.CLO_NO2_M = kCLO_NO2_M;
+    rate(91) = kCLO_NO2_M;
     
     % CLO + CLO + M ->  CL2O2 + M 
     k0 = 1.60e-32*(300./atmosphere.atLevel.T(step.doy)).^4.50;                                           
     ki = 3.00e-12*(300./atmosphere.atLevel.T(step.doy)).^2.00;  %                                                         
-    rate.CLO_CLO_M = termolecular(k0,ki);
+    rate(92) = termolecular(k0,ki);
     
     % CL2O2 + M ->  CLO + CLO + M
     CL2O2_KO = 2.16e-27.*exp(8537./atmosphere.atLevel.T(step.doy));
-    rate.CL2O2_M = kCLO_NO2_M./CL2O2_KO;
+    rate(93) = kCLO_NO2_M./CL2O2_KO;
        
     % BRO + NO2 + M ->  BRONO2 + M 
     k0=5.20e-31*(300./atmosphere.atLevel.T(step.doy)).^3.10;                                            
     ki=6.50e-12*(300./atmosphere.atLevel.T(step.doy)).^2.90;                                                          
-    rate.BRO_NO2_M = termolecular(k0,ki);
+    rate(94) = termolecular(k0,ki);
     
 %     % CL + O2 + M ->  CLOO  
 %     k0 = 2.2e-33*(300./atmosphere.atLevel.T(step.doy).^3.1;                    

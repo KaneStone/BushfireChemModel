@@ -279,8 +279,8 @@ timeind = 1;
     
     % HO2NO2
     
-    rates.HO2NO2.destruction(1) = photo.data(14).*variables.HO2NO2(timeind);% to account for second photolysis pathway that isnt in TUV
-    rates.HO2NO2.destruction(2) = photo.data(14).*variables.HO2NO2(timeind).*HO2NO2pwf;
+    rates.HO2NO2.destruction(1) = photo.data(14).*variables.HO2NO2(timeind).*1./HO2NO2pwf;% to account for second photolysis pathway that isnt in TUV
+    rates.HO2NO2.destruction(2) = photo.data(14).*variables.HO2NO2(timeind);%.*HO2NO2pwf;
     
 %     photoReaction.HO2NO2.dreactionID = 14;
 %     
