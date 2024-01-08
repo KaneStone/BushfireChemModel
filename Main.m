@@ -1,4 +1,5 @@
-% Main 2d model
+%1d chemical equilibrium model for the lower stratosphere
+
 clear variables
 
 % style guide
@@ -7,9 +8,6 @@ clear variables
 % lowerCamelCase = variables
 % Capitalize = structures
 
-% Need to make dummy variables for all atmospheric variables that I use. 
-% Check NO reactions and HO reactions
-
 inputs = Minputs;
 
 vars = {'O','O3','O1D','CLONO2','HCL','HOCL','CLO','CL2','CL2O2','OCLO','CL','BRCL'...
@@ -17,7 +15,7 @@ vars = {'O','O3','O1D','CLONO2','HCL','HOCL','CLO','CL2','CL2O2','OCLO','CL','BR
 
 %% Initial concentrations
 % Read in profiles then select by layer
-[atmosphere,variables] = Initializevars(inputs,vars);
+[atmosphere,variables] = Initializevars(inputs);
 
 %% initiate time step
 
@@ -26,31 +24,30 @@ switch inputs.whichphoto
         photoload = load(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/TUVoutput/',...
             num2str(inputs.altitude),'km_0.25hourstep_photo.mat']);
         photolength = size(photoload.pout,1);        
+        photoout = [];
     case 'inter'
         photoload = [];
         photolength = 1;
         photoout = zeros(length(vars),inputs.timesteps,114);
 end
+
 count = 1;
 daycount = 1;
-photoout = [];
 
 tic;
 flux = [];
-newday = 1;
+newday = day(datetime(inputs.startdate));
 kout = [];
 climScaleFactor = [];
+family = [];
+dayAverage = [];
 photoNamlist = TUVnamelist;
+
 for i = 1:inputs.timesteps
     
-    % initialize step components
+    % initiate step components
     step = initializestep(inputs,i,photolength);       
             
-    % create daily diurnal cycle for climatological species    
-%     if step.hour == 0
-%         [climScaleFactor,SZAdiff] = diurnalfromclim(inputs,i);
-%     end    
-% %     
     if inputs.photosave
         [photo,~,~] = photolysis(inputs,step,atmosphere,[],[]);
         photoout(i,:,:) = photo.dataall;
@@ -58,43 +55,27 @@ for i = 1:inputs.timesteps
     end
     
     % run gasphaserates once per day
-    if step.doy == newday
-        newday = newday+1;
+    if step.doy == newday        
         %kout = gasphaserates_opt2(atmosphere,step);
         kout = gasphaserates_opt(atmosphere,step);
-        
+        newday = newday+1;   
+        if newday == 365
+            newday = 1;
+        end
     end
     
-    [variables,ratesout] = raphsonnewton(inputs,i,atmosphere,step,variables,vars,photoload,kout,climScaleFactor);                    
-    %test(i) = ratesout.CLO_NO2_M;   
+    % initiate solver
+    [variables,ratesout] = raphsonnewton(inputs,i,atmosphere,step,variables,vars,photoload,kout,climScaleFactor);                        
 
+    % Flux correction (see inputs.fluxcorrections)
     [variables,flux] = fluxcorrection(inputs,variables,flux,atmosphere,step,i);    
     
-    % CLY is continuous
-    CLY(i) = variables.CLONO2(i) + variables.HCL(i) + variables.CL(i) +...
-        variables.CL2(i).*2 + variables.CL2O2(i).*2 + variables.HOCL(i) + ...
-        variables.BRCL(i) + variables.CLO(i) + variables.OCLO(i);
-    
-    % BRY is continuous
-    BRY(i) = variables.BRONO2(i) + variables.HBR(i) + variables.BR(i) +...
-        variables.BRCL(i) + variables.HOBR(i) + variables.BRO(i);
-    
-    % I have N2O sto will get a slight increase over time in NOy
-    NOY(i) = variables.BRONO2(i) + variables.CLONO2(i) + variables.HO2NO2(i) +...
-        variables.NO3(i) + variables.NO(i) + variables.NO2(i) + variables.HNO3(i) + variables.N2O5(i).*2;
-    
-    % I dont have all H species in so there wont be continuity here.
-    HOY(i) = variables.HO2(i) + variables.OH(i) + variables.H2O2(i).*2 +...
-        variables.HO2NO2(i) + variables.HNO3(i) + variables.HOBR(i) + variables.HOCL(i) + variables.HCL(i) + variables.HBR(i);
-    
-    
-    if i == daycount*24/inputs.hourstep        
-        for k = 1:length(vars)
-            dayaverage.(vars{k})(daycount) = mean(variables.(vars{k})(1+(daycount-1)*24/inputs.hourstep:daycount*24/inputs.hourstep));
-        end        
-        daycount = daycount+1;        
-    end    
-%     
+    % Calculation of chemical families (for diagostics)
+    family = chemicalfamilies(variables,family,i);    
+          
+    % Day average calculation
+    [dayAverage,daycount] = calcdayaverage(inputs,variables,dayAverage,daycount,vars,i);
+        
     if i == 1001
         a = 1;        
     end
@@ -119,7 +100,7 @@ figure;
 plot(variables.(vartoplot));
 
 %%
-vartoplot = 'NO2';
+vartoplot = 'BRONO2';
 figure;
 plot(dayaverage.(vartoplot));
 hold on;
