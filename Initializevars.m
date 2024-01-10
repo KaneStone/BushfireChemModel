@@ -1,4 +1,4 @@
-function [atmosphere,variables] = Initializevars(inputs)
+function [atmosphere,variables] = initializevars(inputs)
 
 
     % reading in ancil files, smoothing them or creating own, then initializing
@@ -41,7 +41,7 @@ function [atmosphere,variables] = Initializevars(inputs)
 
     %% creating dummy variables for flux correction and input climatology species
     % WILL NOT WORK IF YOU GO ABOVE 25 KM or for NH, polar regions. Will need to
-    % estimate a phase variable from climatology to be more consistent. FOr
+    % estimate a phase variable from climatology to be more consistent. For
     % example HNO3 is out of phase at 16 km.
 
     atmosphere.dummyO3 = createdummyvariables(atmosphere.atLevel.O3.nd,3.6.*pi/3);
