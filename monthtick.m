@@ -7,5 +7,4 @@ else
     tickout.tick = cumsum([1,28,31,30,31,30,31,30,31,31,30,31]);
 end
 
-
 end

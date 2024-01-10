@@ -1,4 +1,4 @@
-function [rates] = hetcontrol(inputs,step,variables,atmosphere,rates)
+function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacobian)
 
     timeind = 1;
 
@@ -63,14 +63,6 @@ function [rates] = hetcontrol(inputs,step,variables,atmosphere,rates)
     molar_h2so4 = den_h2so4.*wt./9.8;
     
     switch inputs.runtype
-        case 'control'
-%             x_h2so4 = wt ./ (wt + (100 - wt) .* 98 ./ 18); % mole fraction
-% 
-%             term1 = .094 - x_h2so4 .* (.61 - 1.2 .* x_h2so4);        
-%             term2 = (8515 - 10718 .* (x_h2so4.^.7)).*Tinv;                
-%             H_hcl_h2so4 = term1 .* exp( -8.68 + term2); %(mol / l / atm)         
-%             M_hcl_h2so4 = H_hcl_h2so4.*HCLatm; %(mol/l/atm * atm) = mol/l        
-%             molar_h2so4 = den_h2so4.*wt./9.8;
         case 'solubility'
             if atmosphere.aoc_aso4_ratio(step.doy) > .7
                 hex_smoothing_strat = exp(28.986 - 33.458./(Tin/100) - 18.135 .* log(Tin/100));
@@ -154,15 +146,13 @@ function [rates] = hetcontrol(inputs,step,variables,atmosphere,rates)
             % calculate acidity and new wt percent
             
             % calculate double linear M values. thats it!
-            if step.i == 2000
-                a = 1
-            end
     end
 
     %SAD = 1e-8;% atmosphere.atLevel.SAD.vmr(step.doy);
         
     %aw = .01;    
-    [kout] = hetrates(variables,Tin,CLONO2atm,HCLatm,atmosphere.dummySAD(step.doy),wt,M_hcl,molar_h2so4,aw,timeind,atmosphere.radius(step.doy));
+    [kout] = hetrates(inputs,variables,Tin,CLONO2atm,HCLatm,atmosphere.dummySAD(step.doy),...
+        wt,M_hcl,molar_h2so4,aw,timeind,atmosphere.radius(step.doy));
     
     % N2O5 + H2O -> 2*HNO3
     rates.N2O5.destruction(end+1) = kout.hetN2O5;
@@ -192,6 +182,15 @@ function [rates] = hetcontrol(inputs,step,variables,atmosphere,rates)
     % BRONO2 + H2O -> HNO3 + HOBR
     rates.BRONO2.destruction(end+1) = kout.hetBRONO2_H2O;
     rates.HOBR.production(end+1) = kout.hetBRONO2_H2O;
-    rates.HNO3.production(end+1) = kout.hetBRONO2_H2O;
+    rates.HNO3.production(end+1) = kout.hetBRONO2_H2O;   
+    
+    if inputs.outputrates && ~jacobian
+        kv.hetN2O5_H2O = kout.hetN2O5;
+        kv.hetCLONO2_H2O = kout.hetCLONO2_H2O;        
+        kv.hetCLONO2_HCL = kout.hetCLONO2_HCL;
+        kv.hetHOCL_HCL = kout.hetHOCL_HCL;
+        kv.hetHOBR_HCL = kout.hetHOBR_HCL;
+        kv.hetBRONO2_H2O = kout.hetBRONO2_H2O;
+    end
     
 end

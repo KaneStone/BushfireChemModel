@@ -32,7 +32,7 @@ temp = squeeze(data.data.T(9,20,:));
 diff1 = diff(temp);
 badind = find(diff1 < -15)+1;
 
-lats = [-55 -30];
+lats = [-50 -45];
 latind = data.data.lat >= lats(1) & data.data.lat <= lats(2);
 latextract = data.data.lat(latind);
 
@@ -168,12 +168,14 @@ ancil.SAD_SULFC.vmr(:,2) = ancil.SAD_SULFC.vmr(:,4);
 ancil.SAD_SULFC.vmr(:,3) = ancil.SAD_SULFC.vmr(:,4);
 
 test = movmean(ancil.SAD_SULFC.vmr,30,2,'omitnan');
-test(:,1) = ancil.SAD_SULFC.vmr(:,1);
-test(:,2) = ancil.SAD_SULFC.vmr(:,1);
-test(:,3) = ancil.SAD_SULFC.vmr(:,1);
-test(:,4) = ancil.SAD_SULFC.vmr(:,1);
+for i = 1:11
+    test(:,i) = ancil.SAD_SULFC.vmr(:,1);
+end
+% test(:,2) = ancil.SAD_SULFC.vmr(:,1);
+% test(:,3) = ancil.SAD_SULFC.vmr(:,1);
+% test(:,4) = ancil.SAD_SULFC.vmr(:,1);
 for i = 1:size(test,1)   
-    test(i,5:16) = interp1(1:2,test(i,[4 16]),1:1/11:2);
+    test(i,12:34) = interp1(1:2,test(i,[11 34]),1:1/22:2);
 end
 
 ancil.SAD_SULFC.vmr = test;

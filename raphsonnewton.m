@@ -1,54 +1,46 @@
-function [variables,kv] = raphsonnewton(inputs,i,atmosphere,step,variables,varNames,photoload,kout,climScaleFactor)
+function [variables,kv] = raphsonnewton(inputs,i,atmosphere,step,variables,varNames,photoload,kout)
 
-    photoout = [];
-
-    for j = 1:length(varNames)
-        varsVector(j) = variables.(varNames{j})(i);
-    end
-
-    %[varsOut,ratesout] = backwards(varsVector,varNames);
-    [varsOut,ratesout,kv] = backwards(varsVector,varNames,inputs,step,atmosphere,photoload,kout);
-
-    for k = 1:length(varNames)
-        variables.(varNames{k})(i+1) = varsOut(end,k);
-    end 
-
-% function [varsIteration,ratesout] = backwards(varsInitial,vars) % varsVector = yb, % ratessum = dy
-function [varsIteration,ratesout,kv] = backwards(varsInitial,vars,inputs,step,atmosphere,photoload,kout) % varsVector = yb, % ratessum = dy
-
-    % backwards euler
-    % initial guess is previous time step.
-    
     %chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://personal.math.ubc.ca/~anstee/math104/newtonmethod.pdf   
     
+    varsInitial = zeros(1,length(varNames));
+    ratesSum = zeros(1,length(varNames));
+    err = zeros(inputs.maxiterations,length(varNames));
+    convTest = zeros(1,inputs.maxiterations);
+    for j = 1:length(varNames)
+        varsInitial(j) = variables.(varNames{j})(i);
+    end
+
     count = 1;
     varsIteration(count,:) = varsInitial; % first guess
     convergence = 0;
-    eps = 1e-5; %percent
-    %ratessum = zeros(1,length(vars));
+    eps = 1e-5; % convergence error threshold (percent)
+    
     while ~convergence
 
-        for l = 1:length(vars)
-            varsIn.(vars{l}) = varsIteration(count,l);
+        for l = 1:length(varNames)
+            varsIn.(varNames{l}) = varsIteration(count,l);
         end
         
-        [ratesout,kv] = ratesControl(inputs,step,atmosphere,varsIn,photoload,kout);
-        %ratesout.CL.destruction(1)     
-        for l = 1:length(vars)
-            ratessum(l) = double((sum(ratesout.(vars{l}).production) - sum(ratesout.(vars{l}).destruction)));                
+        [ratesout,kv] = ratescontrol(inputs,step,atmosphere,varsIn,photoload,kout,0);
+           
+        for l = 1:length(varNames)
+            ratesSum(l) = double((sum(ratesout.(varNames{l}).production) - sum(ratesout.(varNames{l}).destruction)));                
         end
         
         % convert from struct to array
         
-        G = varsIteration(count,:) - varsInitial - ratessum.*inputs.secondstep;
+        G = varsIteration(count,:) - varsInitial - ratesSum.*inputs.secondstep;
         if count == 1
-            J = Jacobian(varsIteration(count,:),varsInitial,inputs,atmosphere,step,vars,photoload,G,kout);
+            J = Jacobian(varsIteration(count,:),varsInitial,inputs,atmosphere,step,varNames,photoload,G,kout);
         elseif count > 1 && inputs.evolvingJ
-            J = Jacobian(varsIteration(count,:),varsInitial,inputs,atmosphere,step,vars,photoload,G,kout);
+            J = Jacobian(varsIteration(count,:),varsInitial,inputs,atmosphere,step,varNames,photoload,G,kout);
         end
         
-        %removing very small J values
-        J (abs(J) < 1e-8) = 1e-8; % not an ideal way of handling near zero derivatives, but easy and doesn't seem to cause problems
+        % removing very small J values
+        % not an ideal way of handling near zero derivatives, but easy and
+        % doesn't seem to cause problems (produces vvery small changes in
+        % conserved families (CLY, etc)
+        J (abs(J) < 1e-8) = 1e-8; 
         
         % calculating iteration solution
         JG = J'\G';       
@@ -56,13 +48,18 @@ function [varsIteration,ratesout,kv] = backwards(varsInitial,vars,inputs,step,at
                                 
         % testing for convergence
         err(count,:) = (varsIteration(count+1,:) - varsIteration(count,:));
-        convtest(count) = abs(sum(err(count,:))./sum(varsIteration(count+1,:))*100);
+        convTest(count) = abs(sum(err(count,:))./sum(varsIteration(count+1,:))*100);
                 
-        if convtest(count) < eps
+        if convTest(count) < eps
             convergence = 1;
             
             %making sure variables don't go below zero.
-            varsIteration (varsIteration < 0) = .001;                   
+            varsIteration (varsIteration < 0) = .001;      
+            
+            for k = 1:length(varNames)
+                variables.(varNames{k})(i+1) = varsIteration(end,k);
+            end 
+            
         else
             count = count+1;
         end
@@ -70,11 +67,9 @@ function [varsIteration,ratesout,kv] = backwards(varsInitial,vars,inputs,step,at
         if count == inputs.maxiterations
             error('Not converging')
             % If this becomes a problem at some point will need to half
-            % current time step and repeat solver. Sould converge in less
+            % current time step and repeat solver. Should converge in less
             % than 5 iterations though.
         end
     end          
-end
-
 end
 

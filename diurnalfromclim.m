@@ -1,5 +1,7 @@
 function [SZAconv,SZAdiff] = diurnalfromclim(inputs,i)
 
+% DEFUNCT script but may be useful in the future so leaving in folder
+
 % calculate SZA over entire day
 SZA = NaN(1,24/inputs.hourstep);
 for j = 1:24/inputs.hourstep

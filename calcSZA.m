@@ -1,4 +1,7 @@
 function SZA = calcSZA(inputs,step)
+
+% Defunct code. Keeping it in folder as it may be useful later
+
 %Calculates the heliocentric position of the Earth. Begins at noon 
 
 % Need to add in an altitude correction

@@ -1,13 +1,9 @@
 function [] = createTUVinput(inputs,atmosphere,step)
 
-    %% save TUV data
+    % For each time step this function will create the TUV input from
+    % climatology ozone, temperature, and density data, and the inputs
+    % latitude (-45 for midlats, -80 for polar).
 
-    % geotime
-%     dayend = cumsum([31,29,31,30,31,30,31,31,30,31,30,31]);
-%     month = 1;
-%     day = 1;
-%     count = 1;
-    
     ozoneout_nd = atmosphere.O3(:,step.doy);
     densityout = atmosphere.M(:,step.doy);
     tempout = atmosphere.T(:,step.doy);

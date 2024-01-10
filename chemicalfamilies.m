@@ -13,7 +13,7 @@ function family = chemicalfamilies(variables,family,i)
     family.NOY(i) = variables.BRONO2(i) + variables.CLONO2(i) + variables.HO2NO2(i) +...
         variables.NO3(i) + variables.NO(i) + variables.NO2(i) + variables.HNO3(i) + variables.N2O5(i).*2;
     
-    % I dont have all H species in so there wont be continuity here.
+    % I dont have all HO species in so there wont be continuity here.
     family.HOY(i) = variables.HO2(i) + variables.OH(i) + variables.H2O2(i).*2 +...
         variables.HO2NO2(i) + variables.HNO3(i) + variables.HOBR(i) + variables.HOCL(i) + variables.HCL(i) + variables.HBR(i);
 
