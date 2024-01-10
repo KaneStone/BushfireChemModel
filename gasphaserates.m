@@ -1,4 +1,4 @@
-function [rate] = gasphaserates_opt(atmosphere,step)
+function [rate] = gasphaserates(atmosphere,step)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Ox

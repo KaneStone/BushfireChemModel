@@ -1,4 +1,4 @@
-function [inputs] = Minputs
+function [inputs] = runinputs
     
     % BEGIN USER INPUTS
     
@@ -16,11 +16,13 @@ function [inputs] = Minputs
         case 'midlatitudes'
             inputs.latitude = -45;
             inputs.longitude = -180;
-            inputs.ancildir = '/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/Ancil/';
-            inputs.outputdir = '/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/output/';
+            inputs.ancildir = 'input/';
+            inputs.outputdir = 'output/';
+            inputs.hemisphere = 'S';
         case 'polar'
             inputs.latitude = -80;
             inputs.longitude = -180;
+            inputs.hemisphere = 'S';
     end   
     
     % physics
@@ -46,6 +48,9 @@ function [inputs] = Minputs
     inputs.outputrates = 0;
     inputs.savedata = 1;    
     
+    %diagnostics
+    inputs.plotdiurnal = 0;
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % END USER INPUTS. Do not alter anything below here    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -57,7 +62,8 @@ function [inputs] = Minputs
     snum = datenum([str2double(inputs.startdate(end-3:end)),1,1,0,0,0]);
     inputs.dayssincestartofyear = (dnum - snum); %used for climatology data
     inputs.stepssincestartofyear = inputs.dayssincestartofyear*24/inputs.hourstep; %used for photodata
-    
+    inputs.stepsinday = 24/inputs.hourstep;
+    inputs.stepsinhour = 1/inputs.hourstep;
     switch inputs.whichphoto
         case 'inter'
             inputs.photosave = 1;

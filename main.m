@@ -2,27 +2,17 @@
 
 clear variables
 
-inputs = Minputs;
+inputs = runinputs;
 
 vars = {'O','O3','O1D','CLONO2','HCL','HOCL','CLO','CL2','CL2O2','OCLO','CL','BRCL',...
     'NO2','NO','NO3','N2O5','HO2NO2','OH','HO2','H2O2','HNO3','BRO','HOBR','HBR','BRONO2','BR'};
 
 %% Initial concentrations
 % Read in profiles then select by layer
-[atmosphere,variables] = Initializevars(inputs);
+[atmosphere,variables] = initializevars(inputs);
 
 %% load photo data
-switch inputs.whichphoto
-    case 'load'
-        photoload = load(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/TUVoutput/',...
-            num2str(inputs.altitude),'km_0.25hourstep_photo.mat']);
-        photolength = size(photoload.pout,1);        
-        photoout = [];
-    case 'inter'
-        photoload = [];
-        photolength = 1;
-        photoout = zeros(inputs.timesteps,114,91);
-end
+[photoout,photoload,photolength] = loadphoto(inputs);
 
 %% initialize counters and output variables
 count = 1;
@@ -75,7 +65,7 @@ for i = 1:inputs.timesteps
     % Day average calculation
     [dayAverage,daycount] = calcdayaverage(inputs,variables,dayAverage,daycount,vars,i);
     
-    % concatenate rates and calculate day average
+    % concatenate rates and calculate day average if inputs.outputrates
     if inputs.outputrates
        ratefields = fields(kv);
        for j = 1:length(ratefields)
@@ -86,7 +76,7 @@ for i = 1:inputs.timesteps
     end  
     
     % debugging if statement (can remove)
-    if i == 100
+    if i == 500
         a = 1;        
     end
     
@@ -98,41 +88,23 @@ for i = 1:inputs.timesteps
     end              
 end
 
-% save photodata if running in interactive mode
-if inputs.photosave
-    for i = 1:size(photoout,3)
-        pout = photoout(:,:,i);
-        save(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/TUVoutput/',...
-            num2str(i-1),'km','_',num2str(inputs.hourstep),'hourstep','_photo.mat'],'pout')
-    end
-end
+%% save if interactive photo
+savephoto(inputs,photoout)
 
-%% save output (variables dayAverage rates)
-if inputs.savedata
-    save([inputs.outputdir,'data/',inputs.runtype,'_',num2str(inputs.altitude)...
-        ,'_',num2str(inputs.fluxcorrections),'_',sprintf('%.2f',inputs.hourstep),'hours.mat'],'variables','dayAverage');
-end
+%% saving output
+savedata(inputs,variables,dayAverage,rates,ratesDayAverage)
 
 %% diagnostic plotting
-vartoplot = 'BRCL';
+vartoplot = 'H2O2';
 figure;
 plot(variables.(vartoplot));
 
 %%
-vartoplot = 'CLONO2';
+vartoplot = 'H2O2';
 figure;
 plot(dayAverage.(vartoplot));
 hold on;
 plot(atmosphere.atLevel.(vartoplot).nd(1:length(dayAverage.(vartoplot))))
 
-% %% plot daily output
-% tickout = monthtick('short',0);
-% for i = 1:length(vars)
-%     createfig('medium','on')
-%     plot(1:365,dayaverage.(vars{i}),'LineWidth',2)
-%     set(gca,'xtick',tickout.tick,'xticklabels',tickout.monthnames,'fontsize',inputs.fsize);
-%     xlabel('Month','fontsize',inputs.fsize+2);
-%     ylabel('Number Density (molecules cm^-^3)','fontsize',inputs.fsize+2);
-%     title([inputs.runtype,', ',vars{i}],'fontsize',inputs.fsize+4);    
-%     savefigure([inputs.outputdir,'figures/'],[inputs.runtype,'_',inputs.fluxcorrections,'_',vars{i},sprintf('%.2f',inputs.hourstep),'hours'],1,0,0,0);
-% end
+%% plotting diurnal cycles for chemical families
+plotdiurnalcycles(variables,inputs)

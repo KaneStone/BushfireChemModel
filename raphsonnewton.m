@@ -1,5 +1,6 @@
 function [variables,kv] = raphsonnewton(inputs,i,atmosphere,step,variables,varNames,photoload,kout)
 
+    % implicit backwards euler solver using raphson newton iterative method
     %chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://personal.math.ubc.ca/~anstee/math104/newtonmethod.pdf   
     
     varsInitial = zeros(1,length(varNames));
@@ -31,14 +32,14 @@ function [variables,kv] = raphsonnewton(inputs,i,atmosphere,step,variables,varNa
         
         G = varsIteration(count,:) - varsInitial - ratesSum.*inputs.secondstep;
         if count == 1
-            J = Jacobian(varsIteration(count,:),varsInitial,inputs,atmosphere,step,varNames,photoload,G,kout);
+            J = jacobian(varsIteration(count,:),varsInitial,inputs,atmosphere,step,varNames,photoload,G,kout);
         elseif count > 1 && inputs.evolvingJ
-            J = Jacobian(varsIteration(count,:),varsInitial,inputs,atmosphere,step,varNames,photoload,G,kout);
+            J = jacobian(varsIteration(count,:),varsInitial,inputs,atmosphere,step,varNames,photoload,G,kout);
         end
         
         % removing very small J values
         % not an ideal way of handling near zero derivatives, but easy and
-        % doesn't seem to cause problems (produces vvery small changes in
+        % doesn't seem to cause problems (produces very small changes in
         % conserved families (CLY, etc)
         J (abs(J) < 1e-8) = 1e-8; 
         

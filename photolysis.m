@@ -13,7 +13,7 @@ function [photo,rates,sza,kv] = photolysis(inputs,step,atmosphere,variables,phot
             system('/bin/zsh runTUV.sh');
 
             % read in TUV output
-            [TUVtemp,sza] = readinTUVoutput('/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/TUV5.4/output/output.txt',118,208);
+            [TUVtemp,sza] = readinTUVoutput('TUV5.4/output/output.txt',118,208);
             photo.altitude = TUVtemp(:,1);
             photo.data = TUVtemp(inputs.altitude,2:end);
             photo.dataall = TUVtemp(:,1:end)';                
@@ -56,6 +56,7 @@ function [photo,rates,sza,kv] = photolysis(inputs,step,atmosphere,variables,phot
     % O1D
     rates.O1D.production(1) = rates.O3.destruction(1); 
     rates.O1D.production(2) = photo.data(9).*atmosphere.atLevel.N2O.nd(step.doy);
+    rates.O1D.production(3) = photo.data(63).*variables.CLO;
        
     % CLONO2 
      rates.CLONO2.destruction(1) = photo.data(73).*variables.CLONO2;
@@ -69,6 +70,7 @@ function [photo,rates,sza,kv] = photolysis(inputs,step,atmosphere,variables,phot
 
     % CLO
     rates.CLO.destruction(1) = rates.O.production(6);   
+    rates.CLO.destruction(2) = rates.O1D.production(3);
     
     rates.CLO.production(1) = rates.OCLO.destruction(1);
     rates.CLO.production(2) = rates.CLONO2.destruction(2); 
@@ -88,11 +90,12 @@ function [photo,rates,sza,kv] = photolysis(inputs,step,atmosphere,variables,phot
     % CL
     rates.CL.production(1) = rates.CL2.destruction(1).*2;
     rates.CL.production(2) = rates.CLO.destruction(1); 
-    rates.CL.production(3) = rates.CL2O2.destruction(1).*2;
-    rates.CL.production(4) = rates.HOCL.destruction(1);
-    rates.CL.production(5) = rates.CLONO2.destruction(1); 
-    rates.CL.production(6) = rates.BRCL.destruction(1);        
-    rates.CL.production(7) = rates.HCL.destruction(1);
+    rates.CL.production(3) = rates.CLO.destruction(2); 
+    rates.CL.production(4) = rates.CL2O2.destruction(1).*2;
+    rates.CL.production(5) = rates.HOCL.destruction(1);
+    rates.CL.production(6) = rates.CLONO2.destruction(1); 
+    rates.CL.production(7) = rates.BRCL.destruction(1);        
+    rates.CL.production(8) = rates.HCL.destruction(1);
 
     % BRONO2
     rates.BRONO2.destruction(1) = photo.data(101).*variables.BRONO2;        
@@ -179,6 +182,7 @@ function [photo,rates,sza,kv] = photolysis(inputs,step,atmosphere,variables,phot
         kv.jHO2NO2_HO_NO3 = rates.HO2NO2.destruction(1);
         
         kv.jCLO_O3P_CL = rates.O.production(6);                
+        kv.jCLO_O1D_CL = rates.O1D.production(3);                
         kv.jCLONO2_CL_NO3 = rates.CLONO2.destruction(1);
         kv.jCLONO2_CLO_NO2 = rates.CLONO2.destruction(2);
         kv.jHCL_CL_H = rates.HCL.destruction(1);
