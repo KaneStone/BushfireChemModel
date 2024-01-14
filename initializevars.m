@@ -16,7 +16,7 @@ function [atmosphere,variables] = Initializevars(inputs)
     atmosphere.T = controlancil.ancil.T;
     atmosphere.P = controlancil.ancil.P;
     atmosphere.M = controlancil.ancil.M;
-    atmosphere.V = controlancil.ancil.V.vmr;
+%    atmosphere.V = controlancil.ancil.V.vmr;
     atmosphere.O3 = controlancil.ancil.O3.nd;
     atmosphere.altitude = 0:90;
 
@@ -34,7 +34,7 @@ function [atmosphere,variables] = Initializevars(inputs)
     atmosphere.atLevel.T = atmosphere.T(inputs.altitude+1,:);
     atmosphere.atLevel.P = atmosphere.P(inputs.altitude+1,:);
     atmosphere.atLevel.M = atmosphere.M(inputs.altitude+1,:);
-    atmosphere.atLevel.V = atmosphere.V(inputs.altitude+1,:);
+    %atmosphere.atLevel.V = atmosphere.V(inputs.altitude+1,:);
 
     atmosphere.atLevel.O2.nd = atmosphere.atLevel.M.*.21;
     atmosphere.atLevel.N2.nd = atmosphere.atLevel.M.*.78;
@@ -49,13 +49,13 @@ function [atmosphere,variables] = Initializevars(inputs)
     atmosphere.dummyHCL = createdummyvariables(atmosphere.atLevel.HCL.nd,3.6.*pi/3);
     atmosphere.dummyHNO3 = createdummyvariables(atmosphere.atLevel.HNO3.nd,3.*pi/2);
     atmosphere.dummyN2O5 = createdummyvariables(atmosphere.atLevel.N2O5.nd,3.*pi/2);
-    atmosphere.dummyCH2O = createdummyvariables(atmosphere.atLevel.CH2O.nd,pi/2);
+    atmosphere.dummyCH2O = createdummyvariables(atmosphere.atLevel.CH2O.nd,pi/2); % testing
     atmosphere.dummyH = createdummyvariables(atmosphere.atLevel.H.nd,pi/2);
     atmosphere.dummyH2O = createdummyvariables(atmosphere.atLevel.H2O.nd,3.*pi/2);
     atmosphere.dummyH2Ovmr = atmosphere.dummyH2O.*inputs.k.*1e6./(atmosphere.atLevel.P(1:365).*100).*atmosphere.atLevel.T(1:365);
     atmosphere.dummyH2Ovmr = atmosphere.dummyH2Ovmr - (atmosphere.dummyH2Ovmr(1) - atmosphere.atLevel.H2O.vmr(1));      
 
-    atmosphere.dummyCH3O2 = fitancil(atmosphere.atLevel.CH3O2.nd,.001);
+    atmosphere.dummyCH3O2 = fitancil(atmosphere.atLevel.CH3O2.nd,.001); % testing
     atmosphere.dummyM = fitancil(atmosphere.atLevel.M,.1);
     atmosphere.dummyH2 = fitancil(atmosphere.atLevel.H2.nd,.001);
     atmosphere.dummyCO = fitancil(atmosphere.atLevel.CO.nd,.001);
@@ -77,7 +77,9 @@ function [atmosphere,variables] = Initializevars(inputs)
 
     % smooth temperature
     tempsmooth = movmean([atmosphere.atLevel.T(end-19:end),atmosphere.atLevel.T,atmosphere.atLevel.T(1:20)],20);
-    atmosphere.atLevel.T = tempsmooth(21:end-20);
+    atmosphere.atLevel.T = tempsmooth(21:end-20)+2; % this value changes
+    %atmosphere.atLevel.T(1:40) = 215; 
+%     atmosphere.atLevel.T(100:140) = atmosphere.atLevel.T(140); 
 
     % smooth pressure
     psmooth = movmean([atmosphere.atLevel.P(end-19:end),atmosphere.atLevel.P,atmosphere.atLevel.P(1:20)],20);

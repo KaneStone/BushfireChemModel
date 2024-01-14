@@ -6,6 +6,7 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
     % calculate water in partial pressure hPa
     %variables.T = 200;
     Pin = atmosphere.atLevel.P(step.doy);
+    %Pin = 50;
     Tin = atmosphere.atLevel.T(step.doy);
     ph2o_hpa = atmosphere.dummyH2Ovmr(step.doy).*Pin; % pressure is in hPa;
     %pHCl = variables.HCl .* variables.pressure ./ 1013.25;
@@ -47,8 +48,9 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
     %molar_h20 = den_h2so4.*(100-wt)./.18; %mol/l
 
     %% with hexanoic solubility
-    
+    %variables.HCL.*inputs.k.*1e6./(atmosphere.atLevel.P(step.doy).*100).*atmosphere.atLevel.T(step.doy)./101;
     %HCLvmr = 1./inputs.k*1e-6.*data(i).data.(vartemp).*data2(i).pressure./data(i).data.T;
+     %dataout.CLONO2.pressureregrid ./ 100 ./ 1013.25
     HCLatm = Tin./(100).*inputs.k.*variables.HCL(timeind)./1e-6 / 1013.25;
     
     CLONO2atm = Tin./(100).*inputs.k.*variables.CLONO2(timeind)./1e-6 /1013.25;
@@ -151,8 +153,8 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
     %SAD = 1e-8;% atmosphere.atLevel.SAD.vmr(step.doy);
         
     %aw = .01;    
-    [kout] = hetrates(inputs,variables,Tin,CLONO2atm,HCLatm,atmosphere.dummySAD(step.doy),...
-        wt,M_hcl,molar_h2so4,aw,timeind,atmosphere.radius(step.doy));
+    [kout] = hetrates(inputs,variables,Tin,CLONO2atm,HCLatm,atmosphere.dummySAD(step.daysincebegin),...
+        wt,M_hcl,molar_h2so4,aw,timeind,atmosphere.radius(step.daysincebegin));
     
     % N2O5 + H2O -> 2*HNO3
     rates.N2O5.destruction(end+1) = kout.hetN2O5;

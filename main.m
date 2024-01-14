@@ -6,14 +6,14 @@ inputs = runinputs;
 
 vars = {'O','O3','O1D','CLONO2','HCL','HOCL','CLO','CL2','CL2O2','OCLO','CL','BRCL',...
     'NO2','NO','NO3','N2O5','HO2NO2','OH','HO2','H2O2','HNO3','BRO','HOBR','HBR','BRONO2','BR'};
-
+%
 %% Initial concentrations
 % Read in profiles then select by layer
 [atmosphere,variables] = initializevars(inputs);
 
 %% load photo data
 [photoout,photoload,photolength] = loadphoto(inputs);
-
+%photoload.pout = photoload.pout.*1.5;
 %% initialize counters and output variables
 count = 1;
 daycount = 1;
@@ -27,22 +27,28 @@ family = [];
 dayAverage = [];
 ratesDayAverage = [];
 photoNamlist = TUVnamelist;
-
+count2 = 194;
 %% Begin simulation
 tic;
 for i = 1:inputs.timesteps
     
     % initiate step components
     step = initializestep(inputs,i,photolength);       
-            
+         
+    if i == 96*count2
+        count2
+        count2 = count2 + 1;
+        toc;
+        a = 1;
+    end
     if inputs.photosave
         %photolysis(inputs,step,atmosphere,variables,photoload);    
         [photo,~,~] = photolysis(inputs,step,atmosphere,[],[]);
-        photoout(i,:,:) = photo.dataall;
+        photoout(i,:,:) = photo.dataall;        
         continue
     end
     
-    % run gasphaserates once per day
+    % run gasphaserates once per day0
     if step.doy == newday                
         kout = gasphaserates(atmosphere,step);
         
@@ -76,7 +82,7 @@ for i = 1:inputs.timesteps
     end  
     
     % debugging if statement (can remove)
-    if i == 500
+    if i == 3000
         a = 1;        
     end
     
@@ -89,18 +95,18 @@ for i = 1:inputs.timesteps
 end
 
 %% save if interactive photo
-savephoto(inputs,photoout)
+savephoto(inputs,photoout) 
 
 %% saving output
-savedata(inputs,variables,dayAverage,rates,ratesDayAverage)
+savedata(inputs,variables,dayAverage,family,rates,ratesDayAverage)
 
 %% diagnostic plotting
-vartoplot = 'H2O2';
+vartoplot = 'CLONO2';
 figure;
 plot(variables.(vartoplot));
 
 %%
-vartoplot = 'H2O2';
+vartoplot = 'HCL';
 figure;
 plot(dayAverage.(vartoplot));
 hold on;

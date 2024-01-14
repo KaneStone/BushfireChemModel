@@ -8,7 +8,7 @@ function [variables,kv] = raphsonnewton(inputs,i,atmosphere,step,variables,varNa
     err = zeros(inputs.maxiterations,length(varNames));
     convTest = zeros(1,inputs.maxiterations);
     for j = 1:length(varNames)
-        varsInitial(j) = variables.(varNames{j})(i);
+        varsInitial(j) = variables.(varNames{j})(end);
     end
 
     count = 1;
@@ -41,7 +41,8 @@ function [variables,kv] = raphsonnewton(inputs,i,atmosphere,step,variables,varNa
         % not an ideal way of handling near zero derivatives, but easy and
         % doesn't seem to cause problems (produces very small changes in
         % conserved families (CLY, etc)
-        J (abs(J) < 1e-8) = 1e-8; 
+        J (J < 1e-8 & J > 0) = 1e-8; 
+        J (J > -1e-8 & J < 0) = -1e-8; 
         
         % calculating iteration solution
         JG = J'\G';       

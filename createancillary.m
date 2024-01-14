@@ -6,7 +6,7 @@ runcase = 'control';
 %vars = {'H2', 'H2O2', 'HO2','CHO2','CL','OH','CH4','CLO','HOCL','CH3CL','CH3BR','CH2BR2','CHBR3'};
 vars = {'T','O','N2O','OH','HO2','CL','BR','NO','NO2','O1D','H','NO3','N2O5','CLO','CLONO2','HCL','HOCL','CL2','H2','CH3CL','CH4','H2O2','OCLO','CL2O2',...
     'CH3O2','BRO','BRCL','CH2O','HNO3','HO2NO2','H2O','HBR',...
-    'BRONO2','HOBR','CO','SULFRE','aoc','aso4','V','CH3BR','CH2BR2','CHBR3','SO2','CLNO2','SAD_SULFC'};
+    'BRONO2','HOBR','CO','SULFRE','aoc','aso4','SO2','SO3','HSO3','H2SO4','SO','S','OCS','SAD_SULFC'};
 tic;
 switch runcase
     case 'Solubility'
@@ -24,7 +24,7 @@ temp = squeeze(data.data.T(9,20,:));
 diff1 = diff(temp);
 badind = find(diff1 < -15)+1;
 
-lats = [-55 -45];
+lats = [-50 -40];
 latind = data.data.lat >= lats(1) & data.data.lat <= lats(2);
 latextract = data.data.lat(latind);
 
@@ -181,30 +181,43 @@ if TUV
     %%
     for k = 1:size(mls_level_new)-1                  
         if k == 1    
-            altitude(k,:) = repmat((287.*273./9.81).*log(1013.25./mls_level_new(k)),[1,366]);    
-            altitude(k+1,:) = 287.*mls_temp_new(k,:)./9.81.*log(mls_level_new(k)./mls_level_new(k+1));
+            altitude(k,:) = 287.*mean([repmat(273.15,[1,366]);mls_temp_new(k,:)],1,'omitnan')./9.81.*log(1013.25./mls_level_new(k));    
+            altitude(k+1,:) = 287.*mean(mls_temp_new(k:k+1,:),1,'omitnan')./9.81.*log(mls_level_new(k)./mls_level_new(k+1));
         else                
-            altitude(k+1,:) = 287.*mls_temp_new(k,:)./9.81.*log(mls_level_new(k)./mls_level_new(k+1));
+            altitude(k+1,:) = 287.*mean(mls_temp_new(k:k+1,:),1,'omitnan')./9.81.*log(mls_level_new(k)./mls_level_new(k+1));
         end
     end
 
-    density = mls_level_new.*100./287./mls_temp_new.*1000./1e6./28.9647.*6.022e23;
+%             % hypsometric
+%         for k = 1:size(data2(i).pressure,2)-1              
+%             if k == size(data2(i).pressure,2)-1                
+%                 data(i).alt2(:,sz(2),:) = (287.*273./9.81).*log(101325./squeeze(data2(i).pressure(:,k,:)));    
+%                 data(i).alt2(:,k,:) = (287.*squeeze(data(i).data.T(:,k,:))./9.81).*log(squeeze(data2(i).pressure(:,k+1,:))./squeeze(data2(i).pressure(:,k,:)));
+%             else                
+%                 data(i).alt2(:,k,:) = (287.*squeeze(data(i).data.T(:,k,:)./9.81)).*log(squeeze(data2(i).pressure(:,k+1,:))./squeeze(data2(i).pressure(:,k,:)));
+%             end
+%         end
+    
+    
+    %density = mls_level_new.*100./287.053./mls_temp_new.*1000./1e6./28.9647.*6.022e23;
+    density = 1./1.38066e-23.*mls_level_new.*100./mls_temp_new.*1e-6;
 
     altout  = cumsum(altitude);
-    altout = altout(1:49,:);
+    altout = altout(1:48,:);
 
 
     %% now interplate everything onto regular altitude grid.    
     for i = 1:size(altitude,2)
-       tempout(:,i) =  interp1(altout(:,i)./1000,squeeze(mls_temp_new(1:49,i)),altgrid,'linear','extrap');
-       ozoneout(:,i) =  interp1(altout(:,i)./1000,squeeze(mls_ozone_new(1:49,i)),altgrid,'linear','extrap');
-       ozoneout_nd(:,i) =  interp1(altout(:,i)./1000,squeeze(mls_ozone_new_nd(1:49,i)),altgrid,'linear','extrap');
-       densityout(:,i) =  interp1(altout(:,i)./1000,squeeze(density(1:49,i)),altgrid,'linear','extrap');
-       pressureout(:,i) =  exp(interp1(altout(:,i)./1000,log(squeeze(mls_level_new(1:49))),altgrid,'linear','extrap'));
+       tempout(:,i) =  interp1(altout(:,i)./1000,squeeze(mls_temp_new(1:48,i)),altgrid,'linear','extrap');
+       ozoneout(:,i) =  interp1(altout(:,i)./1000,squeeze(mls_ozone_new(1:48,i)),altgrid,'linear','extrap');
+       ozoneout_nd(:,i) =  interp1(altout(:,i)./1000,squeeze(mls_ozone_new_nd(1:48,i)),altgrid,'linear','extrap');
+       densityout(:,i) =  exp(interp1(altout(:,i)./1000,log(squeeze(density(1:48,i))),altgrid,'linear','extrap'));
+       pressureout(:,i) =  exp(interp1(altout(:,i)./1000,log(squeeze(mls_level_new(1:48))),altgrid,'linear','extrap'));
     end
 
 end
 
+%%
 ancil.T = double(tempout);
 ancil.P = double(pressureout);
 ancil.M = double(densityout);

@@ -8,7 +8,7 @@ function [inputs] = runinputs
     inputs.runlength = 1; %years    
             
     % height
-    inputs.altitude = 20; % altitude to analyse in km    
+    inputs.altitude = 18; % altitude to analyse in km    
     
     % location
     inputs.region = 'midlatitudes';    
@@ -37,7 +37,7 @@ function [inputs] = runinputs
     inputs.maxiterations = 50; % solver will throw error if more than max
     
     % heterogeneous chemistry
-    inputs.runtype = 'control'; %'control','solubility','doublelinear'
+    inputs.runtype = 'doublelinear'; %'control','solubility','doublelinear'
     inputs.radius = 'ancil'; % ancil reads yearly average radius from CARMA ancil (standard is 1e-5 cm)
     
     % flux corrections (to relax back to climatology). Be very careful when
@@ -45,7 +45,7 @@ function [inputs] = runinputs
     inputs.fluxcorrections = 0;
     
     % outputs
-    inputs.outputrates = 0;
+    inputs.outputrates = 1;
     inputs.savedata = 1;    
     
     %diagnostics
