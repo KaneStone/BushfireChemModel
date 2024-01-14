@@ -6,7 +6,7 @@ runcase = 'control';
 %vars = {'H2', 'H2O2', 'HO2','CHO2','CL','OH','CH4','CLO','HOCL','CH3CL','CH3BR','CH2BR2','CHBR3'};
 vars = {'T','O','N2O','OH','HO2','CL','BR','NO','NO2','O1D','H','NO3','N2O5','CLO','CLONO2','HCL','HOCL','CL2','H2','CH3CL','CH4','H2O2','OCLO','CL2O2',...
     'CH3O2','BRO','BRCL','CH2O','HNO3','HO2NO2','H2O','HBR',...
-    'BRONO2','HOBR','CO','SULFRE','aoc','aso4','SO2','SO3','HSO3','H2SO4','SO','S','OCS','SAD_SULFC'};
+    'BRONO2','HOBR','CO','SULFRE','aoc','aso4','SO2','SO3','HSO3','H2SO4','SO','S','OCS','CH3OH','CH3OOH','SAD_SULFC'};
 tic;
 switch runcase
     case 'Solubility'

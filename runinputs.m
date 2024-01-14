@@ -40,6 +40,10 @@ function [inputs] = runinputs
     inputs.runtype = 'doublelinear'; %'control','solubility','doublelinear'
     inputs.radius = 'ancil'; % ancil reads yearly average radius from CARMA ancil (standard is 1e-5 cm)
     
+    % modules
+    %adds in CH2O, CH3O2, CH3OH and CH3OOH.
+    inputs.methanechemistry = 0; 
+    
     % flux corrections (to relax back to climatology). Be very careful when
     % using this for sensitivity simulations.
     inputs.fluxcorrections = 0;

@@ -73,7 +73,7 @@ function [atmosphere,variables] = Initializevars(inputs)
     % CH4 may be better to use sine.
     CH4min = min(atmosphere.atLevel.CH4.nd);
     CH4max = max(atmosphere.atLevel.CH4.nd);
-    atmosphere.dummyCH4 = atmosphere.dummyM./(max(atmosphere.dummyM)./((CH4min+CH4max)./2));
+    atmosphere.dummyCH4 = atmosphere.dummyM./(max(atmosphere.dummyM)./((CH4min+CH4max)./2)).*1.2;
 
     % smooth temperature
     tempsmooth = movmean([atmosphere.atLevel.T(end-19:end),atmosphere.atLevel.T,atmosphere.atLevel.T(1:20)],20);
@@ -147,6 +147,13 @@ function [atmosphere,variables] = Initializevars(inputs)
     variables.BRONO2 = atmosphere.atLevel.BRONO2.nd(1);
     variables.BR = atmosphere.atLevel.BR.nd(1);
 
+    if inputs.methanechemistry
+        variables.CH2O = atmosphere.atLevel.CH2O.nd(1);
+        variables.CH3O2 = atmosphere.atLevel.CH3O2.nd(1);
+        variables.CH3OOH = atmosphere.atLevel.CH3OOH.nd(1);
+        variables.CH3OH = atmosphere.atLevel.CH3OH.nd(1);
+    end
+    
     % diagnostics for debugging to make sure appropriate total family
     % concentrations are accurates. Because CLY, BRY, NOy are conserved if the
     % initial amount is too low or too high it will ALWAYS be too low or too high 

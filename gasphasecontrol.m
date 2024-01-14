@@ -1,4 +1,4 @@
-function [rates,kv] = gasphasecontrol(step,variables,atmosphere,rates,k,kv,jacobian)
+function [rates,kv] = gasphasecontrol(inputs,step,variables,atmosphere,rates,k,kv)
 
     
     % calculate all the rates here first
@@ -45,7 +45,7 @@ function [rates,kv] = gasphasecontrol(step,variables,atmosphere,rates,k,kv,jacob
     kv.CL_H2O2 = k.CL_H2O2.*variables.CL.*variables.H2O2;
     kv.CL_HO2a = k.CL_HO2a.*variables.CL.*variables.HO2;
     kv.CL_HO2b = k.CL_HO2b.*variables.CL.*variables.HO2;
-    kv.CL_CH2O = k.CL_CH2O.*variables.CL.*atmosphere.dummyCH2O(step.doy);
+    
     kv.CL_CH4 = k.CL_CH4.*variables.CL.*atmosphere.dummyCH4(step.doy);
     kv.CLO_OHb = k.CLO_OHb.*variables.CLO.*variables.OH;
     kv.CLO_OHa = k.CLO_OHa.*variables.CLO.*variables.OH;
@@ -68,7 +68,7 @@ function [rates,kv] = gasphasecontrol(step,variables,atmosphere,rates,k,kv,jacob
     kv.BRO_CLOa = k.BRO_CLOa.*variables.CLO.*variables.BRO;
     kv.BRO_CLOb = k.BRO_CLOb.*variables.CLO.*variables.BRO;
     kv.BRO_CLOc = k.BRO_CLOc.*variables.CLO.*variables.BRO;
-    kv.CLO_CH3O2 = k.CLO_CH3O2.*variables.CLO.*atmosphere.dummyCH3O2(step.doy);
+    
 
     kv.BRO_OH = k.BRO_OH.*variables.BRO.*variables.OH;
     kv.BRO_HO2 = k.BRO_HO2.*variables.BRO.*variables.HO2;
@@ -77,8 +77,6 @@ function [rates,kv] = gasphasecontrol(step,variables,atmosphere,rates,k,kv,jacob
     kv.BRO_BRO = k.BRO_BRO.*variables.BRO.^2;
 
     kv.BR_HO2 = k.BR_HO2.*variables.BR.*variables.HO2;
-    kv.BR_CH2O = k.BR_CH2O.*variables.BR.*atmosphere.dummyCH2O(step.doy);
-
     kv.HBR_OH = k.HBR_OH.*variables.HBR.*variables.OH;
     %kv.HBR_O1D = k.HBR_O1D.*variables.HBR.*variables.O1D;
 
@@ -89,32 +87,68 @@ function [rates,kv] = gasphasecontrol(step,variables,atmosphere,rates,k,kv,jacob
     kv.NO3_OH = k.NO3_OH.*variables.NO3.*variables.OH;
     kv.NO3_HO2 = k.NO3_HO2.*variables.NO3.*variables.HO2;
     kv.HO2NO2_OH = k.HO2NO2_OH.*variables.OH.*variables.HO2NO2;
-    kv.CH3O2_NO = k.CH3O2_NO.*variables.NO.*atmosphere.dummyCH3O2(step.doy);
+    
 
     kv.NO2_NO3_M = k.NO2_NO3_M.*variables.NO2.*variables.NO3;
     kv.NO2_HO2_M = k.NO2_HO2_M.*variables.NO2.*variables.HO2;
     kv.NO2_OH_M = k.NO2_OH_M.*variables.NO2.*variables.OH;
     kv.HNO3_OH = k.HNO3_OH.*variables.HNO3.*variables.OH;
-    kv.NO3_CH2O = k.NO3_CH2O.*variables.NO3.*atmosphere.dummyCH2O(step.doy);
+    
 
     kv.OH_HO2 = k.OH_HO2.*variables.OH.*variables.HO2;
     kv.OH_H2 = k.OH_H2.*variables.OH.*atmosphere.dummyH2(step.doy);
     kv.OH_H2O2 = k.OH_H2O2.*variables.OH.*variables.H2O2;
     kv.OH_OH_M = k.OH_OH_M.*variables.OH.^2;
     kv.CH4_OH = k.CH4_OH.*variables.OH.*atmosphere.dummyCH4(step.doy);
-
-    kv.OH_CH2O = k.OH_CH2O.*variables.OH.*atmosphere.dummyCH2O(step.doy);
+    
     kv.OH_CO_Ma = k.OH_CO_Ma.*variables.OH.*atmosphere.dummyCO(step.doy);
     kv.OH_CO_Mb = k.OH_CO_Mb.*variables.OH.*atmosphere.dummyCO(step.doy);
 
     kv.H2_O1D = k.H2_O1D.*variables.O1D.*atmosphere.dummyH2(step.doy);
-    kv.CH4_O1D = k.CH4_O1D.*variables.O1D.*atmosphere.dummyCH4(step.doy);
+    kv.CH4_O1Da = k.CH4_O1Da.*variables.O1D.*atmosphere.dummyCH4(step.doy);
+    kv.CH4_O1Db = k.CH4_O1Db.*variables.O1D.*atmosphere.dummyCH4(step.doy);
+    kv.CH4_O1Dc = k.CH4_O1Dc.*variables.O1D.*atmosphere.dummyCH4(step.doy);
     kv.H2O2_O = k.H2O2_O.*variables.H2O2.*variables.O;
-    kv.HO2_HO2 = k.HO2_HO2.*variables.HO2.^2;
-    kv.HO2_CH2O = k.HO2_CH2O.*variables.HO2.*atmosphere.dummyCH2O(step.doy);
+    kv.HO2_HO2 = k.HO2_HO2.*variables.HO2.^2;    
 
     kv.H_O2_M = k.H_O2_M.*atmosphere.dummyH(step.doy).*atmosphere.dummyO2(step.doy); %no way this is important in lower stratopshere
 
+    %% put aditional modules here
+    
+    % additions of CH2O, CH3O2...
+    if inputs.methanechemistry
+%         kv.CH3O2_CH3O2a = k.CH3O2_CH3O2a.*variables.CH3O2.^2;
+%         kv.CH3O2_CH3O2b = k.CH3O2_CH3O2b.*variables.CH3O2.^2;        
+%         kv.CH3OH_OH = k.CH3OH_OH.*variables.CH3OH.*variables.OH;   
+%         kv.CH3OOH_OH = k.CH3OOH_OH.*variables.CH3OOH.*variables.OH;         
+        
+        kv.CH3O2_CH3O2a = k.CH3O2_CH3O2a.*variables.CH3O2.^2;
+        kv.CH3O2_CH3O2b = k.CH3O2_CH3O2b.*variables.CH3O2.^2;        
+        kv.CH3OH_OH = k.CH3OH_OH.*variables.CH3OH.*variables.OH;   
+        kv.CH3OOH_OH = k.CH3OOH_OH.*variables.CH3OOH.*variables.OH;    
+        kv.CLO_CH3O2 = k.CLO_CH3O2.*variables.CLO.*variables.CH3O2;
+        kv.CH3O2_NO = k.CH3O2_NO.*variables.NO.*variables.CH3O2;
+        
+        kv.CH2O_O = k.CH2O_O.*variables.CH2O.*variables.O;           
+        kv.CL_CH2O = k.CL_CH2O.*variables.CL.*variables.CH2O;
+        kv.BR_CH2O = k.BR_CH2O.*variables.BR.*variables.CH2O;
+        kv.NO3_CH2O = k.NO3_CH2O.*variables.NO3.*variables.CH2O;
+        kv.OH_CH2O = k.OH_CH2O.*variables.OH.*variables.CH2O;
+        kv.HO2_CH2O = k.HO2_CH2O.*variables.HO2.*variables.CH2O;
+        
+        kv.CH3O2_HO2 = k.CH3O2_HO2.*variables.CH3O2.*variables.HO2;
+    else
+        kv.CL_CH2O = k.CL_CH2O.*variables.CL.*atmosphere.dummyCH2O(step.doy);
+        kv.BR_CH2O = k.BR_CH2O.*variables.BR.*atmosphere.dummyCH2O(step.doy);
+        kv.NO3_CH2O = k.NO3_CH2O.*variables.NO3.*atmosphere.dummyCH2O(step.doy);
+        kv.OH_CH2O = k.OH_CH2O.*variables.OH.*atmosphere.dummyCH2O(step.doy);
+        kv.HO2_CH2O = k.HO2_CH2O.*variables.HO2.*atmosphere.dummyCH2O(step.doy);
+        kv.CH2O_O = k.CH2O_O.*variables.O.*atmosphere.dummyCH2O(step.doy);
+        kv.CLO_CH3O2 = k.CLO_CH3O2.*variables.CLO.*atmosphere.dummyCH3O2(step.doy);
+        kv.CH3O2_NO = k.CH3O2_NO.*variables.NO.*atmosphere.dummyCH3O2(step.doy);
+        kv.CH2O_O = k.CH2O_O.*atmosphere.dummyCH2O(step.doy).*variables.O;           
+    end
+    
     %% Begin gas phase continuity
 
     %% O3P
@@ -138,6 +172,7 @@ function [rates,kv] = gasphasecontrol(step,variables,atmosphere,rates,k,kv,jacob
     rates.O.destruction(13) = kv.BRO_O;
     rates.O.destruction(14) = kv.BRONO2_O;
     rates.O.destruction(15) = kv.OH_O;
+    rates.O.destruction(16) = kv.CH2O_O;
 
     %% O1D
 
@@ -150,7 +185,9 @@ function [rates,kv] = gasphasecontrol(step,variables,atmosphere,rates,k,kv,jacob
     rates.O1D.destruction(end+1) = kv.O1D_O3;
     %rates.O1D.destruction(8) = kv.HBR_O1D;
     rates.O1D.destruction(end+1) = kv.H2_O1D;
-    rates.O1D.destruction(end+1) = kv.CH4_O1D;
+    rates.O1D.destruction(end+1) = kv.CH4_O1Da;
+    rates.O1D.destruction(end+1) = kv.CH4_O1Db;
+    rates.O1D.destruction(end+1) = kv.CH4_O1Dc;
 
     %% O3 RATES
 
@@ -432,7 +469,7 @@ function [rates,kv] = gasphasecontrol(step,variables,atmosphere,rates,k,kv,jacob
     rates.OH.production(end+1) = kv.HO2_O;
     rates.OH.production(end+1) = kv.NO_HO2;
     rates.OH.production(end+1) = kv.H2_O1D;
-    rates.OH.production(end+1) = kv.CH4_O1D;
+    rates.OH.production(end+1) = kv.CH4_O1Da;
     rates.OH.production(end+1) = kv.CL_HO2b;
     rates.OH.production(end+1) = kv.H2O2_O;
     rates.OH.production(end+1) = kv.NO3_HO2;
@@ -440,6 +477,7 @@ function [rates,kv] = gasphasecontrol(step,variables,atmosphere,rates,k,kv,jacob
     rates.OH.production(end+1) = kv.HOCL_O;
     rates.OH.production(end+1) = kv.HCL_O;
     rates.OH.production(end+1) = kv.HOBR_O;
+    rates.OH.production(end+1) = kv.CH2O_O;
 
     %% HO2
 
@@ -462,7 +500,7 @@ function [rates,kv] = gasphasecontrol(step,variables,atmosphere,rates,k,kv,jacob
     rates.HO2.production(end+1) = kv.OH_H2O2;
     rates.HO2.production(end+1) = kv.H2O2_O;
     rates.HO2.production(end+1) = kv.CLO_OHa;
-    rates.HO2.production(end+1) = kv.CH4_O1D;
+    rates.HO2.production(end+1) = kv.CH4_O1Db;
     rates.HO2.production(end+1) = kv.NO3_OH;
     rates.HO2.production(end+1) = kv.CL_H2O2;
     rates.HO2.production(end+1) = kv.CL_CH2O;
@@ -471,6 +509,7 @@ function [rates,kv] = gasphasecontrol(step,variables,atmosphere,rates,k,kv,jacob
     rates.HO2.production(end+1) = kv.OH_CO_Ma;
     rates.HO2.production(end+1) = kv.CLO_CH3O2;
     rates.HO2.production(end+1) = kv.HO2NO2_M;
+    rates.HO2.production(end+1) = kv.CH2O_O;
 
     %% H2O2
 
@@ -482,4 +521,54 @@ function [rates,kv] = gasphasecontrol(step,variables,atmosphere,rates,k,kv,jacob
 
     % If adding in new species add additional gas phase rates here.
 
+    if inputs.methanechemistry
+        % CH2O
+        rates.CH2O.production(end+1) = kv.CH4_O1Db;
+        rates.CH2O.production(end+1) = kv.CH4_O1Dc;
+        rates.CH2O.production(end+1) = kv.CH3O2_NO;
+        rates.CH2O.production(end+1) = kv.CLO_CH3O2;
+        rates.CH2O.production(end+1) = kv.CH3O2_CH3O2a.*2;
+        rates.CH2O.production(end+1) = kv.CH3O2_CH3O2b;
+        rates.CH2O.production(end+1) = kv.CH3OH_OH;
+        rates.CH2O.production(end+1) = kv.CH3OOH_OH.*.3;
+        
+        rates.CH2O.destruction(end+1) = kv.CL_CH2O;
+        rates.CH2O.destruction(end+1) = kv.BR_CH2O;
+        rates.CH2O.destruction(end+1) = kv.NO3_CH2O;
+        rates.CH2O.destruction(end+1) = kv.OH_CH2O;
+        rates.CH2O.destruction(end+1) = kv.HO2_CH2O;
+        rates.CH2O.destruction(end+1) = kv.CH2O_O;
+        
+        % CH3O2
+        rates.CH3O2.production(1) = kv.CL_CH4;
+        rates.CH3O2.production(2) = kv.CH4_O1Da;
+        rates.CH3O2.production(3) = kv.CH4_OH;
+        rates.CH3O2.production(4) = kv.CH3OOH_OH.*.7;
+        
+        rates.CH3O2.destruction(1) = kv.CLO_CH3O2;
+        rates.CH3O2.destruction(2) = kv.CH3O2_NO;
+        rates.CH3O2.destruction(3) = kv.CH3O2_HO2;
+        rates.CH3O2.destruction(4) = kv.CH3O2_CH3O2a.*2;
+        rates.CH3O2.destruction(5) = kv.CH3O2_CH3O2b.*2;        
+        
+        % CH3OOH
+        rates.CH3OOH.production(1) = kv.CH3O2_HO2;
+        
+        rates.CH3OOH.destruction(end+1) = kv.CH3OOH_OH;
+        
+        %CH3OH
+        rates.CH3OH.production(1) = kv.CH3O2_CH3O2b;
+        rates.CH3OH.destruction(2) = kv.CH3OH_OH;
+        
+        % additions to species that are already in main code block
+        rates.HO2.production(end+1) = kv.CH3O2_CH3O2a.*2;
+        rates.HO2.production(end+1) = kv.CH3OH_OH;
+        rates.HO2.production(end+1) = kv.CH3O2_HO2;
+        rates.HO2.production(end+1) = kv.CH2O_O;
+        
+        rates.OH.destruction(end+1) = kv.CH3OH_OH;
+        rates.OH.destruction(end+1) = kv.CH3OOH_OH;
+        
+    end
+    
 end

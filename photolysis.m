@@ -167,6 +167,18 @@ function [photo,rates,sza,kv] = photolysis(inputs,step,atmosphere,variables,phot
     rates.OH.production(5) = rates.HOCL.destruction(1);
     rates.OH.production(6) = rates.HO2NO2.destruction(2);
 
+    if inputs.methanechemistry
+        
+        rates.CH2O.production(1) = photo.data(24).*variables.CH3OOH;
+        
+        rates.CH2O.destruction(1) = photo.data(18).*variables.CH2O;
+        rates.CH2O.destruction(2) = photo.data(19).*variables.CH2O;
+        
+        rates.CH3OOH.destruction(1) = rates.CH2O.production(1);
+        
+        rates.OH.production(end+1) = rates.CH3OOH.destruction(1);
+    end
+        
     if inputs.outputrates && ~jacobian
         kv.jO3_O1D_O2 = rates.O3.destruction(1);
         kv.jO3_O3P_O2 = rates.O3.destruction(2);
@@ -201,6 +213,13 @@ function [photo,rates,sza,kv] = photolysis(inputs,step,atmosphere,variables,phot
         
         kv.jHO2_OH_O = rates.O.production(3);
         kv.H2O2_2OH = rates.H2O2.destruction(1);
+        
+        if inputs.methanechemistry
+            kv.jCH2Oa = rates.CH2O.destruction(1);
+            kv.jCH2Ob = rates.CH2O.destruction(2);        
+            kv.jCH3OOH = rates.CH3OOH.destruction(1);        
+        end
+        
     end
     
 end

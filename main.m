@@ -5,8 +5,9 @@ clear variables
 inputs = runinputs;
 
 vars = {'O','O3','O1D','CLONO2','HCL','HOCL','CLO','CL2','CL2O2','OCLO','CL','BRCL',...
-    'NO2','NO','NO3','N2O5','HO2NO2','OH','HO2','H2O2','HNO3','BRO','HOBR','HBR','BRONO2','BR'};
-%
+    'NO2','NO','NO3','N2O5','HO2NO2','OH','HO2','H2O2','HNO3','BRO','HOBR','HBR','BRONO2','BR'};%,...
+    %'CH2O','CH3O2','CH3OOH','CH3OH'};
+%add in CH2O, CH3O2, CH3OH, CH3OOH
 %% Initial concentrations
 % Read in profiles then select by layer
 [atmosphere,variables] = initializevars(inputs);
@@ -82,7 +83,7 @@ for i = 1:inputs.timesteps
     end  
     
     % debugging if statement (can remove)
-    if i == 3000
+    if i == 5001
         a = 1;        
     end
     
@@ -101,7 +102,7 @@ savephoto(inputs,photoout)
 savedata(inputs,variables,dayAverage,family,rates,ratesDayAverage)
 
 %% diagnostic plotting
-vartoplot = 'CLONO2';
+vartoplot = 'CH3O2';
 figure;
 plot(variables.(vartoplot));
 
