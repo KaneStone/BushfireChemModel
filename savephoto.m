@@ -8,13 +8,8 @@ function savephoto(inputs,photoout)
         for i = 1:size(photoout,3)
             pout = photoout(:,:,i);
             save(['output/TUVoutput',abs(num2str(inputs.latitude)),inputs.hemisphere,'/',...
-                num2str(i-1),'km','_',num2str(inputs.hourstep),'hourstep','_photo_new3.mat'],'pout')
+                num2str(i-1),'km','_',num2str(inputs.hourstep),'hourstep','_photo.mat'],'pout')
         end
-%         for i = 1:size(photoout,3)
-%             pout = photoout(:,:,i);
-%             save(['output/TUVoutput/',abs(num2str(inputs.latitude)),inputs.hemisphere,'/',...
-%                 num2str(i-1),'km','_',num2str(inputs.hourstep),'hourstep','_photo_new1.mat'],'pout')
-%         end
     end
     
 end

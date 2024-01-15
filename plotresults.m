@@ -1,7 +1,7 @@
 % plotting 1D model
 inputs = runinputs;
 inputs.fluxcorrections = 0;
-inputs.altitude = 18;
+inputs.altitude = 19;
 % Read in profiles then select by layer
 [atmosphere,variables] = initializevars(inputs);
 
@@ -15,7 +15,7 @@ d.doublelinear = load([inputs.outputdir,'runoutput/','doublelinear','_',num2str(
 
 d.doublelinear2 = load([inputs.outputdir,'runoutput/','doublelinear','_',num2str(inputs.altitude),...
     'km_',abs(num2str(inputs.latitude)),inputs.hemisphere...
-    ,'_',num2str(inputs.fluxcorrections),'flux_',sprintf('%.2f',inputs.hourstep),'hours_testingtempCH3O2.mat']);
+    ,'_',num2str(inputs.fluxcorrections),'flux_',sprintf('%.2f',inputs.hourstep),'hours_lowerJlevel.mat']);
 
 
 %% if compare CARMA
@@ -31,7 +31,7 @@ if comparecarma
     diff2 = diff(temp2);
     badind2 = find(diff2 < -10)+1;
         
-    vars = {'HCL','CLONO2','O3','CH2O'};
+    vars = {'HCL'};
     for i = 1:length(vars)
         
         for l = 1:length(badind)
@@ -51,8 +51,8 @@ if comparecarma
     end
 
     %% extract latitude range and height
-    lats = [-50, -40];
-    lev = 18;
+    lats = [-45, -42];
+    lev = 19;
     %latind = olddata.data.lat >= lats(1) & olddata.data.lat <= lats(2);
     oldlatind = olddata.data.lat >= lats(1) & olddata.data.lat <= lats(2);
     %[~,mlevind] = min(abs(lev - rpres./100));
@@ -71,7 +71,7 @@ if comparecarma
 % %         % convert to vmr
         d.control.([vars{i},'vmr']) = d.control.dayAverage.(vars{i}).*inputs.k.*1e6./(atmosphere.atLevel.P(1:365).*100).*atmosphere.atLevel.T(1:365);
         d.doublelinear.([vars{i},'vmr']) = d.doublelinear.dayAverage.(vars{i}).*inputs.k.*1e6./((atmosphere.atLevel.P(1:365)).*100).*(atmosphere.atLevel.T(1:365));
-%         d.doublelinear2.([vars{i},'vmr']) = d.doublelinear2.dayAverage.(vars{i}).*inputs.k.*1e6./((atmosphere.atLevel.P(1:365)).*100).*(atmosphere.atLevel.T(1:365));
+        d.doublelinear2.([vars{i},'vmr']) = d.doublelinear2.dayAverage.(vars{i}).*inputs.k.*1e6./((atmosphere.atLevel.P(1:365)).*100).*(atmosphere.atLevel.T(1:365));
 % 
 %         d.control.CLONO2vmr = d.control.dayAverage.CLONO2.*inputs.k.*1e6./(atmosphere.atLevel.P(1:365).*100).*atmosphere.atLevel.T(1:365);
 %         d.doublelinear.CLONO2vmr = d.doublelinear.dayAverage.CLONO2.*inputs.k.*1e6./(atmosphere.atLevel.P(1:365).*100).*atmosphere.atLevel.T(1:365);
@@ -89,7 +89,7 @@ if comparecarma
 %     coldmodelCLONO2latextract = weightedaverage(squeeze(coldvertical.CLONO2.regrid(oldlatind,lev,:)),oldlatextract ,1);
 
     %%
-    vars2 = {'CH2O'};
+    vars2 = {'HCL'};
     for i = 1:length(vars2)
         createfig('medium','on')
         oldtick = [1:53]./53*12-1/53*12;
@@ -100,8 +100,8 @@ if comparecarma
         hold on
         ph2 = plot(oldtick,oldmodel.(vars2{i})(1:53),'LineWidth',lwidth,'color','k');
         ph3 = plot(newtick,d.control.([vars2{i},'vmr']),'LineWidth',lwidth,'color','r','LineStyle','--');
-        %ph4 = plot(newtick,d.doublelinear.([vars2{i},'vmr']),'LineWidth',lwidth,'color','r');
-        ph5 = plot(newtick,d.doublelinear.([vars2{i},'vmr']),'LineWidth',lwidth,'color','r');
+        ph4 = plot(newtick,d.doublelinear.([vars2{i},'vmr']),'LineWidth',lwidth,'color','r');
+        ph5 = plot(newtick,d.doublelinear2.([vars2{i},'vmr']),'LineWidth',lwidth,'color','b');
         %ylim([.1e-10 1.5e-10]);
     end
 %     createfig('medium','on')
@@ -135,12 +135,12 @@ end
 fsize = 18;
 df = fields(d);
 tickout = monthtick('short',0);
-vars = {'CLONO2'};
+vars = {'O3'};
 for i = 1:length(vars)
     createfig('medium','on')
     for j = 1:length(df)
         
-        ph(j) = plot(1:365,d.(df{j}).dayAverage.(vars{i}),'LineWidth',2);
+        ph(j) = plot(1:length(d.(df{j}).dayAverage.(vars{i})),d.(df{j}).dayAverage.(vars{i}),'LineWidth',2);
         hold on                
     end
     

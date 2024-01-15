@@ -1,6 +1,11 @@
-function [inputs] = runinputs
+function [inputs,vars] = runinputs
     
     % BEGIN USER INPUTS
+    
+    % base vars
+    vars = {'O','O3','O1D','CLONO2','HCL','HOCL','CLO','CL2',...
+        'CL2O2','OCLO','CL','BRCL','NO2','NO','NO3','N2O5',...
+        'HO2NO2','OH','HO2','H2O2','HNO3','BRO','HOBR','HBR','BRONO2','BR'};
     
     % time
     inputs.startdate = '1-Jan-2017'; %2017 is chosen to have a 365 day year 
@@ -8,7 +13,7 @@ function [inputs] = runinputs
     inputs.runlength = 1; %years    
             
     % height
-    inputs.altitude = 18; % altitude to analyse in km    
+    inputs.altitude = 19; % altitude to analyse in km    
     
     % location
     inputs.region = 'midlatitudes';    
@@ -41,7 +46,8 @@ function [inputs] = runinputs
     inputs.radius = 'ancil'; % ancil reads yearly average radius from CARMA ancil (standard is 1e-5 cm)
     
     % modules
-    %adds in CH2O, CH3O2, CH3OH and CH3OOH.
+    % adds in CH2O, CH3O2, CH3OH and CH3OOH.
+    % may need to shorten time step.
     inputs.methanechemistry = 0; 
     
     % flux corrections (to relax back to climatology). Be very careful when
@@ -68,11 +74,19 @@ function [inputs] = runinputs
     inputs.stepssincestartofyear = inputs.dayssincestartofyear*24/inputs.hourstep; %used for photodata
     inputs.stepsinday = 24/inputs.hourstep;
     inputs.stepsinhour = 1/inputs.hourstep;
+    
     switch inputs.whichphoto
         case 'inter'
             inputs.photosave = 1;
         otherwise
             inputs.photosave = 0;
+    end
+    
+    if inputs.methanechemistry
+        addvars = {'CH2O','CH3O2','CH3OOH','CH3OH'};
+        addvarslength = length(addvars);
+        varslength = length(vars);        
+        vars(varslength+1:addvarslength+varslength) = addvars;
     end
     
 end

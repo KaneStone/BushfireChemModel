@@ -27,8 +27,7 @@ function [variables,flux] = fluxcorrection(inputs,variables,flux,atmosphere,step
         variables.HNO3(end) = variables.HNO3(end) - flux.HNO3(i).*variables.HNO3(end);
         variables.CLONO2(end) = variables.CLONO2(end) - flux.CLONO2(i).*variables.CLONO2(end);
 
-    else
-        return
-    end
-
+            
+    end        
+    
 end

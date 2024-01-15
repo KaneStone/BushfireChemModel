@@ -8,8 +8,8 @@ function step = initializestep(inputs,i,photolength)
     step.month = month(step.date);
     step.year = year(step.date);    
     step.i = i;
-    stepPerPhoto = inputs.timesteps./photolength;  
-    step.photoInd = ceil((i + inputs.stepssincestartofyear - inputs.timesteps.*(step.year - inputs.yearstart))./stepPerPhoto); 
+    stepPerPhoto = inputs.timesteps./inputs.runlength./photolength;  
+    step.photoInd = ceil((i + inputs.stepssincestartofyear - inputs.timesteps./inputs.runlength.*(step.year - inputs.yearstart))./stepPerPhoto); 
     step.doy = step.daysincebegin - 365.*(step.year - inputs.yearstart);
             
 end

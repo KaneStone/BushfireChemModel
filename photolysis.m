@@ -9,7 +9,11 @@ function [photo,rates,sza,kv] = photolysis(inputs,step,atmosphere,variables,phot
             % TUV code first
             createTUVinput(inputs,atmosphere,step)
 
-            % run TUV code from matlab system command. (create bash script)
+            % run TUV code from matlab system command. (from bash script)
+            % If you want to run interactive photolysis you will need to
+            % compile the code first and makes sure you have fortran
+            % installed.
+            
             system('/bin/zsh runTUV.sh');
 
             % read in TUV output
@@ -24,17 +28,6 @@ function [photo,rates,sza,kv] = photolysis(inputs,step,atmosphere,variables,phot
             sza = [];
             
     end
-    
-%     % TUV code first
-%     createTUVinput(inputs,atmosphere,step)
-%     
-%     % run TUV code from matlab system command. (create bash script)
-%     system('/bin/zsh runTUV.sh');
-%     
-%     % read in TUV output
-%     [TUVtemp,sza] = readinTUVoutput('/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/TUV5.4/output/output.txt',118,208);
-%     photo.altitude = TUVtemp(:,1);
-%     photo.data = TUVtemp(inputs.altitude+1,2:end);
     
     if inputs.photosave
         return

@@ -40,7 +40,8 @@ function [variables,kv] = raphsonnewton(inputs,i,atmosphere,step,variables,varNa
         % removing very small J values
         % not an ideal way of handling near zero derivatives, but easy and
         % doesn't seem to cause problems (produces very small changes in
-        % conserved families (CLY, etc)
+        % conserved families (CLY, etc). Although this may produce larger
+        % weights for variables with lower concentrations. 
         J (J < 1e-8 & J > 0) = 1e-8; 
         J (J > -1e-8 & J < 0) = -1e-8; 
         

@@ -1,4 +1,4 @@
-function [rate] = gasphaserates(atmosphere,step)
+function [rate] = gasphaserates(inputs,atmosphere,step)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Ox
@@ -499,23 +499,25 @@ function [rate] = gasphaserates(atmosphere,step)
 %         .*atmosphere.atLevel.C2H6.nd(step.doy).*variables.CL(timeind);   
 
 %% Methane oxidation chemistry
-     % CH3O2 + CH3O2 -> 2*CH2O + HO2
-    rate.CH3O2_CH3O2a = 5.00E-13*exp(-424./atmosphere.atLevel.T(step.doy));
-    
-    % CH3O2 + CH3O2 -> CH2O + CH3OH
-    rate.CH3O2_CH3O2b = 1.9E-14*exp(706./atmosphere.atLevel.T(step.doy));
-    
-    % CH3OH + OH -> CH2O + HO2
-    rate.CH3OH_OH = 2.9E-12*exp(-345./atmosphere.atLevel.T(step.doy));
-    
-    % CH3OOH + OH -> .7*CH3O2 + .3*OH + .3*CH2O + H2O 
-    rate.CH3OOH_OH = 3.80E-12*exp(200./atmosphere.atLevel.T(step.doy));
-    
-    % CH2O + O -> HO2 + OH + H
-    rate.CH2O_O = 3.40e-11*exp(-1600./atmosphere.atLevel.T(step.doy));
-    
-    % CH3O2 + HO2 -> CH3OO2 + O2
-    rate.CH3O2_HO2 = 4.10e-13*exp(750./atmosphere.atLevel.T(step.doy));
+    if inputs.methanechemistry
+         % CH3O2 + CH3O2 -> 2*CH2O + HO2
+        rate.CH3O2_CH3O2a = 5.00E-13*exp(-424./atmosphere.atLevel.T(step.doy));
+
+        % CH3O2 + CH3O2 -> CH2O + CH3OH
+        rate.CH3O2_CH3O2b = 1.9E-14*exp(706./atmosphere.atLevel.T(step.doy));
+
+        % CH3OH + OH -> CH2O + HO2
+        rate.CH3OH_OH = 2.9E-12*exp(-345./atmosphere.atLevel.T(step.doy));
+
+        % CH3OOH + OH -> .7*CH3O2 + .3*OH + .3*CH2O + H2O 
+        rate.CH3OOH_OH = 3.80E-12*exp(200./atmosphere.atLevel.T(step.doy));
+
+        % CH2O + O -> HO2 + OH + H
+        rate.CH2O_O = 3.40e-11*exp(-1600./atmosphere.atLevel.T(step.doy));
+
+        % CH3O2 + HO2 -> CH3OO2 + O2
+        rate.CH3O2_HO2 = 4.10e-13*exp(750./atmosphere.atLevel.T(step.doy));
+    end
 
     function kout = termolecular(k0,ki,atmosphere,step)                
         x = .6;

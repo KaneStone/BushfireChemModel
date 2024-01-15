@@ -22,7 +22,7 @@ function [rates,kv] = gasphasecontrol(inputs,step,variables,atmosphere,rates,k,k
     kv.BRONO2_O = k.BRONO2_O.*variables.O.*variables.BRONO2;
     kv.OH_O = k.OH_O.*variables.O.*variables.OH;
 
-    kv.H2O_O1D = k.H2O_O1D.*variables.O1D.*atmosphere.atLevel.H2O.nd(step.doy);
+    kv.H2O_O1D = k.H2O_O1D.*variables.O1D.*atmosphere.dummyH2O(step.doy);
     kv.O1D_N2Oa = k.O1D_N2Oa.*variables.O1D.*atmosphere.dummyN2O(step.doy);
     kv.O1D_N2Ob = k.O1D_N2Ob.*variables.O1D.*atmosphere.dummyN2O(step.doy);
     kv.HCL_O1D = k.HCL_O1D.*variables.O1D.*variables.HCL;
@@ -46,7 +46,7 @@ function [rates,kv] = gasphasecontrol(inputs,step,variables,atmosphere,rates,k,k
     kv.CL_HO2a = k.CL_HO2a.*variables.CL.*variables.HO2;
     kv.CL_HO2b = k.CL_HO2b.*variables.CL.*variables.HO2;
     
-    kv.CL_CH4 = k.CL_CH4.*variables.CL.*atmosphere.dummyCH4(step.doy);
+    kv.CL_CH4 = k.CL_CH4.*variables.CL.*atmosphere.dummyCH4(step.doy);    
     kv.CLO_OHb = k.CLO_OHb.*variables.CLO.*variables.OH;
     kv.CLO_OHa = k.CLO_OHa.*variables.CLO.*variables.OH;
     kv.HOCL_CL = k.HOCL_CL.*variables.CL.*variables.HOCL;
@@ -98,15 +98,15 @@ function [rates,kv] = gasphasecontrol(inputs,step,variables,atmosphere,rates,k,k
     kv.OH_HO2 = k.OH_HO2.*variables.OH.*variables.HO2;
     kv.OH_H2 = k.OH_H2.*variables.OH.*atmosphere.dummyH2(step.doy);
     kv.OH_H2O2 = k.OH_H2O2.*variables.OH.*variables.H2O2;
-    kv.OH_OH_M = k.OH_OH_M.*variables.OH.^2;
+    kv.OH_OH_M = k.OH_OH_M.*variables.OH.^2;    
     kv.CH4_OH = k.CH4_OH.*variables.OH.*atmosphere.dummyCH4(step.doy);
     
     kv.OH_CO_Ma = k.OH_CO_Ma.*variables.OH.*atmosphere.dummyCO(step.doy);
     kv.OH_CO_Mb = k.OH_CO_Mb.*variables.OH.*atmosphere.dummyCO(step.doy);
 
-    kv.H2_O1D = k.H2_O1D.*variables.O1D.*atmosphere.dummyH2(step.doy);
-    kv.CH4_O1Da = k.CH4_O1Da.*variables.O1D.*atmosphere.dummyCH4(step.doy);
-    kv.CH4_O1Db = k.CH4_O1Db.*variables.O1D.*atmosphere.dummyCH4(step.doy);
+    kv.H2_O1D = k.H2_O1D.*variables.O1D.*atmosphere.dummyH2(step.doy);    
+    kv.CH4_O1Da = k.CH4_O1Da.*variables.O1D.*atmosphere.dummyCH4(step.doy);        
+    kv.CH4_O1Db = k.CH4_O1Db.*variables.O1D.*atmosphere.dummyCH4(step.doy);    
     kv.CH4_O1Dc = k.CH4_O1Dc.*variables.O1D.*atmosphere.dummyCH4(step.doy);
     kv.H2O2_O = k.H2O2_O.*variables.H2O2.*variables.O;
     kv.HO2_HO2 = k.HO2_HO2.*variables.HO2.^2;    
@@ -117,11 +117,7 @@ function [rates,kv] = gasphasecontrol(inputs,step,variables,atmosphere,rates,k,k
     
     % additions of CH2O, CH3O2...
     if inputs.methanechemistry
-%         kv.CH3O2_CH3O2a = k.CH3O2_CH3O2a.*variables.CH3O2.^2;
-%         kv.CH3O2_CH3O2b = k.CH3O2_CH3O2b.*variables.CH3O2.^2;        
-%         kv.CH3OH_OH = k.CH3OH_OH.*variables.CH3OH.*variables.OH;   
-%         kv.CH3OOH_OH = k.CH3OOH_OH.*variables.CH3OOH.*variables.OH;         
-        
+              
         kv.CH3O2_CH3O2a = k.CH3O2_CH3O2a.*variables.CH3O2.^2;
         kv.CH3O2_CH3O2b = k.CH3O2_CH3O2b.*variables.CH3O2.^2;        
         kv.CH3OH_OH = k.CH3OH_OH.*variables.CH3OH.*variables.OH;   
@@ -142,11 +138,9 @@ function [rates,kv] = gasphasecontrol(inputs,step,variables,atmosphere,rates,k,k
         kv.BR_CH2O = k.BR_CH2O.*variables.BR.*atmosphere.dummyCH2O(step.doy);
         kv.NO3_CH2O = k.NO3_CH2O.*variables.NO3.*atmosphere.dummyCH2O(step.doy);
         kv.OH_CH2O = k.OH_CH2O.*variables.OH.*atmosphere.dummyCH2O(step.doy);
-        kv.HO2_CH2O = k.HO2_CH2O.*variables.HO2.*atmosphere.dummyCH2O(step.doy);
-        kv.CH2O_O = k.CH2O_O.*variables.O.*atmosphere.dummyCH2O(step.doy);
+        kv.HO2_CH2O = k.HO2_CH2O.*variables.HO2.*atmosphere.dummyCH2O(step.doy);        
         kv.CLO_CH3O2 = k.CLO_CH3O2.*variables.CLO.*atmosphere.dummyCH3O2(step.doy);
-        kv.CH3O2_NO = k.CH3O2_NO.*variables.NO.*atmosphere.dummyCH3O2(step.doy);
-        kv.CH2O_O = k.CH2O_O.*atmosphere.dummyCH2O(step.doy).*variables.O;           
+        kv.CH3O2_NO = k.CH3O2_NO.*variables.NO.*atmosphere.dummyCH3O2(step.doy);        
     end
     
     %% Begin gas phase continuity
@@ -172,7 +166,7 @@ function [rates,kv] = gasphasecontrol(inputs,step,variables,atmosphere,rates,k,k
     rates.O.destruction(13) = kv.BRO_O;
     rates.O.destruction(14) = kv.BRONO2_O;
     rates.O.destruction(15) = kv.OH_O;
-    rates.O.destruction(16) = kv.CH2O_O;
+    %rates.O.destruction(16) = kv.CH2O_O;
 
     %% O1D
 
@@ -476,8 +470,7 @@ function [rates,kv] = gasphasecontrol(inputs,step,variables,atmosphere,rates,k,k
     rates.OH.production(end+1) = kv.HCL_O1D;
     rates.OH.production(end+1) = kv.HOCL_O;
     rates.OH.production(end+1) = kv.HCL_O;
-    rates.OH.production(end+1) = kv.HOBR_O;
-    rates.OH.production(end+1) = kv.CH2O_O;
+    rates.OH.production(end+1) = kv.HOBR_O;   
 
     %% HO2
 
@@ -509,7 +502,6 @@ function [rates,kv] = gasphasecontrol(inputs,step,variables,atmosphere,rates,k,k
     rates.HO2.production(end+1) = kv.OH_CO_Ma;
     rates.HO2.production(end+1) = kv.CLO_CH3O2;
     rates.HO2.production(end+1) = kv.HO2NO2_M;
-    rates.HO2.production(end+1) = kv.CH2O_O;
 
     %% H2O2
 
@@ -518,7 +510,7 @@ function [rates,kv] = gasphasecontrol(inputs,step,variables,atmosphere,rates,k,k
 
     rates.H2O2.production(1) = kv.HO2_HO2;
     rates.H2O2.production(2) = kv.OH_OH_M;
-
+    
     % If adding in new species add additional gas phase rates here.
 
     if inputs.methanechemistry
@@ -568,6 +560,9 @@ function [rates,kv] = gasphasecontrol(inputs,step,variables,atmosphere,rates,k,k
         
         rates.OH.destruction(end+1) = kv.CH3OH_OH;
         rates.OH.destruction(end+1) = kv.CH3OOH_OH;
+        rates.HO2.production(end+1) = kv.CH2O_O;
+        
+        rates.O.destuction(end+1) = kv.CH2O_O;
         
     end
     

@@ -2,25 +2,19 @@
 
 clear variables
 
-inputs = runinputs;
+[inputs,vars] = runinputs;
 
-vars = {'O','O3','O1D','CLONO2','HCL','HOCL','CLO','CL2','CL2O2','OCLO','CL','BRCL',...
-    'NO2','NO','NO3','N2O5','HO2NO2','OH','HO2','H2O2','HNO3','BRO','HOBR','HBR','BRONO2','BR'};%,...
-    %'CH2O','CH3O2','CH3OOH','CH3OH'};
-%add in CH2O, CH3O2, CH3OH, CH3OOH
 %% Initial concentrations
-% Read in profiles then select by layer
 [atmosphere,variables] = initializevars(inputs);
 
 %% load photo data
 [photoout,photoload,photolength] = loadphoto(inputs);
-%photoload.pout = photoload.pout.*1.5;
+
 %% initialize counters and output variables
 count = 1;
 daycount = 1;
 daycount2 = 1;
 flux = [];
-%newday = day(datetime(inputs.startdate));
 newday = inputs.dayssincestartofyear + 1;
 kout = [];
 climScaleFactor = [];
@@ -28,20 +22,15 @@ family = [];
 dayAverage = [];
 ratesDayAverage = [];
 photoNamlist = TUVnamelist;
-count2 = 194;
 %% Begin simulation
 tic;
 for i = 1:inputs.timesteps
     
     % initiate step components
     step = initializestep(inputs,i,photolength);       
-         
-    if i == 96*count2
-        count2
-        count2 = count2 + 1;
-        toc;
-        a = 1;
-    end
+    
+    % currently setup to save photo if interactive photo is selected, so
+    % won't main body.
     if inputs.photosave
         %photolysis(inputs,step,atmosphere,variables,photoload);    
         [photo,~,~] = photolysis(inputs,step,atmosphere,[],[]);
@@ -51,7 +40,7 @@ for i = 1:inputs.timesteps
     
     % run gasphaserates once per day0
     if step.doy == newday                
-        kout = gasphaserates(atmosphere,step);
+        kout = gasphaserates(inputs,atmosphere,step);
         
         if newday == 365
             newday = 1;
@@ -83,16 +72,16 @@ for i = 1:inputs.timesteps
     end  
     
     % debugging if statement (can remove)
-    if i == 5001
+    if i == 300
         a = 1;        
     end
     
     % timer (can remove)
-    if i ==count*1000
-        toc;
-        i
+    if i ==count*inputs.stepsinday+1
+        step.date       
         count = count + 1;
-    end              
+        toc
+    end                  
 end
 
 %% save if interactive photo
@@ -102,7 +91,7 @@ savephoto(inputs,photoout)
 savedata(inputs,variables,dayAverage,family,rates,ratesDayAverage)
 
 %% diagnostic plotting
-vartoplot = 'CH3O2';
+vartoplot = 'CL';
 figure;
 plot(variables.(vartoplot));
 

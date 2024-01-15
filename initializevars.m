@@ -1,4 +1,4 @@
-function [atmosphere,variables] = Initializevars(inputs)
+function [atmosphere,variables] = initializevars(inputs)
 
 
     % reading in ancil files, smoothing them or creating own, then initializing
@@ -33,8 +33,7 @@ function [atmosphere,variables] = Initializevars(inputs)
 
     atmosphere.atLevel.T = atmosphere.T(inputs.altitude+1,:);
     atmosphere.atLevel.P = atmosphere.P(inputs.altitude+1,:);
-    atmosphere.atLevel.M = atmosphere.M(inputs.altitude+1,:);
-    %atmosphere.atLevel.V = atmosphere.V(inputs.altitude+1,:);
+    atmosphere.atLevel.M = atmosphere.M(inputs.altitude+1,:);    
 
     atmosphere.atLevel.O2.nd = atmosphere.atLevel.M.*.21;
     atmosphere.atLevel.N2.nd = atmosphere.atLevel.M.*.78;
@@ -62,29 +61,33 @@ function [atmosphere,variables] = Initializevars(inputs)
     atmosphere.dummyO2 = atmosphere.dummyM.*.21;
     atmosphere.dummyN2 = atmosphere.dummyM.*.78;
 
-    % For N2O I am trying to maintain a seasonal cycle only (this shouldn't
-    % cause any problems as I am only using N2O to calculate O1D, but should be
-    % careful if trying to run at high altitudes.
-
-    N2Omin = min(atmosphere.atLevel.N2O.nd);
-    N2Omax = max(atmosphere.atLevel.N2O.nd);
-    atmosphere.dummyN2O = atmosphere.dummyM./(max(atmosphere.dummyM)./((N2Omin+N2Omax)./2));
-
-    % CH4 may be better to use sine.
-    CH4min = min(atmosphere.atLevel.CH4.nd);
-    CH4max = max(atmosphere.atLevel.CH4.nd);
-    atmosphere.dummyCH4 = atmosphere.dummyM./(max(atmosphere.dummyM)./((CH4min+CH4max)./2)).*1.2;
+    % smooth temperature
+    Msmooth = movmean([atmosphere.atLevel.M(end-19:end),atmosphere.atLevel.M,atmosphere.atLevel.M(1:20)],20);
+    atmosphere.dummyM = Msmooth(21:end-20); % this value changes
+    
+    atmosphere.dummyO2 = atmosphere.dummyM.*.21;
+    atmosphere.dummyN2 = atmosphere.dummyM.*.78;        
+    
+    N2Osmooth = movmean([atmosphere.atLevel.N2O.nd(end-19:end),atmosphere.atLevel.N2O.nd,atmosphere.atLevel.N2O.nd(1:20)],20);
+    atmosphere.dummyN2O = N2Osmooth(21:end-20); % this value changes
+    
+    CH4smooth = movmean([atmosphere.atLevel.CH4.nd(end-19:end),atmosphere.atLevel.CH4.nd,atmosphere.atLevel.CH4.nd(1:20)],20);
+    atmosphere.dummyCH4 = CH4smooth(21:end-20); % this value changes
 
     % smooth temperature
     tempsmooth = movmean([atmosphere.atLevel.T(end-19:end),atmosphere.atLevel.T,atmosphere.atLevel.T(1:20)],20);
-    atmosphere.atLevel.T = tempsmooth(21:end-20)+2; % this value changes
-    %atmosphere.atLevel.T(1:40) = 215; 
-%     atmosphere.atLevel.T(100:140) = atmosphere.atLevel.T(140); 
+    atmosphere.atLevel.T = tempsmooth(21:end-20); % this value changes        
 
     % smooth pressure
     psmooth = movmean([atmosphere.atLevel.P(end-19:end),atmosphere.atLevel.P,atmosphere.atLevel.P(1:20)],20);
-    atmosphere.atLevel.P = psmooth(21:end-20);
-
+    atmosphere.atLevel.P = psmooth(21:end-20);        
+    
+    atmosphere.atLevel.H2O.nd(330:end) = atmosphere.atLevel.H2O.nd(330);
+    H2Osmooth = movmean([atmosphere.atLevel.H2O.nd(end-19:end),atmosphere.atLevel.H2O.nd,atmosphere.atLevel.H2O.nd(1:20)],20);
+    atmosphere.dummyH2O = H2Osmooth(21:end-20); % this value changes
+    atmosphere.dummyH2Ovmr = atmosphere.dummyH2O.*inputs.k.*1e6./(atmosphere.atLevel.P.*100).*atmosphere.atLevel.T;
+    atmosphere.dummyH2Ovmr = atmosphere.dummyH2Ovmr - (atmosphere.dummyH2Ovmr(1) - atmosphere.atLevel.H2O.vmr(1));      
+    
     switch inputs.runtype        
         case 'solubility'
 
@@ -92,9 +95,12 @@ function [atmosphere,variables] = Initializevars(inputs)
             atmosphere.aoc_aso4_ratio = solancil.ancil.aoc.vmr(inputs.altitude+1,1:inputs.days)./solancil.ancil.aso4.vmr(inputs.altitude+1,1:inputs.days);        
             atmosphere.radius = solancil.ancil.SULFRE.vmr(inputs.altitude+1,1:inputs.days).*1e-4;
 
+            % 2020 had higher temperature early on.
+            atmosphere.atLevel.T(1:242) =  atmosphere.atLevel.T(242);
         case 'doublelinear'
             atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:inputs.days);   % 1.5 is arbitrary 
-
+%             atmosphere.dummySAD(end-9:end) = atmosphere.dummySAD(end-10);
+%             atmosphere.dummySAD(2:10) = atmosphere.dummySAD(1);
             atmosphere.mixsulffrac = solancil.ancil.mixsulffrac.vmr(inputs.altitude+1,1:inputs.days);
             atmosphere.so4pure = solancil.ancil.so4pure.vmr(inputs.altitude+1,1:inputs.days);
 
@@ -102,6 +108,9 @@ function [atmosphere,variables] = Initializevars(inputs)
             atmosphere.mixsulffrac(26:46) = atmosphere.mixsulffrac(25);
 
             atmosphere.radius = solancil.ancil.SULFRE.vmr(inputs.altitude+1,1:inputs.days).*1e-4;
+            
+            % 2020 had higher temperature early on.
+            atmosphere.atLevel.T(1:242) =  atmosphere.atLevel.T(242);
 
         case 'control'
 
@@ -145,7 +154,7 @@ function [atmosphere,variables] = Initializevars(inputs)
     variables.HBR = atmosphere.atLevel.HBR.nd(1);
     variables.HOBR = atmosphere.atLevel.HOBR.nd(1);
     variables.BRONO2 = atmosphere.atLevel.BRONO2.nd(1);
-    variables.BR = atmosphere.atLevel.BR.nd(1);
+    variables.BR = atmosphere.atLevel.BR.nd(1);    
 
     if inputs.methanechemistry
         variables.CH2O = atmosphere.atLevel.CH2O.nd(1);
