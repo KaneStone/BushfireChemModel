@@ -42,7 +42,7 @@ function [inputs,vars] = runinputs
     inputs.maxiterations = 50; % solver will throw error if more than max
     
     % heterogeneous chemistry
-    inputs.runtype = 'doublelinear'; %'control','solubility','doublelinear'
+    inputs.runtype = 'control'; %'control','solubility','doublelinear'
     inputs.radius = 'ancil'; % ancil reads yearly average radius from CARMA ancil (standard is 1e-5 cm)
     
     % modules
@@ -87,6 +87,7 @@ function [inputs,vars] = runinputs
         addvarslength = length(addvars);
         varslength = length(vars);        
         vars(varslength+1:addvarslength+varslength) = addvars;
+        inputs.hourstep = 5/60;     
     end
     
 end

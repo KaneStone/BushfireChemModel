@@ -72,7 +72,7 @@ for i = 1:inputs.timesteps
     end  
     
     % debugging if statement (can remove)
-    if i == 300
+    if i == 2000
         a = 1;        
     end
     
