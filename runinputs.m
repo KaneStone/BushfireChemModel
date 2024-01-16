@@ -21,8 +21,7 @@ function [inputs,vars] = runinputs
         case 'midlatitudes'
             inputs.latitude = -45;
             inputs.longitude = -180;
-            inputs.ancildir = 'input/';
-            inputs.outputdir = 'output/';
+            inputs.ancildir = 'input/';            
             inputs.hemisphere = 'S';
         case 'polar'
             inputs.latitude = -80;
@@ -57,6 +56,7 @@ function [inputs,vars] = runinputs
     % outputs
     inputs.outputrates = 1;
     inputs.savedata = 1;    
+    inputs.outputdir = 'output/';
     inputs.saveext = ''; % extension for saving when producing debug output
     
     %diagnostics

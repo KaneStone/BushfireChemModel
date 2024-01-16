@@ -31,7 +31,7 @@ for i = 1:inputs.timesteps
     step = initializestep(inputs,i,photolength);       
     
     % currently setup to save photo if interactive photo is selected, so
-    % won't main body.
+    % won't run main body.
     if inputs.photosave
         %photolysis(inputs,step,atmosphere,variables,photoload);    
         [photo,~,~] = photolysis(inputs,step,atmosphere,[],[]);
