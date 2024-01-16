@@ -22,6 +22,7 @@ family = [];
 dayAverage = [];
 ratesDayAverage = [];
 photoNamlist = TUVnamelist;
+photoload.pout = photoload.pout.*1.05;
 %% Begin simulation
 tic;
 for i = 1:inputs.timesteps
@@ -72,7 +73,7 @@ for i = 1:inputs.timesteps
     end  
     
     % debugging if statement (can remove)
-    if i == 2000
+    if i == 5000
         a = 1;        
     end
     
@@ -91,7 +92,7 @@ savephoto(inputs,photoout)
 savedata(inputs,variables,dayAverage,family,rates,ratesDayAverage)
 
 %% diagnostic plotting
-vartoplot = 'CL';
+vartoplot = 'CLONO2';
 figure;
 plot(variables.(vartoplot));
 

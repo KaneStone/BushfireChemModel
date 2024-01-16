@@ -57,6 +57,7 @@ function [inputs,vars] = runinputs
     % outputs
     inputs.outputrates = 1;
     inputs.savedata = 1;    
+    inputs.saveext = ''; % extension for saving when producing debug output
     
     %diagnostics
     inputs.plotdiurnal = 0;
