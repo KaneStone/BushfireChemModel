@@ -5,12 +5,12 @@ function [atmosphere,variables] = initializevars(inputs)
     % variables ensuring chemical families have appropriate number densities 
 
     controlancil = load([inputs.ancildir,'variables/','climInControl.mat']);
-
-    switch inputs.runtype
-        case {'solubility','doublelinear'}
-            solancil = load([inputs.ancildir,'variables/','climInSolubility.mat']);        
-        otherwise
-    end
+    solancil = load([inputs.ancildir,'variables/','climInSolubility.mat']);        
+    % switch inputs.runtype
+    %     case {'solubility','doublelinear','doublelinear_wtsulf'}
+    %         solancil = load([inputs.ancildir,'variables/','climInSolubility.mat']);        
+    %     otherwise
+    % end
 
     % extract temperature, pressure, and density
     atmosphere.T = controlancil.ancil.T;
@@ -97,26 +97,26 @@ function [atmosphere,variables] = initializevars(inputs)
 
             % 2020 had higher temperature early on.
             atmosphere.atLevel.T(1:242) =  atmosphere.atLevel.T(242);
-        case 'doublelinear'
-            atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:inputs.days);   % 1.5 is arbitrary 
+        case {'doublelinear','doublelinear_wtsulf'}
+            atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:ceil(inputs.days));   % 1.5 is arbitrary 
 %             atmosphere.dummySAD(end-9:end) = atmosphere.dummySAD(end-10);
 %             atmosphere.dummySAD(2:10) = atmosphere.dummySAD(1);
-            atmosphere.mixsulffrac = solancil.ancil.mixsulffrac.vmr(inputs.altitude+1,1:inputs.days);
-            atmosphere.so4pure = solancil.ancil.so4pure.vmr(inputs.altitude+1,1:inputs.days);
+            atmosphere.mixsulffrac = solancil.ancil.mixsulffrac.vmr(inputs.altitude+1,1:ceil(inputs.days));
+            atmosphere.so4pure = solancil.ancil.so4pure.vmr(inputs.altitude+1,1:ceil(inputs.days));
 
             atmosphere.so4pure(26:46) = atmosphere.so4pure(25);
             atmosphere.mixsulffrac(26:46) = atmosphere.mixsulffrac(25);
 
-            atmosphere.radius = solancil.ancil.SULFRE.vmr(inputs.altitude+1,1:inputs.days).*1e-4;
+            atmosphere.radius = solancil.ancil.SULFRE.vmr(inputs.altitude+1,1:ceil(inputs.days)).*1e-4;
             
             % 2020 had higher temperature early on.
             atmosphere.atLevel.T(1:242) =  atmosphere.atLevel.T(242);
 
         case 'control'
 
-            SADini = .7e-8;
+            %SADini = .7e-8;
             atmosphere.dummySAD = SADini+1e-9 + SADini./40.*sin(2*pi./365.*(1:365)+pi.*1.1);
-
+            %atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:ceil(inputs.days));   % 1.5 is arbitrary 
             if strcmp(inputs.radius,'ancil')
                 atmosphere.radius = controlancil.SULFRE.vmr(inputs.altitude+1,:).*1e-4; % cm; 
             else

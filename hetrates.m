@@ -1,4 +1,4 @@
-function [kout] = hetrates(inputs,variables,T_limit,CLONO2atm,HCLatm,SAD,wt,M_hcl_h2so4,molar_h2so4,aw,timeind,rad_sulf)
+function [kout] = hetrates(inputs,variables,T_limit,CLONO2atm,HCLatm,SAD,wt,M_hcl_h2so4,molar_h2so4,molar_h2so4_new,aw,timeind,rad_sulf,ah_hcl)
     
     T_limiti = 1./T_limit;
 
@@ -17,7 +17,7 @@ function [kout] = hetrates(inputs,variables,T_limit,CLONO2atm,HCLatm,SAD,wt,M_hc
     ah    = exp( term1 - term2 + term3 - term4 - term5 + term6./term7);
 
     wrk = .25.*SAD;
-
+    %ah = ah_hcl;
     %R = 8.31; % J K-1 mol-1
 
     av_clono2 = (8.*inputs.R.*T_limit.*1000./(pi*98)).^.5 * 100; 
@@ -48,7 +48,7 @@ function [kout] = hetrates(inputs,variables,T_limit,CLONO2atm,HCLatm,SAD,wt,M_hc
     term1         = 1./tanh( rad_sulf./rdl_cnt ); 
     term2         = rdl_cnt./rad_sulf; 
     f_cnt         = term1 - term2; 
-
+    %f_cnt         = f_cnt.*1000;         
     term1         = 4.*H_cnt*.082.*T_limit;
     term2         = sqrt( D_cnt.*k_hydr );
     Gamma_b_h2o   = term1.*term2./C_cnt;
@@ -144,5 +144,16 @@ function [kout] = hetrates(inputs,variables,T_limit,CLONO2atm,HCLatm,SAD,wt,M_hc
     term2     = 1./gprob_rxn;
     gprob_bnt_h2o = 1./(term1 + term2);
     kout.hetBRONO2_H2O  = wrk*av_brono2.*gprob_bnt_h2o.*variables.BRONO2(timeind);
+    
+    %% N2O5 + HCL (Talukdar 2012)
+    % CLNO2yeild = [.005, .01, .03, .1, .2, .3, .4, .5, .6, .7, .8, .9];
+    % MHCL = [1e-5, 2e-5, 3e-5, 3e-4, 4e-4, 5e-4, 2e-3, 3e-3, 4e-3, 5e-3, 8e-3, 1e-2];
+    % f=fit(MHCL',CLNO2yeild','poly3');
+    %val(x) = p1*x^3 + p2*x^2 + p3*x + p4    
 
+    % CLNO2yield = 1.505e6.*M_hcl_h2so4.^3 - 3.045e+04.*M_hcl_h2so4.^2 + ...
+    %     239.5.*M_hcl_h2so4 + .05174; 
+    % gamman2o5_hcl = gprob_n2o5.*CLNO2yield;
+    % kout.hetN2O5_HCL  = wrk*av_n2o5.*gamman2o5_hcl.*variables.N2O5(timeind);
+ 
 end

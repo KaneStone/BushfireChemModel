@@ -22,7 +22,7 @@ family = [];
 dayAverage = [];
 ratesDayAverage = [];
 photoNamlist = TUVnamelist;
-photoload.pout = photoload.pout.*1.05;
+%photoload.pout = photoload.pout;
 %% Begin simulation
 tic;
 for i = 1:inputs.timesteps
@@ -73,7 +73,7 @@ for i = 1:inputs.timesteps
     end  
     
     % debugging if statement (can remove)
-    if i == 5000
+    if i == 4000
         a = 1;        
     end
     
@@ -97,7 +97,7 @@ figure;
 plot(variables.(vartoplot));
 
 %%
-vartoplot = 'HCL';
+vartoplot = 'NO2';
 figure;
 plot(dayAverage.(vartoplot));
 hold on;
