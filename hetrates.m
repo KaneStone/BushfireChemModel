@@ -1,4 +1,4 @@
-function [kout] = hetrates(inputs,variables,T_limit,CLONO2atm,HCLatm,SAD,wt,M_hcl_h2so4,molar_h2so4,molar_h2so4_new,aw,timeind,rad_sulf,ah_hcl)
+function [kout,gprob_hobr_hcl] = hetrates(inputs,variables,T_limit,CLONO2atm,HCLatm,HOBRatm,SAD,wt,M_hcl_h2so4,molar_h2so4,molar_h2so4_new,aw,timeind,rad_sulf,ah_hcl)
     
     T_limiti = 1./T_limit;
 
@@ -18,6 +18,7 @@ function [kout] = hetrates(inputs,variables,T_limit,CLONO2atm,HCLatm,SAD,wt,M_hc
 
     wrk = .25.*SAD;
     %ah = ah_hcl;
+    %molar_h2so4 = molar_h2so4_new;
     %R = 8.31; % J K-1 mol-1
 
     av_clono2 = (8.*inputs.R.*T_limit.*1000./(pi*98)).^.5 * 100; 
@@ -103,21 +104,42 @@ function [kout] = hetrates(inputs,variables,T_limit,CLONO2atm,HCLatm,SAD,wt,M_hc
 
      %% HOBr + HCl
     C_hobr          = 1477.*sqrt(T_limit);
-    D_hobr          = 9.e-9;
+    %D_hobr          = 9.e-9; %6.4e-8.*T_limit./vis_h2so4;
+    D_hobr          = 6.4e-8.*T_limit./vis_h2so4;
     k_wasch         = .125.*exp(.542.*wt - 6440.*T_limiti + 10.3);
-
+    %k_wasch         = exp(.542.*wt - 6440.*T_limiti + 10.3);
     H_hobr          = exp( -9.86 + 5427.*T_limiti );
+    %H_hobr = 4.6e-4.*exp(4.5e3./T_limit);
+    
+    switch inputs.runtype        
+        case 'ghcl'            
+            Mcase = H_hobr.*HOBRatm;       
+            Hcase = M_hcl_h2so4./HCLatm;
+            Ccase = (8.*8.31.*T_limit.*1000./(pi.*36.46)).^.5.*100;
+            Dcase = 7.8e-8.*T_limit./vis_h2so4;
+        otherwise            
+            Mcase = M_hcl_h2so4;
+            Hcase = H_hobr;
+            Ccase = C_hobr;
+            Dcase = D_hobr;
+    end
+    
+    Mcase = H_hobr.*HOBRatm;       
+    Hcase = M_hcl_h2so4./HCLatm;
+    Ccase = (8.*8.31.*T_limit.*1000./(pi.*36.46)).^.5.*100;
+    Dcase = 7.8e-8.*T_limit./vis_h2so4;
+
     k_dl            = 7.5e14.*D_hobr.*2;                       
 
     k_hobr_hcl = NaN(size(k_wasch));
-    k_hobr_hcl(k_wasch >= k_dl) = k_dl .* M_hcl_h2so4(k_wasch >= k_dl);
-    k_hobr_hcl(k_wasch < k_dl) = k_wasch(k_wasch < k_dl) .* M_hcl_h2so4(k_wasch < k_dl);
+    k_hobr_hcl(k_wasch >= k_dl) = k_dl .* Mcase(k_wasch >= k_dl);
+    k_hobr_hcl(k_wasch < k_dl) = k_wasch(k_wasch < k_dl) .* Mcase(k_wasch < k_dl);
 
-    term1           = 4.*H_hobr.*.082.*T_limit;
-    term2           = sqrt(D_hobr.*k_hobr_hcl);
+    term1           = 4.*Hcase.*.082.*T_limit;
+    term2           = sqrt(Dcase.*k_hobr_hcl);
     tmp             = rad_sulf./term2;
-    Gamma_hobr_rxn  = term1.*term2./C_hobr;
-    rdl_hobr        = sqrt(D_hobr./k_hobr_hcl);
+    Gamma_hobr_rxn  = term1.*term2./Ccase;
+    rdl_hobr        = sqrt(Dcase./k_hobr_hcl);
     if tmp < 1e2 
         term1           = 1./tanh(rad_sulf./rdl_hobr);
     else
@@ -131,8 +153,12 @@ function [kout] = hetrates(inputs,variables,T_limit,CLONO2atm,HCLatm,SAD,wt,M_hc
     else
         gprob_hobr_hcl  = 0;
     end
-
-    kout.hetHOBR_HCL = wrk.*av_hobr.*gprob_hobr_hcl.*1.*variables.HOBR(timeind);
+    switch inputs.runtype
+        case 'ghcl'
+            kout.hetHOBR_HCL = wrk.*Ccase.*gprob_hobr_hcl.*1.*variables.HCL(timeind);
+        otherwise
+            kout.hetHOBR_HCL = wrk.*Ccase.*gprob_hobr_hcl.*1.*variables.HCL(timeind);
+    end
 
     %% BRONO2 + H2O
     h1    = 29.24;

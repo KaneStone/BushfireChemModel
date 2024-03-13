@@ -73,7 +73,7 @@ for i = 1:inputs.timesteps
     end  
     
     % debugging if statement (can remove)
-    if i == 4000
+    if i == 2000
         a = 1;        
     end
     
@@ -97,7 +97,7 @@ figure;
 plot(variables.(vartoplot));
 
 %%
-vartoplot = 'NO2';
+vartoplot = 'HOBR';
 figure;
 plot(dayAverage.(vartoplot));
 hold on;

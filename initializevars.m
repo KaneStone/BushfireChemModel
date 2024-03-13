@@ -92,13 +92,15 @@ function [atmosphere,variables] = initializevars(inputs)
         case 'solubility'
 
             atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:inputs.days);   % 1.5 is arbitrary 
+            %atmosphere.dummySAD(366:end) = atmosphere.dummySAD(366:end)./8;
             atmosphere.aoc_aso4_ratio = solancil.ancil.aoc.vmr(inputs.altitude+1,1:inputs.days)./solancil.ancil.aso4.vmr(inputs.altitude+1,1:inputs.days);        
             atmosphere.radius = solancil.ancil.SULFRE.vmr(inputs.altitude+1,1:inputs.days).*1e-4;
 
             % 2020 had higher temperature early on.
-            atmosphere.atLevel.T(1:242) =  atmosphere.atLevel.T(242);
+            %atmosphere.atLevel.T(1:242) =  atmosphere.atLevel.T(242);
         case {'doublelinear','doublelinear_wtsulf'}
             atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:ceil(inputs.days));   % 1.5 is arbitrary 
+            
 %             atmosphere.dummySAD(end-9:end) = atmosphere.dummySAD(end-10);
 %             atmosphere.dummySAD(2:10) = atmosphere.dummySAD(1);
             atmosphere.mixsulffrac = solancil.ancil.mixsulffrac.vmr(inputs.altitude+1,1:ceil(inputs.days));
@@ -110,18 +112,51 @@ function [atmosphere,variables] = initializevars(inputs)
             atmosphere.radius = solancil.ancil.SULFRE.vmr(inputs.altitude+1,1:ceil(inputs.days)).*1e-4;
             
             % 2020 had higher temperature early on.
-            atmosphere.atLevel.T(1:242) =  atmosphere.atLevel.T(242);
+            %atmosphere.atLevel.T(1:242) =  atmosphere.atLevel.T(242);
+        case '2xorganics'
+             atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:ceil(inputs.days)).*4;   % 1.5 is arbitrary 
+%             atmosphere.dummySAD(end-9:end) = atmosphere.dummySAD(end-10);
+%             atmosphere.dummySAD(2:10) = atmosphere.dummySAD(1);
+            atmosphere.mixsulffrac = solancil.ancil.mixsulffrac.vmr(inputs.altitude+1,1:ceil(inputs.days))./4;
+            atmosphere.so4pure = solancil.ancil.so4pure.vmr(inputs.altitude+1,1:ceil(inputs.days))./4;
 
-        case 'control'
+            %atmosphere.so4pure(26:46) = atmosphere.so4pure(25);
+            %atmosphere.mixsulffrac(26:46) = atmosphere.mixsulffrac(25);
 
-            %SADini = .7e-8;
-            atmosphere.dummySAD = SADini+1e-9 + SADini./40.*sin(2*pi./365.*(1:365)+pi.*1.1);
+            atmosphere.radius = solancil.ancil.SULFRE.vmr(inputs.altitude+1,1:ceil(inputs.days)).*1e-4;
+            
+            % 2020 had higher temperature early on.
+            %atmosphere.atLevel.T(1:242) =  atmosphere.atLevel.T(242);
+        case {'control','ghcl'}
+
+            SADini = .9e-8;%.7
+            atmosphere.dummySAD = (SADini+1e-9 + SADini./40.*sin(2*pi./365.*(1:365)+pi.*1.1));            
+            
             %atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:ceil(inputs.days));   % 1.5 is arbitrary 
             if strcmp(inputs.radius,'ancil')
                 atmosphere.radius = controlancil.SULFRE.vmr(inputs.altitude+1,:).*1e-4; % cm; 
             else
                 atmosphere.radius = inputs.radius;
             end
+        case 'Hunga'
+
+            SADini = .9e-8;
+            atmosphere.dummySAD = (SADini+1e-9 + SADini./40.*sin(2*pi./365.*(1:365)+pi.*1.1));            
+            atmosphere.dummySAD(190:end) = atmosphere.dummySAD(190:end)+5e-8;
+            
+
+            monthtemps = [215.055441932141, 215.568443982536, 214.461859807604, 213.359479872438,...
+                213.017318175080, 212.232093731955, 211.423060160350, 211.552241021724, 213.590188009631,...
+                214.743488141370, 214.875345028124, 214.348034524305];
+            atmosphere.atLevel.T = interp1(1:12,monthtemps,1+11/365:11/365:12);
+
+            atmosphere.dummyH2Ovmr(190:end) = atmosphere.dummyH2Ovmr(190:end)+2e-6;
+            dummyh2Otemp = atmosphere.dummyH2O(1);
+            atmosphere.dummyH2O = atmosphere.dummyH2Ovmr(1:365)./(inputs.k.*1e6).*(atmosphere.atLevel.P(1:365).*100)./atmosphere.atLevel.T;
+            atmosphere.dummyH2O = atmosphere.dummyH2O - (atmosphere.dummyH2O(1) - dummyh2Otemp);
+            atmosphere.radius = controlancil.SULFRE.vmr(inputs.altitude+1,:).*1e-4; % cm; 
+            atmosphere.radius(190:end) = atmosphere.radius(190:end).*2;
+
 
     end    
     %% initialize variables

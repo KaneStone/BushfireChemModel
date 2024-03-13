@@ -52,6 +52,7 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
     %HCLvmr = 1./inputs.k*1e-6.*data(i).data.(vartemp).*data2(i).pressure./data(i).data.T;
      %dataout.CLONO2.pressureregrid ./ 100 ./ 1013.25
     HCLatm = Tin./(100).*inputs.k.*variables.HCL(timeind)./1e-6 / 1013.25;
+    HOBRatm = Tin./(100).*inputs.k.*variables.HOBR(timeind)./1e-6 / 1013.25;
     
     CLONO2atm = Tin./(100).*inputs.k.*variables.CLONO2(timeind)./1e-6 /1013.25;
     
@@ -67,7 +68,7 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
     molar_h2so4_new = [];
     switch inputs.runtype
         case 'solubility'
-            if atmosphere.aoc_aso4_ratio(step.doy) > .7
+            %if atmosphere.aoc_aso4_ratio(step.doy) > .7
                 hex_smoothing_strat = exp(28.986 - 33.458./(Tin/100) - 18.135 .* log(Tin/100));
                 ratio_hcl = 1./(1./hex_smoothing_strat - 1);
                 Ka = 10^5.9; % test is meant to be 5.9        
@@ -78,8 +79,8 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
                 M_hcl = H_hcl_h2so4.*HCLatm; %(mol/l/atm * atm) = mol/l
                 %molar_h2so4 = den_h2so4.*wt./9.8; 
                 
-            end
-        case 'doublelinear'
+            %end
+        case {'doublelinear','2xorganics'};
 %             so4pure = apsul/(amix + asoa + apsul + appoa)
 %             aso4mix = amix - apoa - abc - adst - aslt
 %             mixsulffrac = aso4mix/(amix + asoa + appoa)
@@ -145,6 +146,7 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
 
            % partitioning for mixed aerosols (organics in mixed) and using fraction of aerosols that are mixed (1-so4pure)
            H_hcl        = ratio_hcl./116.16.*den_hex.*(1 + 7.9433e5./ah_hcl);
+           %H_hcl        = x_hcl./116.16.*den_hex.*(1 + 7.9433e5./ah_hcl);
            M_hcl        = M_hcl_h2so4 + (H_hcl.*HCLatm.*x_org + M_hcl_h2so4_newwt).*(1.-atmosphere.so4pure(step.doy));
            %M_hcl        = M_hcl_h2so4./atmosphere.so4pure(step.doy);
            %M_hcl = M_hcl.*4;
@@ -227,7 +229,7 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
     %SAD = 1e-8;% atmosphere.atLevel.SAD.vmr(step.doy);
         
     %aw = .01;    
-    [kout] = hetrates(inputs,variables,Tin,CLONO2atm,HCLatm,atmosphere.dummySAD(step.daysincebegin),...
+    [kout,kv.gprob_hobr_hcl] = hetrates(inputs,variables,Tin,CLONO2atm,HCLatm,HOBRatm,atmosphere.dummySAD(step.daysincebegin),...
         wt,M_hcl,molar_h2so4,molar_h2so4_new,aw,timeind,atmosphere.radius(step.daysincebegin),ah_hcl);
     
     % % N2O5 + H2O -> 2*HNO3
