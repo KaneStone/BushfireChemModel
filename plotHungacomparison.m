@@ -26,6 +26,14 @@ d.HungaGHCL = load([inputs.outputdir,'runoutput/','Hunga','_',num2str(inputs.alt
     'km_',abs(num2str(inputs.latitude)),inputs.hemisphere...
     ,'_',num2str(inputs.fluxcorrections),'flux_',sprintf('%.2f',inputs.hourstep),'hours_ghca.mat']);
 
+d.HunganohetHOBR = load([inputs.outputdir,'runoutput/','Hunga','_',num2str(inputs.altitude),...
+    'km_',abs(num2str(inputs.latitude)),inputs.hemisphere...
+    ,'_',num2str(inputs.fluxcorrections),'flux_',sprintf('%.2f',inputs.hourstep),'hoursno_HOBR_HCL.mat']);
+
+d.HunganohetHOBR_WA = load([inputs.outputdir,'runoutput/','Hunga','_',num2str(inputs.altitude),...
+    'km_',abs(num2str(inputs.latitude)),inputs.hemisphere...
+    ,'_',num2str(inputs.fluxcorrections),'flux_',sprintf('%.2f',inputs.hourstep),'hoursno_HOBR_HCL.mat']);
+
 
 controlHCLvmr = d.control.dayAverage.HCL.*inputs.k.*1e6./(atmosphere.atLevel.P(151:362).*100).*atmosphere.atLevel.T(151:362);
 controlWAHCLvmr = d.controlWA.dayAverage.HCL.*inputs.k.*1e6./(atmosphere.atLevel.P(151:362).*100).*atmosphere.atLevel.T(151:362);
@@ -34,6 +42,102 @@ HungaWAHCLvmr = d.HungaWA.dayAverage.HCL.*inputs.k.*1e6./(atmosphere.atLevel.P(1
 HungaghclHCLvmr = d.HungaGHCL.dayAverage.HCL.*inputs.k.*1e6./(atmosphere.atLevel.P(151:362).*100).*atmosphere.atLevel.T(151:362);
 %atmosphere.dummyH2O.*inputs.k.*1e6./(atmosphere.atLevel.P.*100).*atmosphere.atLevel.T;
 
+%% plot important rates for HCL
+
+createfig('large','on')
+t = tiledlayout(4,3);
+nexttile
+ph(1) = plot(151:362,d.Hunga.ratesDayAverage.CLO_OHb - d.control.ratesDayAverage.CLO_OHb,'LineWidth',2);
+hold on
+ph(2) = plot(151:362,d.Hunga.ratesDayAverage.CL_CH4 - d.control.ratesDayAverage.CL_CH4,'LineWidth',2);
+ph(3) = plot(151:362,-d.Hunga.ratesDayAverage.HCL_OH + d.control.ratesDayAverage.HCL_OH,'LineWidth',2);
+ph(4) = plot(151:362,-d.Hunga.ratesDayAverage.hetHOBR_HCL + d.control.ratesDayAverage.hetHOBR_HCL,'LineWidth',2);
+ph(5) = plot(151:362,-d.Hunga.ratesDayAverage.hetCLONO2_HCL + d.control.ratesDayAverage.hetCLONO2_HCL,'LineWidth',2);
+ph(6) = plot(151:362,-d.Hunga.ratesDayAverage.hetHOCL_HCL + d.control.ratesDayAverage.hetHOCL_HCL,'LineWidth',2);
+plot([189 189],[1e-5 .1],'k--','LineWidth',2)
+legend(ph,'CLO+OH','CL+CH4','HCL+OH','hetHOBR+HCL','hetCLONO2+HCL','hetHOCL+HCL')
+
+nexttile;
+plot(151:362,d.Hunga.ratesDayAverage.CLO_OHb - d.control.ratesDayAverage.CLO_OHb + ...
+    d.Hunga.ratesDayAverage.CL_CH4 - d.control.ratesDayAverage.CL_CH4 + ...
+    -d.Hunga.ratesDayAverage.HCL_OH + d.control.ratesDayAverage.HCL_OH...
+    ,'LineWidth',2);
+
+nexttile;
+plot(151:362,d.Hunga.ratesDayAverage.CLO_OHb - d.control.ratesDayAverage.CLO_OHb + ...
+    d.Hunga.ratesDayAverage.CL_CH4 - d.control.ratesDayAverage.CL_CH4 + ...
+    -d.Hunga.ratesDayAverage.HCL_OH + d.control.ratesDayAverage.HCL_OH + ...
+    -d.Hunga.ratesDayAverage.hetHOBR_HCL + d.control.ratesDayAverage.hetHOBR_HCL,'LineWidth',2);
+
+
+nexttile;
+ph(1) = plot(151:362,d.HunganohetHOBR.ratesDayAverage.CLO_OHb - d.control.ratesDayAverage.CLO_OHb,'LineWidth',2);
+hold on
+ph(2) = plot(151:362,d.HunganohetHOBR.ratesDayAverage.CL_CH4 - d.control.ratesDayAverage.CL_CH4,'LineWidth',2);
+ph(3) = plot(151:362,-d.HunganohetHOBR.ratesDayAverage.HCL_OH + d.control.ratesDayAverage.HCL_OH,'LineWidth',2);
+ph(4) = plot(151:362,-d.HunganohetHOBR.ratesDayAverage.hetHOBR_HCL + d.control.ratesDayAverage.hetHOBR_HCL,'LineWidth',2);
+ph(5) = plot(151:362,-d.HunganohetHOBR.ratesDayAverage.hetCLONO2_HCL + d.control.ratesDayAverage.hetCLONO2_HCL,'LineWidth',2);
+ph(6) = plot(151:362,-d.HunganohetHOBR.ratesDayAverage.hetHOCL_HCL + d.control.ratesDayAverage.hetHOCL_HCL,'LineWidth',2);
+plot([189 189],[1e-5 .1],'k--','LineWidth',2)
+legend(ph,'CLO+OH','CL+CH4','HCL+OH','hetHOBR+HCL','hetCLONO2+HCL','hetHOCL+HCL')
+
+nexttile;
+plot(151:362,d.HunganohetHOBR.ratesDayAverage.CLO_OHb - d.control.ratesDayAverage.CLO_OHb + ...
+    d.HunganohetHOBR.ratesDayAverage.CL_CH4 - d.control.ratesDayAverage.CL_CH4 + ...
+    -d.HunganohetHOBR.ratesDayAverage.HCL_OH + d.control.ratesDayAverage.HCL_OH...
+    ,'LineWidth',2);
+
+nexttile;
+plot(151:362,d.HunganohetHOBR.ratesDayAverage.CLO_OHb - d.control.ratesDayAverage.CLO_OHb + ...
+    d.HunganohetHOBR.ratesDayAverage.CL_CH4 - d.control.ratesDayAverage.CL_CH4 + ...
+    -d.HunganohetHOBR.ratesDayAverage.HCL_OH + d.control.ratesDayAverage.HCL_OH + ...
+    -d.HunganohetHOBR.ratesDayAverage.hetHOBR_HCL + d.control.ratesDayAverage.hetHOBR_HCL,'LineWidth',2);
+
+nexttile;
+ph(1) = plot(151:362,d.HungaWA.ratesDayAverage.CLO_OHb - d.controlWA.ratesDayAverage.CLO_OHb,'LineWidth',2);
+hold on
+ph(2) = plot(151:362,d.HungaWA.ratesDayAverage.CL_CH4 - d.controlWA.ratesDayAverage.CL_CH4,'LineWidth',2);
+ph(3) = plot(151:362,-d.HungaWA.ratesDayAverage.HCL_OH + d.controlWA.ratesDayAverage.HCL_OH,'LineWidth',2);
+ph(4) = plot(151:362,-d.HungaWA.ratesDayAverage.hetHOBR_HCL + d.controlWA.ratesDayAverage.hetHOBR_HCL,'LineWidth',2);
+ph(5) = plot(151:362,-d.HungaWA.ratesDayAverage.hetCLONO2_HCL + d.controlWA.ratesDayAverage.hetCLONO2_HCL,'LineWidth',2);
+ph(6) = plot(151:362,-d.HungaWA.ratesDayAverage.hetHOCL_HCL + d.controlWA.ratesDayAverage.hetHOCL_HCL,'LineWidth',2);
+plot([189 189],[1e-5 .1],'k--','LineWidth',2)
+legend(ph,'CLO+OH','CL+CH4','HCL+OH','hetHOBR+HCL','hetCLONO2+HCL','hetHOCL+HCL')
+
+nexttile;
+plot(151:362,d.HungaWA.ratesDayAverage.CLO_OHb - d.controlWA.ratesDayAverage.CLO_OHb + ...
+    d.HungaWA.ratesDayAverage.CL_CH4 - d.controlWA.ratesDayAverage.CL_CH4 + ...
+    -d.HungaWA.ratesDayAverage.HCL_OH + d.controlWA.ratesDayAverage.HCL_OH...
+    ,'LineWidth',2);
+
+nexttile;
+plot(151:362,d.HungaWA.ratesDayAverage.CLO_OHb - d.controlWA.ratesDayAverage.CLO_OHb + ...
+    d.HungaWA.ratesDayAverage.CL_CH4 - d.controlWA.ratesDayAverage.CL_CH4 + ...
+    -d.HungaWA.ratesDayAverage.HCL_OH + d.controlWA.ratesDayAverage.HCL_OH + ...
+    -d.HungaWA.ratesDayAverage.hetHOBR_HCL + d.controlWA.ratesDayAverage.hetHOBR_HCL,'LineWidth',2);
+
+nexttile;
+ph(1) = plot(151:362,d.HunganohetHOBR_WA.ratesDayAverage.CLO_OHb - d.controlWA.ratesDayAverage.CLO_OHb,'LineWidth',2);
+hold on
+ph(2) = plot(151:362,d.HunganohetHOBR_WA.ratesDayAverage.CL_CH4 - d.controlWA.ratesDayAverage.CL_CH4,'LineWidth',2);
+ph(3) = plot(151:362,-d.HunganohetHOBR_WA.ratesDayAverage.HCL_OH + d.controlWA.ratesDayAverage.HCL_OH,'LineWidth',2);
+ph(4) = plot(151:362,-d.HunganohetHOBR_WA.ratesDayAverage.hetHOBR_HCL + d.controlWA.ratesDayAverage.hetHOBR_HCL,'LineWidth',2);
+ph(5) = plot(151:362,-d.HunganohetHOBR_WA.ratesDayAverage.hetCLONO2_HCL + d.controlWA.ratesDayAverage.hetCLONO2_HCL,'LineWidth',2);
+ph(6) = plot(151:362,-d.HunganohetHOBR_WA.ratesDayAverage.hetHOCL_HCL + d.controlWA.ratesDayAverage.hetHOCL_HCL,'LineWidth',2);
+plot([189 189],[1e-5 .1],'k--','LineWidth',2)
+legend(ph,'CLO+OH','CL+CH4','HCL+OH','hetHOBR+HCL','hetCLONO2+HCL','hetHOCL+HCL')
+
+nexttile;
+plot(151:362,d.HunganohetHOBR_WA.ratesDayAverage.CLO_OHb - d.controlWA.ratesDayAverage.CLO_OHb + ...
+    d.HunganohetHOBR_WA.ratesDayAverage.CL_CH4 - d.controlWA.ratesDayAverage.CL_CH4 + ...
+    -d.HunganohetHOBR_WA.ratesDayAverage.HCL_OH + d.controlWA.ratesDayAverage.HCL_OH...
+    ,'LineWidth',2);
+
+nexttile;
+plot(151:362,d.HunganohetHOBR_WA.ratesDayAverage.CLO_OHb - d.controlWA.ratesDayAverage.CLO_OHb + ...
+    d.HunganohetHOBR_WA.ratesDayAverage.CL_CH4 - d.controlWA.ratesDayAverage.CL_CH4 + ...
+    -d.HunganohetHOBR_WA.ratesDayAverage.HCL_OH + d.controlWA.ratesDayAverage.HCL_OH + ...
+    -d.HunganohetHOBR_WA.ratesDayAverage.hetHOBR_HCL + d.controlWA.ratesDayAverage.hetHOBR_HCL,'LineWidth',2);
 %%
 
 createfig('largelandscape','on')

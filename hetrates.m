@@ -106,10 +106,14 @@ function [kout,gprob_hobr_hcl] = hetrates(inputs,variables,T_limit,CLONO2atm,HCL
     C_hobr          = 1477.*sqrt(T_limit);
     %D_hobr          = 9.e-9; %6.4e-8.*T_limit./vis_h2so4;
     D_hobr          = 6.4e-8.*T_limit./vis_h2so4;
+    % WACCM (Hanson)
     k_wasch         = .125.*exp(.542.*wt - 6440.*T_limiti + 10.3);
-    %k_wasch         = exp(.542.*wt - 6440.*T_limiti + 10.3);
     H_hobr          = exp( -9.86 + 5427.*T_limiti );
+    % Wasch-Abbatt
+    %k_wasch         = exp(.542.*wt - 6440.*T_limiti + 10.3);
     %H_hobr = 4.6e-4.*exp(4.5e3./T_limit);
+    
+    
     
     switch inputs.runtype        
         case 'ghcl'            
@@ -157,7 +161,7 @@ function [kout,gprob_hobr_hcl] = hetrates(inputs,variables,T_limit,CLONO2atm,HCL
         case 'ghcl'
             kout.hetHOBR_HCL = wrk.*Ccase.*gprob_hobr_hcl.*1.*variables.HCL(timeind);
         otherwise
-            kout.hetHOBR_HCL = wrk.*Ccase.*gprob_hobr_hcl.*1.*variables.HCL(timeind);
+            kout.hetHOBR_HCL = wrk.*Ccase.*gprob_hobr_hcl.*1.*variables.HOBR(timeind);
     end
 
     %% BRONO2 + H2O

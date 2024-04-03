@@ -80,7 +80,7 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
                 %molar_h2so4 = den_h2so4.*wt./9.8; 
                 
             %end
-        case {'doublelinear','2xorganics'};
+        case {'doublelinear','2xorganics','constantdoublelinear'}
 %             so4pure = apsul/(amix + asoa + apsul + appoa)
 %             aso4mix = amix - apoa - abc - adst - aslt
 %             mixsulffrac = aso4mix/(amix + asoa + appoa)

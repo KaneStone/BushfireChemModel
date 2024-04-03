@@ -113,6 +113,27 @@ function [atmosphere,variables] = initializevars(inputs)
             
             % 2020 had higher temperature early on.
             %atmosphere.atLevel.T(1:242) =  atmosphere.atLevel.T(242);
+        case 'constantdoublelinear'
+            atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:ceil(inputs.days));   % 1.5 is arbitrary 
+            atmosphere.dummySAD(:) = atmosphere.dummySAD(5);
+%             atmosphere.dummySAD(end-9:end) = atmosphere.dummySAD(end-10);
+%             atmosphere.dummySAD(2:10) = atmosphere.dummySAD(1);
+            atmosphere.mixsulffrac = solancil.ancil.mixsulffrac.vmr(inputs.altitude+1,1:ceil(inputs.days));
+            atmosphere.so4pure = solancil.ancil.so4pure.vmr(inputs.altitude+1,1:ceil(inputs.days));
+            
+            atmosphere.mixsulffrac(:) = atmosphere.mixsulffrac(40);    
+            atmosphere.so4pure(:) = atmosphere.so4pure(40);
+
+            atmosphere.atLevel.T(:) = 214;
+            atmosphere.atLevel.H2O.vmr(:) = atmosphere.atLevel.H2O.vmr(40);
+            atmosphere.atLevel.H2O.nd(:) = atmosphere.atLevel.H2O.nd(40);
+            atmosphere.atLevel.CH4.nd(:) = atmosphere.atLevel.CH4.nd(1);
+
+            % atmosphere.so4pure(26:46) = atmosphere.so4pure(25);
+            % atmosphere.mixsulffrac(26:46) = atmosphere.mixsulffrac(25);
+
+            atmosphere.radius = solancil.ancil.SULFRE.vmr(inputs.altitude+1,1:ceil(inputs.days)).*1e-4;
+            atmosphere.radius(:) = atmosphere.radius(40);
         case '2xorganics'
              atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:ceil(inputs.days)).*4;   % 1.5 is arbitrary 
 %             atmosphere.dummySAD(end-9:end) = atmosphere.dummySAD(end-10);
@@ -131,10 +152,14 @@ function [atmosphere,variables] = initializevars(inputs)
 
             SADini = .9e-8;%.7
             atmosphere.dummySAD = (SADini+1e-9 + SADini./40.*sin(2*pi./365.*(1:365)+pi.*1.1));            
+            atmosphere.dummySAD = repmat(atmosphere.dummySAD, 1,2);
+            atmosphere.dummySAD = atmosphere.dummySAD(1:ceil(inputs.days));
             
             %atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:ceil(inputs.days));   % 1.5 is arbitrary 
             if strcmp(inputs.radius,'ancil')
                 atmosphere.radius = controlancil.SULFRE.vmr(inputs.altitude+1,:).*1e-4; % cm; 
+                atmosphere.radius = repmat(atmosphere.radius,1,2);
+                atmosphere.radius = atmosphere.radius(1:ceil(inputs.days));
             else
                 atmosphere.radius = inputs.radius;
             end
