@@ -231,7 +231,19 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
     %aw = .01;    
     [kout,kv.gprob_hobr_hcl] = hetrates(inputs,variables,Tin,CLONO2atm,HCLatm,HOBRatm,atmosphere.dummySAD(step.daysincebegin),...
         wt,M_hcl,molar_h2so4,molar_h2so4_new,aw,timeind,atmosphere.radius(step.daysincebegin),ah_hcl);
-    
+    switch inputs.runtype
+        case 'glassy'
+            av_clono2 = (8.*inputs.R.*Tin.*1000./(pi*98)).^.5 * 100; 
+            av_brono2 = (8.*inputs.R.*Tin.*1000./(pi*141.9)).^.5 * 100; 
+            av_hocl = (8.*inputs.R.*Tin.*1000./(pi*52.5)).^.5 * 100; 
+            av_hobr = (8.*inputs.R.*Tin.*1000./(pi*96.9)).^.5 * 100; 
+            av_n2o5 = (8.*inputs.R.*Tin.*1000./(pi*108)).^.5 * 100; 
+            kout.hetN2O5 = kout.hetN2O5+atmosphere.dummySADsolid(step.daysincebegin)./4.*av_n2o5.*.02.*variables.N2O5(timeind);
+            kout.hetCLONO2_H2O = kout.hetCLONO2_H2O+atmosphere.dummySADsolid(step.daysincebegin)./4.*av_clono2.*4e-3.*variables.CLONO2(timeind);
+            kout.hetCLONO2_HCL = kout.hetCLONO2_HCL+atmosphere.dummySADsolid(step.daysincebegin)./4.*av_clono2.*.01.*variables.CLONO2(timeind);
+            kout.hetHOCL_HCL = kout.hetHOCL_HCL+atmosphere.dummySADsolid(step.daysincebegin)./4.*av_hocl.*.005.*variables.HOCL(timeind);
+            kout.hetBRONO2_H2O = kout.hetBRONO2_H2O+atmosphere.dummySADsolid(step.daysincebegin)./4.*av_brono2.*.015.*variables.BRONO2(timeind);
+    end
     % % N2O5 + H2O -> 2*HNO3
     rates.N2O5.destruction(end+1) = kout.hetN2O5;
     rates.HNO3.production(end+1) = kout.hetN2O5.*2;

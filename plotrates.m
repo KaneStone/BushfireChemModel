@@ -8,7 +8,7 @@ inputs.altitude = 19;
 
 d.doublelinear = load([inputs.outputdir,'runoutput/','constantdoublelinear','_',num2str(inputs.altitude),...
     'km_',abs(num2str(inputs.latitude)),inputs.hemisphere...
-    ,'_',num2str(inputs.fluxcorrections),'flux_',sprintf('%.2f',inputs.hourstep),'hours_2years.mat']);
+    ,'_',num2str(inputs.fluxcorrections),'flux_',sprintf('%.2f',inputs.hourstep),'hours_onlyCLONO2_HNO3_NO2_NO3_N2O5.mat']);
 
 % d.doublelinear = load([inputs.outputdir,'runoutput/','doublelinear','_',num2str(inputs.altitude),...
 %     'km_',abs(num2str(inputs.latitude)),inputs.hemisphere...
@@ -18,11 +18,24 @@ d.control = load([inputs.outputdir,'runoutput/','control','_',num2str(inputs.alt
     'km_',abs(num2str(inputs.latitude)),inputs.hemisphere...
     ,'_',num2str(inputs.fluxcorrections),'flux_',sprintf('%.2f',inputs.hourstep),'hours_2years.mat']);
 %lngth = length(d.doublelinear.dayAverage.HCL);
-lngth = 730;
+lngth = 365;
 
+%% plot individual rates
+fsize = 18;
+lngth = 365;
+ratetoplot = 'CL_CH4';
+vartit = ratetoplot;
+vartit (vartit == '_') = '+';
+createfig('medium','on')
+plot(1:lngth,d.doublelinear.ratesDayAverage.(ratetoplot)(1:lngth),'LineWidth',3)
+addLabels(18,[vartit,' rate'],'molec./cm^3/s','Month')
+tickout = monthtick('short',0);
+set(gca,'xtick',[tickout.tick(1:1:12),tickout.tick(1:1:12)+365],'xticklabels',[tickout.monthnames(1:1:12),tickout.monthnames(1:1:12)],'fontsize',fsize);
+xlim([0 366])
+savefigure(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushfireChemistry/BoxModelOutput/seasonality/'],[vartit,'_ind_timeseries'],1,0,0,0);
 %% plot day average variables first
-lngth = 730;
-vars = {'HCL','CLONO2','CLO','CL','CL2','OH','HOCL','CL2O2','O3'};
+lngth = 365;
+vars = {'HCL','CLONO2','CLO','CL','CL2','O3','NO2','HO2NO2','HNO3'};
 createfig('largelandscape','on')
 t = tiledlayout(3,3);
 fsize = 18;
@@ -35,9 +48,9 @@ d.control.dayAverage.CH4 = repmat(atmosphere.atLevel.CH4.nd(1:365),1,lngth/365);
 d.doublelinear.dayAverage.CH4 = repmat(atmosphere.atLevel.CH4.nd(1:365),1,lngth/365);
 for i = 1:length(vars)
     nexttile;
-    ph1 = plot(1:lngth,d.control.dayAverage.(vars{i}),'LineWidth',lwidth);
+    ph1 = plot(1:lngth,d.control.dayAverage.(vars{i})(1:lngth),'LineWidth',lwidth);
     hold on
-    ph2 = plot(1:lngth,d.doublelinear.dayAverage.(vars{i}),'LineWidth',lwidth);
+    ph2 = plot(1:lngth,d.doublelinear.dayAverage.(vars{i})(1:lngth),'LineWidth',lwidth);
 
     set(gca,'xtick',[tickout.tick(1:3:12),tickout.tick(1:3:12)+365],'xticklabels',[tickout.monthnames(1:3:12),tickout.monthnames(1:3:12)],'fontsize',fsize);
     if i == 7 
@@ -68,7 +81,7 @@ lwidth = 3;
 tickout = monthtick('short',0);    
 for i = 1:length(vars)
     nexttile;
-    ph1 = plot(1:lngth,d.doublelinear.dayAverage.(vars{i})-d.control.dayAverage.(vars{i}),'LineWidth',lwidth);
+    ph1 = plot(1:lngth,d.doublelinear.dayAverage.(vars{i})(1:lngth)-d.control.dayAverage.(vars{i})(1:lngth),'LineWidth',lwidth);
     hold on
     plot([0 lngth],[0 0],'--','color',[.4 .4 .4],'LineWidth',2)
     
@@ -90,6 +103,50 @@ for i = 1:length(vars)
     % end
 end
 savefigure(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushfireChemistry/BoxModelOutput/seasonality/'],['anomalies_timeseries'],1,0,0,0);
+
+%% plot individual rates
+d.doublelinear.ratesDayAverage.jCLONO2 = (d.doublelinear.ratesDayAverage.jCLONO2_CL_NO3 + ...
+    d.doublelinear.ratesDayAverage.jCLONO2_CLO_NO2);
+
+d.control.ratesDayAverage.jCLONO2 = (d.control.ratesDayAverage.jCLONO2_CL_NO3 + ...
+    d.control.ratesDayAverage.jCLONO2_CLO_NO2);
+lngth = 365;
+vars = {'HCL_OH','CL_CH4','CLO_NO2_M','jCLONO2','jCL2_2CL','jCL2O2_CL_2CL','CL_O3','hetCLONO2_HCL','hetHOBR_HCL'};
+vartit = {'HCL+OH','CL+CH4','CLO+NO2+M','jCLONO2','jCL2','jCL2O2','CL+O3','het. CLONO2+HCL','het. HOBR+HCL'};
+createfig('largelandscape','on')
+t = tiledlayout(3,3);
+fsize = 18;
+title(t,'Box model, 19 km, 45S, constant T, SAD, RAD, H2O, and organics (wildfire levels)',...
+    'fontsize',fsize+6,'fontweight','bold')
+lwidth = 3;
+
+tickout = monthtick('short',0);    
+d.control.dayAverage.CH4 = repmat(atmosphere.atLevel.CH4.nd(1:365),1,lngth/365);
+d.doublelinear.dayAverage.CH4 = repmat(atmosphere.atLevel.CH4.nd(1:365),1,lngth/365);
+for i = 1:length(vars)
+    nexttile;
+    ph1 = plot(1:lngth,d.control.ratesDayAverage.(vars{i})(1:lngth),'LineWidth',lwidth);
+    hold on
+    ph2 = plot(1:lngth,d.doublelinear.ratesDayAverage.(vars{i})(1:lngth),'LineWidth',lwidth);
+
+    set(gca,'xtick',[tickout.tick(1:3:12),tickout.tick(1:3:12)+365],'xticklabels',[tickout.monthnames(1:3:12),tickout.monthnames(1:3:12)],'fontsize',fsize);
+    if i == 7 
+        addLabels(fsize,vartit{i},'Month','molec./cm^3/s')
+    elseif i > 7
+        addLabels(fsize,vartit{i},'Month','')
+    elseif i == 1 || i == 4
+        addLabels(fsize,vartit{i},'','molec./cm^3/s')
+    else
+        addLabels(fsize,vartit{i},'','')
+    end
+    if i == 1
+        lh = legend([ph1,ph2],'control','double linear','fontsize',fsize,'box','off','location','southeast');
+    end
+    if strcmp(vars{i},'CH4')
+        legend(ph2,'CARMA CH4 (used in box model)','box', 'off')
+    end
+end
+savefigure(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushfireChemistry/BoxModelOutput/seasonality/'],['rates_timeseries'],1,0,0,0);
 
 %%
 % want to plot CLONO2, HCL total production and loss
@@ -340,7 +397,13 @@ for i = 1:length(vars)+1
     else 
         toplot1 = toplot1 - d.(toplot).ratesDayAverage.(vars{i-1})(1:lngth);
     end
-    plot(1:lngth,toplot1(1:lngth),'LineWidth',1.5);
+    if i == 1
+        plot(1:lngth,toplot1(1:lngth),'LineWidth',3,'color','k','LineStyle','--');
+    elseif i == length(vars)+1
+        plot(1:lngth,toplot1(1:lngth),'LineWidth',3,'color','k');
+    else
+        plot(1:lngth,toplot1(1:lngth),'LineWidth',2);
+    end
 end
 plot([0 365],[0 0],'--','color',[ .6 .6 .6],'LineWidth',1.5)
 tickout = monthtick('short',0);
@@ -367,7 +430,13 @@ for i = 1:length(vars)+2
     else 
         toplot1 = toplot1 - d.(toplot).ratesDayAverage.(vars{i-2})(1:lngth);
     end
-    plot(1:lngth,toplot1(1:lngth),'LineWidth',1.5);
+    if i == 1
+        plot(1:lngth,toplot1(1:lngth),'LineWidth',3,'color','k','LineStyle','--');
+    elseif i == length(vars)+2
+        plot(1:lngth,toplot1(1:lngth),'LineWidth',3,'color','k');
+    else
+        plot(1:lngth,toplot1(1:lngth),'LineWidth',2);
+    end
 end
 % for i = 1:length(vars2)
 %     hold on
@@ -421,4 +490,23 @@ box on;
 addLabels(fsize,'2020 45S Box model CL reaction rates','Month','molec./cm^3/s')
 
 savefigure(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushfireChemistry/BoxModelOutput/seasonality/'],['CL_total_prod_loss'],1,0,0,0);
+
+%%
+cbrew = cbrewer('qual','Set1',10);
+lngth = 365;
+createfig('medium','on');
+vars = {'CL2','CLO','CL2O2','CL','BRCL','CLONO2','HCL','HOCL'};
+for i = 1:length(vars)
+    ph(i) = plot(1:lngth,abs(d.doublelinear.dayAverage.(vars{i})(1:lngth) - d.control.dayAverage.(vars{i})(1:lngth))...
+        ./max(abs(d.doublelinear.dayAverage.(vars{i})(1:lngth)-d.control.dayAverage.(vars{i})(1:lngth))),'LineWidth',3,'color',cbrew(i,:));
+    hold on
+end
+ylim([0 1.1]);
+tickout = monthtick('short',0);
+set(gca,'xtick',[tickout.tick(1:3:12),tickout.tick(1:3:12)+365],'xticklabels',[tickout.monthnames(1:3:12),tickout.monthnames(1:3:12)],'fontsize',fsize);
+legend(ph,vars,'fontsize',fsize+2,'box','off')
+box on;
+addLabels(fsize,'2020 45S normalized absolute anomalies from control','Month','normalized concentration')
+
+savefigure(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushfireChemistry/BoxModelOutput/seasonality/'],['CL_species_peak_timing'],1,0,0,0);
     

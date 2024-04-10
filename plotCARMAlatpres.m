@@ -31,7 +31,7 @@ end
 
 %% take monthly average
 % month start and end dates\
-year = 2021;
+year = 2022;
 tick = monthtick('short',1);
 mon = 7;
 if year == 2020
@@ -59,7 +59,7 @@ end
 %% read in MLS
 lats = [-50 -40];
 mlstype = 'PressureZM';
-mlsvar = 'N2O';
+mlsvar = 'HCL';
 switch mlsvar
     case 'N2O'
         climsmls = -.05:.005:.05;
@@ -90,6 +90,38 @@ outdir = '/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushfireChemistry/20
 filename = ['MLS_HCL','_LatPres_anomaly_',monname,'_',yearname];
 savefigure(outdir,filename,1,0,0,0);
 
+%% MLS line plots
+% mls N2O anomaly
+% daily anomalies
+% dailyclim = squeeze(mean(mls.N2O(10,8,:,:),4,'omitnan'));
+% allextract = squeeze(mls.N2O(10,8,:,:));
+% allanomaly = allextract - dailyclim;
+% 
+% dailyclim2 = squeeze(mean(mls.HCL(10,8,:,:),4,'omitnan'));
+% allextract2 = squeeze(mls.HCL(10,8,:,:));
+% allanomaly2 = allextract2 - dailyclim2;
+
+% take monthly average of MLS data
+mlstick2 = mlstick.tick;
+mlstick2(end+1) = 366;
+for i = 1:12
+    mlsmonthlyHCL(:,:,i,:) = mean(mls.HCL(:,:,mlstick.tick(i):mlstick.tick(i)+1,:),3,'omitnan');
+    mlsmonthlyN2O(:,:,i,:) = mean(mls.N2O(:,:,mlstick.tick(i):mlstick.tick(i)+1,:),3,'omitnan');
+end
+dailyclim = squeeze(mean(mlsmonthlyN2O(20,15,:,:),4,'omitnan'));
+allextract = squeeze(mlsmonthlyN2O(20,15,:,:));
+allanomaly = allextract - dailyclim;
+
+dailyclim2 = squeeze(mean(mlsmonthlyHCL(20,15,:,:),4,'omitnan'));
+allextract2 = squeeze(mlsmonthlyHCL(20,15,:,:));
+allanomaly2 = allextract2 - dailyclim2;
+createfig('medium','on');
+plot(allanomaly(:))
+%ylim([-4e-8 4e-8])
+hold on
+yyaxis right
+plot(allanomaly2(:))
+%ylim([-6e-10 6e-10])
 %% plotting
 clims.HCL = -.5:.05:.5;
 clims.CLONO2 = -.5:.05:.5;

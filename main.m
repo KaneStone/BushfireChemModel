@@ -23,6 +23,15 @@ dayAverage = [];
 ratesDayAverage = [];
 photoNamlist = TUVnamelist;
 %photoload.pout = photoload.pout;
+% constant HNO3 photolysis
+%photoload.pout(:,[5:13,15:73,76:114]) = repmat(photoload.pout(1:96,[5:13,15:73,76:114]),365,1);
+%photoload.pout(:,[5:114]) = repmat(photoload.pout(1:96,[5:114]),365,1);
+% CLONO2 and  Ox only
+%photoload.pout(:,[16:62,71:73,76:101,104:114]) = repmat(photoload.pout(1:96,[16:62,71:73,76:101,104:114]),365,1);
+%photoload.pout(:,[1:6,15:73,76:101,104:114]) = repmat(photoload.pout(1:96,[1:6,15:73,76:101,104:114]),365,1);
+
+%photoload.pout(:,[5:73,76:114]) = repmat(photoload.pout(17281:17281+95,[5:73,76:114]),365,1);
+
 %% Begin simulation
 tic;
 for i = 1:inputs.timesteps
@@ -73,7 +82,7 @@ for i = 1:inputs.timesteps
     end  
     
     % debugging if statement (can remove)
-    if i == 2000
+    if i == 1000
         a = 1;        
     end
     
@@ -92,12 +101,12 @@ savephoto(inputs,photoout)
 savedata(inputs,variables,dayAverage,family,rates,ratesDayAverage)
 
 %% diagnostic plotting
-vartoplot = 'CLONO2';
+vartoplot = 'NO';
 figure;
 plot(variables.(vartoplot));
 
 %%
-vartoplot = 'HOBR';
+vartoplot = 'HCL';
 figure;
 plot(dayAverage.(vartoplot));
 hold on;

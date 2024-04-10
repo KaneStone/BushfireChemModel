@@ -175,6 +175,9 @@ function [kout,gprob_hobr_hcl] = hetrates(inputs,variables,T_limit,CLONO2atm,HCL
     gprob_bnt_h2o = 1./(term1 + term2);
     kout.hetBRONO2_H2O  = wrk*av_brono2.*gprob_bnt_h2o.*variables.BRONO2(timeind);
     
+    %% surface reactions
+    
+
     %% N2O5 + HCL (Talukdar 2012)
     % CLNO2yeild = [.005, .01, .03, .1, .2, .3, .4, .5, .6, .7, .8, .9];
     % MHCL = [1e-5, 2e-5, 3e-5, 3e-4, 4e-4, 5e-4, 2e-3, 3e-3, 4e-3, 5e-3, 8e-3, 1e-2];

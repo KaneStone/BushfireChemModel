@@ -181,7 +181,24 @@ function [atmosphere,variables] = initializevars(inputs)
             atmosphere.dummyH2O = atmosphere.dummyH2O - (atmosphere.dummyH2O(1) - dummyh2Otemp);
             atmosphere.radius = controlancil.SULFRE.vmr(inputs.altitude+1,:).*1e-4; % cm; 
             atmosphere.radius(190:end) = atmosphere.radius(190:end).*2;
+        
+        case 'glassy'
+            atmosphere.dummySADsolid = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:ceil(inputs.days))-controlancil.SAD_SULFC.vmr(inputs.altitude+1,1:ceil(inputs.days));   % 1.5 is arbitrary 
+            atmosphere.dummySADsolid (atmosphere.dummySADsolid < 0) = 0;
+            SADini = .9e-8;%.7
+            atmosphere.dummySAD = (SADini+1e-9 + SADini./40.*sin(2*pi./365.*(1:365)+pi.*1.1));            
+            atmosphere.dummySAD = repmat(atmosphere.dummySAD, 1,2);
+            atmosphere.dummySAD = atmosphere.dummySAD(1:ceil(inputs.days));
+            
+%             atmosphere.dummySAD(end-9:end) = atmosphere.dummySAD(end-10);
+%             atmosphere.dummySAD(2:10) = atmosphere.dummySAD(1);
+            atmosphere.mixsulffrac = solancil.ancil.mixsulffrac.vmr(inputs.altitude+1,1:ceil(inputs.days));
+            atmosphere.so4pure = solancil.ancil.so4pure.vmr(inputs.altitude+1,1:ceil(inputs.days));
 
+            atmosphere.so4pure(26:46) = atmosphere.so4pure(25);
+            atmosphere.mixsulffrac(26:46) = atmosphere.mixsulffrac(25);
+
+            atmosphere.radius = solancil.ancil.SULFRE.vmr(inputs.altitude+1,1:ceil(inputs.days)).*1e-4;
 
     end    
     %% initialize variables

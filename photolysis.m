@@ -114,6 +114,7 @@ function [photo,rates,sza,kv] = photolysis(inputs,step,atmosphere,variables,phot
 
     % HNO3
     rates.HNO3.destruction(1) = photo.data(13).*variables.HNO3;
+    %rates.HNO3.destruction(1) = photo.data(13).*variables.HNO3;
     
     % HO2NO2
     rates.HO2NO2.destruction(1) = photo.data(14).*variables.HO2NO2.*1./HO2NO2pwf;% to account for second photolysis pathway that isnt in TUV
@@ -195,7 +196,7 @@ function [photo,rates,sza,kv] = photolysis(inputs,step,atmosphere,variables,phot
         kv.jCL2_2CL = rates.CL2.destruction(1);
         % actually produces CL + CLOO, but CLOO will immediately either
         % photolyze or reac with M to produce CL + O2
-        kv.jCL2O2_CL_2CL = rates.CL2O2.destruction(1);  
+        kv.jCL2O2_O2_2CL = rates.CL2O2.destruction(1);  
         kv.jHOCL_HO_CL = rates.HOCL.destruction(1);
         
         kv.jBRO_O3P_BR = rates.O.production(7);
