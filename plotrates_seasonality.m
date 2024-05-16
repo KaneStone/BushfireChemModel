@@ -20,11 +20,11 @@ d.doublelinear2 = load([inputs.outputdir,'runoutput/','constantdoublelinear','_'
 
 d.doublelinear3 = load([inputs.outputdir,'runoutput/','constantdoublelinear','_',num2str(inputs.altitude),...
     'km_',abs(num2str(inputs.latitude)),inputs.hemisphere...
-    ,'_',num2str(inputs.fluxcorrections),'flux_',sprintf('%.2f',inputs.hourstep),'hours_onlyCLONO2_Ox_winter.mat']);
+    ,'_',num2str(inputs.fluxcorrections),'flux_',sprintf('%.2f',inputs.hourstep),'hours_constantJ_exceptCLONO2.mat']);
 
 d.doublelinear4 = load([inputs.outputdir,'runoutput/','constantdoublelinear','_',num2str(inputs.altitude),...
     'km_',abs(num2str(inputs.latitude)),inputs.hemisphere...
-    ,'_',num2str(inputs.fluxcorrections),'flux_',sprintf('%.2f',inputs.hourstep),'hours_onlyCLONO2_NO2_HNO3_N2O5_Ox.mat']);
+    ,'_',num2str(inputs.fluxcorrections),'flux_',sprintf('%.2f',inputs.hourstep),'hours_onlyCLONO2_HNO3_HO2NO2_N2O5_NO2_NO3_Ox.mat']);
 
 d.doublelinear5 = load([inputs.outputdir,'runoutput/','constantdoublelinear','_',num2str(inputs.altitude),...
     'km_',abs(num2str(inputs.latitude)),inputs.hemisphere...
@@ -77,8 +77,9 @@ end
 set(gca,'color','none')
 
 %lh = legend([ph1,ph2,ph3,ph4,ph5,ph6],'control','Only Ox','+HNO3+N2O5','+CLONO2','all (double linear)','fontsize',fsize,'box','off','location','south');
-lh = legend([ph1,ph2,ph3,ph4,ph5,ph6,ph7],'control','Only Ox','+HNO3+N2O5','Ox+CLONO2','Ox+CLONO2+NO2','Ox+CLONO2+NO2+HNO3+N2O5','all (double linear)','fontsize',fsize,'box','off');
-set(lh,'position',[.7 .1 .2 .175])
+%lh = legend([ph1,ph2,ph3,ph4,ph5,ph6,ph7],'control','Only Ox','+HNO3+N2O5','Ox+CLONO2','CLONO2 only','Ox+CLONO2+NO2+HNO3+N2O5','all (double linear)','fontsize',fsize,'box','off');
+lh = legend([ph1,ph2,ph3,ph4,ph5,ph6,ph7],'control','Only Ox','Ox+HNO3+N2O5','Ox+CLONO2','CLONO2 only','CLONO2+HNO3+HO2NO2+N2O5+NO2+NO3+Ox','all (double linear)','fontsize',fsize,'box','off');
+set(lh,'position',[.65 .1 .2 .175])
 if strcmp(vars{i},'CH4')
     legend(ph2,'CARMA CH4 (used in box model)','box', 'off')
 end

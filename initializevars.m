@@ -5,7 +5,9 @@ function [atmosphere,variables] = initializevars(inputs)
     % variables ensuring chemical families have appropriate number densities 
 
     controlancil = load([inputs.ancildir,'variables/','climInControl.mat']);
-    solancil = load([inputs.ancildir,'variables/','climInSolubility.mat']);        
+    solancil1 = load([inputs.ancildir,'variables/','climInSolubility.mat']);        
+    solancil = load([inputs.ancildir,'variables/','climInSolubilitynosoa.mat']);        
+    solancil2 = load([inputs.ancildir,'variables/','climInControlnosoa.mat']);        
     % switch inputs.runtype
     %     case {'solubility','doublelinear','doublelinear_wtsulf'}
     %         solancil = load([inputs.ancildir,'variables/','climInSolubility.mat']);        
@@ -98,7 +100,7 @@ function [atmosphere,variables] = initializevars(inputs)
 
             % 2020 had higher temperature early on.
             %atmosphere.atLevel.T(1:242) =  atmosphere.atLevel.T(242);
-        case {'doublelinear','doublelinear_wtsulf'}
+        case {'doublelinear','doublelinear_wtsulf','doublelinearnomix'}
             atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:ceil(inputs.days));   % 1.5 is arbitrary 
             
 %             atmosphere.dummySAD(end-9:end) = atmosphere.dummySAD(end-10);

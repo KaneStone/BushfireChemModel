@@ -1,7 +1,7 @@
 % create time series averaged over level and latitudes from model data
 clear variables
 
-runcase = 'Solubility';
+runcase = 'control';
 %vars = {'O3','HCL','CLONO2','CLO','CL2O2','HOCL','HNO3','O'};
 %vars = {'H2', 'H2O2', 'HO2','CHO2','CL','OH','CH4','CLO','HOCL','CH3CL','CH3BR','CH2BR2','CHBR3'};
 vars = {'T','SOAB','SOAI','SOAM','SOAT','SOAX','CRMIX01','CRMIX02','CRMIX03','CRMIX04','CRMIX05',...
@@ -18,9 +18,9 @@ vars = {'T','SOAB','SOAI','SOAM','SOAT','SOAX','CRMIX01','CRMIX02','CRMIX03','CR
 tic;
 switch runcase
     case 'Solubility'
-        data = readinBfolder(['/Volumes/ExternalOne/work/data/Bushfire/CESM/finalensembles/','SD/','raw','/'],'*hexanoic_nowt.nc',1); 
+        data = readinBfolder(['/Users/kanestone/work/data/Bushfire/'],'*out_SD_solubility.nc',1); 
     otherwise
-        data = readinBfolder(['/Volumes/ExternalOne/work/data/Bushfire/CESM/finalensembles/','SD/','raw','/'],'*control.nc',1); 
+        data = readinBfolder(['/Users/kanestone/work/data/Bushfire/control/'],'*control.nc',1); 
 end
 %data.data.T2 = data.data.T;
 toc;
@@ -107,9 +107,14 @@ MIXBC = zonalmean.CRBC01.vmrregrid + zonalmean.CRBC02.vmrregrid + zonalmean.CRBC
     zonalmean.CRBC13.vmrregrid + zonalmean.CRBC14.vmrregrid + zonalmean.CRBC15.vmrregrid + zonalmean.CRBC16.vmrregrid +...
     zonalmean.CRBC17.vmrregrid + zonalmean.CRBC18.vmrregrid + zonalmean.CRBC19.vmrregrid + zonalmean.CRBC20.vmrregrid;
 %%
-zm.so4pure = PURESULF./(MIX + SOA + PURESULF + PUREORGANICS);
+% zm.so4pure = PURESULF./(MIX + SOA + PURESULF + PUREORGANICS);
+% so4mix = MIX - OCMIX - MIXBC; % - black carbon
+% zm.mixsulffrac = so4mix./(MIX + SOA + PUREORGANICS); % because assuming pure organics are in mixed particles
+
+
+zm.so4pure = PURESULF./(MIX + PURESULF + PUREORGANICS);
 so4mix = MIX - OCMIX - MIXBC; % - black carbon
-zm.mixsulffrac = so4mix./(MIX + SOA + PUREORGANICS); % because assuming pure organics are in mixed particles
+zm.mixsulffrac = so4mix./(MIX + PUREORGANICS); % because assuming pure organics are in mixed particles
 
 % interpolate so4pure, mixsulffrac, SAD_SULFC, SULFRE
 
@@ -181,7 +186,7 @@ end
 ancil.SAD_SULFC.vmr = test;
     %% output temperature and density data for TUV code
 
-save(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/Ancil/variables/','climIn',runcase,'.mat'],'ancil');
+save(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/Ancil/variables/','climIn',runcase,'nosoa.mat'],'ancil');
     %% smooth data
 
 

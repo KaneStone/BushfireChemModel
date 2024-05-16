@@ -30,7 +30,12 @@ photoNamlist = TUVnamelist;
 %photoload.pout(:,[16:62,71:73,76:101,104:114]) = repmat(photoload.pout(1:96,[16:62,71:73,76:101,104:114]),365,1);
 %photoload.pout(:,[1:6,15:73,76:101,104:114]) = repmat(photoload.pout(1:96,[1:6,15:73,76:101,104:114]),365,1);
 
+%winter values
 %photoload.pout(:,[5:73,76:114]) = repmat(photoload.pout(17281:17281+95,[5:73,76:114]),365,1);
+%CLONO2 + NO2
+%photoload.pout(:,[1:6,8:73,76:114]) = repmat(photoload.pout(1:96,[1:6,8:73,76:114]),365,1);
+%NO2
+%photoload.pout(:,[1:6,8:114]) = repmat(photoload.pout(1:96,[1:6,8:114]),365,1);
 
 %% Begin simulation
 tic;
@@ -82,7 +87,7 @@ for i = 1:inputs.timesteps
     end  
     
     % debugging if statement (can remove)
-    if i == 1000
+    if i == 10000
         a = 1;        
     end
     

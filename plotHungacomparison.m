@@ -40,6 +40,7 @@ controlWAHCLvmr = d.controlWA.dayAverage.HCL.*inputs.k.*1e6./(atmosphere.atLevel
 HungaHCLvmr = d.Hunga.dayAverage.HCL.*inputs.k.*1e6./(atmosphere.atLevel.P(151:362).*100).*atmosphere.atLevel.T(151:362);
 HungaWAHCLvmr = d.HungaWA.dayAverage.HCL.*inputs.k.*1e6./(atmosphere.atLevel.P(151:362).*100).*atmosphere.atLevel.T(151:362);
 HungaghclHCLvmr = d.HungaGHCL.dayAverage.HCL.*inputs.k.*1e6./(atmosphere.atLevel.P(151:362).*100).*atmosphere.atLevel.T(151:362);
+HunganohetHOBRvmr = d.HunganohetHOBR.dayAverage.HCL.*inputs.k.*1e6./(atmosphere.atLevel.P(151:362).*100).*atmosphere.atLevel.T(151:362);
 %atmosphere.dummyH2O.*inputs.k.*1e6./(atmosphere.atLevel.P.*100).*atmosphere.atLevel.T;
 
 %% plot important rates for HCL
@@ -163,9 +164,10 @@ ph(2) = plot(151:362,d.controlWA.ratesDayAverage.(vars),...
 ph(3) = plot(151:362,d.Hunga.ratesDayAverage.(vars),'color',cbrewtouse(3,:),'LineWidth',lwidth);
 ph(4) = plot(151:362,d.HungaWA.ratesDayAverage.(vars),'color',cbrewtouse(4,:),'LineWidth',lwidth);
 ph(5) = plot(151:362,d.HungaGHCL.ratesDayAverage.(vars),'color',cbrewtouse(5,:),'LineStyle','--','LineWidth',lwidth);    
+ph(6) = plot(151:362,d.HunganohetHOBR.ratesDayAverage.(vars),'color',cbrewtouse(6,:),'LineStyle','--','LineWidth',lwidth);    
 
 lh = legend(ph,'control, Hanson gamma hobr','control, Wasch-Abbatt gamma hobr','Hunga-Tonga, Hanson gamma hobr (WACCM values)','Hunga-Tonga, Wasch-Abbatt gamma hobr',...
-    'Hunga-Tonga, Hanson gamma hcl','fontsize',fsize,'box','off');
+    'Hunga-Tonga, Hanson gamma hcl','Gas phase only','fontsize',fsize,'box','off');
 set(lh,'position',[.5 .2 .3 .2])
 tickout = monthtick('short',0);
 set(gca,'xtick',tickout.tick(6:end),'xticklabels',tickout.monthnames(6:end),'fontsize',fsize);
@@ -201,6 +203,7 @@ ylim([-.2 .05]);
 %plot(151:362,HungaHCLvmr,'color',cbrewtouse(3,:),'LineWidth',lwidth);
 plot(151:362,(HungaWAHCLvmr - controlWAHCLvmr).*1e9,'color',cbrewtouse(4,:),'LineWidth',lwidth);
 plot(151:362,(HungaghclHCLvmr - controlHCLvmr).*1e9,'color',cbrewtouse(5,:),'LineStyle','--','LineWidth',lwidth);    
+plot(151:362,(HunganohetHOBRvmr - controlHCLvmr).*1e9,'color',cbrewtouse(6,:),'LineStyle','--','LineWidth',lwidth);    
 
 % legend('Hunga-Tonga, Hanson gamma hobr','Hunga-Tonga, Wasch-Abbatt gamma hobr',...
 %     'Hunga-Tonga, Hanson gamma hcl','fontsize',fsize,'box','off','location','southeast')
@@ -209,4 +212,100 @@ set(gca,'xtick',tickout.tick(6:end),'xticklabels',tickout.monthnames(6:end),'fon
 addLabels(fsize,'HCL anomaly from control','Month','ppb')
 
 savefigure(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/HungaTonga/'],['HungaTonga_gammaAnalysis'],1,0,0,0);
+
+%% plot HCL+OH and CH4+CL and others
+createfig('largelandscape','on')
+t= tiledlayout(3,2);
+title(t,'June-December, 45S, 21 km, box model reaction rates','fontsize',24,'fontweight','bold')
+
+
+lwidth = 3;
+fsize = 18;
+cbrew = cbrewer('qual','Set1',10);
+cbrewtouse = [[0 0 0];[.6 .6 .6];cbrew([1,2,4,8,9],:)];
+vars = {'HCL_OH','CL_CH4','CLO_OHb','hetHOBR_HCL'};
+vartit = {'HCL+OH','CL+CH4','CLO+OH','het. HOBR+HCL anomaly','all gas phase HCL production/loss anomaly','all gas+het. phase HCL production/loss anomaly'};
+lstyle = {'-','-','-',':','--'};
+lims = [0 1500; 0 1500; 0 200; 0 200; -200 200; -200 200]
+
+for i = 1:6
+
+
+
+if i < 4
+    nexttile;
+    box on
+    hold on
+    plot([189 189],[lims(i,1) lims(i,2)],'k--','LineWidth',2)
+    ph(1) = plot(151:362,d.control.ratesDayAverage.(vars{i}),...
+        'LineStyle',lstyle{1},'color',cbrewtouse(1,:),'LineWidth',lwidth);
+    
+    ph(2) = plot(151:362,d.controlWA.ratesDayAverage.(vars{i}),...
+        'LineStyle',':','color',cbrewtouse(2,:),'LineWidth',lwidth);
+    ph(3) = plot(151:362,d.Hunga.ratesDayAverage.(vars{i}),'color',cbrewtouse(3,:),'LineWidth',lwidth);
+    ph(4) = plot(151:362,d.HungaWA.ratesDayAverage.(vars{i}),'color',cbrewtouse(4,:),'LineWidth',lwidth);
+    ph(5) = plot(151:362,d.HungaGHCL.ratesDayAverage.(vars{i}),'color',cbrewtouse(5,:),'LineStyle','--','LineWidth',lwidth);    
+    ph(6) = plot(151:362,d.HunganohetHOBR.ratesDayAverage.(vars{i}),'color',cbrewtouse(6,:),'LineStyle','-.','LineWidth',lwidth);    
+elseif i == 4
+    nexttile;
+    box on
+    hold on
+    plot([189 189],[lims(i,1) lims(i,2)],'k--','LineWidth',2)
+    % ph(1) = plot(151:362,d.control.ratesDayAverage.(vars{i}),...
+    %     'LineStyle',lstyle{1},'color',cbrewtouse(1,:),'LineWidth',lwidth);
+    % 
+    % ph(2) = plot(151:362,d.controlWA.ratesDayAverage.(vars{i}),...
+    %     'LineStyle',':','color',cbrewtouse(2,:),'LineWidth',lwidth);
+    plot(151:362,d.Hunga.ratesDayAverage.(vars{i})-d.control.ratesDayAverage.(vars{i}),'color',cbrewtouse(3,:),'LineWidth',lwidth);
+    plot(151:362,d.HungaWA.ratesDayAverage.(vars{i})-d.controlWA.ratesDayAverage.(vars{i}),'color',cbrewtouse(4,:),'LineWidth',lwidth);
+    plot(151:362,d.HungaGHCL.ratesDayAverage.(vars{i})-d.control.ratesDayAverage.(vars{i}),'color',cbrewtouse(5,:),'LineStyle','--','LineWidth',lwidth);    
+elseif i == 5
+    nexttile;
+    hold on;
+    box on
+    plot([189 189],[-200 200],'k--','LineWidth',2)
+    plot([151 362],[0 0],'k--','LineWidth',2)
+    controlgpr = d.control.ratesDayAverage.CL_CH4+d.control.ratesDayAverage.CLO_OHb+d.control.ratesDayAverage.CL_CH2O+d.control.ratesDayAverage.CL_H2+d.control.ratesDayAverage.CL_HO2a - d.control.ratesDayAverage.HCL_OH;
+    controlgpr2 = d.controlWA.ratesDayAverage.CL_CH4+d.controlWA.ratesDayAverage.CLO_OHb - d.controlWA.ratesDayAverage.HCL_OH+d.controlWA.ratesDayAverage.CL_CH2O+d.controlWA.ratesDayAverage.CL_H2+d.controlWA.ratesDayAverage.CL_HO2a;
+    % plot(151:362,d.control.ratesDayAverage.CL_CH4+d.control.ratesDayAverage.CLO_OHb - d.control.ratesDayAverage.HCL_OH,'color',cbrewtouse(1,:),'LineWidth',lwidth)
+    % plot(151:362,d.controlWA.ratesDayAverage.CL_CH4+d.controlWA.ratesDayAverage.CLO_OHb - d.controlWA.ratesDayAverage.HCL_OH,'color',cbrewtouse(2,:),'LineWidth',lwidth)
+    plot(151:362,d.Hunga.ratesDayAverage.CL_CH2O+d.Hunga.ratesDayAverage.CL_H2+d.Hunga.ratesDayAverage.CL_HO2a+d.Hunga.ratesDayAverage.CL_CH4+d.Hunga.ratesDayAverage.CLO_OHb - d.Hunga.ratesDayAverage.HCL_OH-controlgpr,'color',cbrewtouse(3,:),'LineWidth',lwidth)
+    plot(151:362,d.HungaWA.ratesDayAverage.CL_CH2O+d.HungaWA.ratesDayAverage.CL_H2+d.HungaWA.ratesDayAverage.CL_HO2a+d.HungaWA.ratesDayAverage.CL_CH4+d.HungaWA.ratesDayAverage.CLO_OHb - d.HungaWA.ratesDayAverage.HCL_OH-controlgpr2,'color',cbrewtouse(4,:),'LineWidth',lwidth)
+    plot(151:362,d.HungaGHCL.ratesDayAverage.CL_CH2O+d.HungaGHCL.ratesDayAverage.CL_H2+d.HungaGHCL.ratesDayAverage.CL_HO2a+d.HungaGHCL.ratesDayAverage.CL_CH4+d.HungaGHCL.ratesDayAverage.CLO_OHb - d.HungaGHCL.ratesDayAverage.HCL_OH-controlgpr,'color',cbrewtouse(5,:),'LineWidth',lwidth,'LineStyle','--')
+    plot(151:362,d.HunganohetHOBR.ratesDayAverage.CL_CH2O+d.HunganohetHOBR.ratesDayAverage.CL_H2+d.HunganohetHOBR.ratesDayAverage.CL_HO2a+d.HunganohetHOBR.ratesDayAverage.CL_CH4+d.HunganohetHOBR.ratesDayAverage.CLO_OHb - d.HunganohetHOBR.ratesDayAverage.HCL_OH-controlgpr,'color',cbrewtouse(6,:),'LineWidth',lwidth,'LineStyle','-.')
+elseif i == 6
+    nexttile;
+    hold on;
+    box on
+    plot([189 189],[-200 200],'k--','LineWidth',2)
+    plot([151 362],[0 0],'k--','LineWidth',2)
+    controlgpr = d.control.ratesDayAverage.CL_CH4+d.control.ratesDayAverage.CLO_OHb - d.control.ratesDayAverage.HCL_OH - d.control.ratesDayAverage.hetHOBR_HCL+d.control.ratesDayAverage.CL_CH2O+d.control.ratesDayAverage.CL_H2+d.control.ratesDayAverage.CL_HO2a;
+    controlgpr2 = d.controlWA.ratesDayAverage.CL_CH4+d.controlWA.ratesDayAverage.CLO_OHb - d.controlWA.ratesDayAverage.HCL_OH - d.controlWA.ratesDayAverage.hetHOBR_HCL+d.controlWA.ratesDayAverage.CL_CH2O+d.controlWA.ratesDayAverage.CL_H2+d.controlWA.ratesDayAverage.CL_HO2a;
+    % plot(151:362,d.control.ratesDayAverage.CL_CH4+d.control.ratesDayAverage.CLO_OHb - d.control.ratesDayAverage.HCL_OH - d.control.ratesDayAverage.hetHOBR_HCL,'color',cbrewtouse(1,:),'LineWidth',lwidth)
+    % plot(151:362,d.controlWA.ratesDayAverage.CL_CH4+d.controlWA.ratesDayAverage.CLO_OHb - d.controlWA.ratesDayAverage.HCL_OH - d.controlWA.ratesDayAverage.hetHOBR_HCL,'color',cbrewtouse(2,:),'LineWidth',lwidth)
+    plot(151:362,d.Hunga.ratesDayAverage.CL_CH2O+d.Hunga.ratesDayAverage.CL_H2+d.Hunga.ratesDayAverage.CL_HO2a+d.Hunga.ratesDayAverage.CL_CH4+d.Hunga.ratesDayAverage.CLO_OHb - d.Hunga.ratesDayAverage.HCL_OH - d.Hunga.ratesDayAverage.hetHOBR_HCL-controlgpr,'color',cbrewtouse(3,:),'LineWidth',lwidth)
+    plot(151:362,d.HungaWA.ratesDayAverage.CL_CH2O+d.HungaWA.ratesDayAverage.CL_H2+d.HungaWA.ratesDayAverage.CL_HO2a+d.HungaWA.ratesDayAverage.CL_CH4+d.HungaWA.ratesDayAverage.CLO_OHb - d.HungaWA.ratesDayAverage.HCL_OH - d.HungaWA.ratesDayAverage.hetHOBR_HCL-controlgpr2,'color',cbrewtouse(4,:),'LineWidth',lwidth)
+    plot(151:362,d.HungaGHCL.ratesDayAverage.CL_CH2O+d.HungaGHCL.ratesDayAverage.CL_H2+d.HungaGHCL.ratesDayAverage.CL_HO2a+d.HungaGHCL.ratesDayAverage.CL_CH4+d.HungaGHCL.ratesDayAverage.CLO_OHb - d.HungaGHCL.ratesDayAverage.HCL_OH - d.HungaGHCL.ratesDayAverage.hetHOBR_HCL-controlgpr,'color',cbrewtouse(5,:),'LineWidth',lwidth,'LineStyle','--')
+    plot(151:362,d.HunganohetHOBR.ratesDayAverage.CL_CH2O+d.HunganohetHOBR.ratesDayAverage.CL_H2+d.HunganohetHOBR.ratesDayAverage.CL_HO2a+d.HunganohetHOBR.ratesDayAverage.CL_CH4+d.HunganohetHOBR.ratesDayAverage.CLO_OHb - d.HunganohetHOBR.ratesDayAverage.HCL_OH - d.HunganohetHOBR.ratesDayAverage.hetHOBR_HCL-controlgpr,'color',cbrewtouse(6,:),'LineWidth',lwidth,'LineStyle','-.')
+end
+if i == 1
+    lh = legend(ph,'control, Hanson gamma hobr','control, Wasch-Abbatt gamma hobr','Hunga-Tonga, Hanson gamma hobr (WACCM values)','Hunga-Tonga, Wasch-Abbatt gamma hobr',...
+        'Hunga-Tonga, Hanson gamma hcl','Gas phase only','fontsize',fsize-4,'box','off');
+    %set(lh,'position',[.5 .2 .3 .2])
+    set(lh,'location','northwest')
+end
+tickout = monthtick('short',0);
+set(gca,'xtick',tickout.tick(6:end),'xticklabels',tickout.monthnames(6:end),'fontsize',fsize);
+if i == 1 || i == 3 
+    addLabels(fsize,vartit{i},'','molecules/cm^3/s')
+elseif i == 5
+    addLabels(fsize,vartit{i},'Month','molecules/cm^3/s')
+elseif i == 6
+    addLabels(fsize,vartit{i},'Month','')
+else
+    addLabels(fsize,vartit{i},'','')
+end
+xlim([150 363])
+end
+savefigure(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/HungaTonga/'],['HungaTonga_gasphaserates'],1,0,0,0);
 
