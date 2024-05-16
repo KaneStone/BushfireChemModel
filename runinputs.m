@@ -10,10 +10,10 @@ function [inputs,vars] = runinputs
     % time
     inputs.startdate = '1-Jun-2017'; %2017 is chosen to have a 365 day year 
     inputs.hourstep = 15/60;           
-    inputs.runlength = 2; %years    
+    inputs.runlength = 7/12; %years    
             
     % height
-    inputs.altitude = 19; % altitude to analyse in km    
+    inputs.altitude = 21; % altitude to analyse in km    
     
     % location
     inputs.region = 'midlatitudes';    
@@ -41,10 +41,11 @@ function [inputs,vars] = runinputs
     inputs.maxiterations = 50; % solver will throw error if more than max
     
     % heterogeneous chemistry
-    inputs.runtype = 'doublelinearnomix'; %'control','solubility','doublelinear',
+    inputs.runtype = 'Hunga'; %'control','solubility','doublelinear',
     % 'ghcl','Hunga','constantdoublelinear','glassy','doublelinearnomix'
     inputs.radius = 'ancil'; % ancil reads yearly average radius from CARMA ancil (standard is 1e-5 cm)
-    
+    inputs.HOBR = 'Hanson'; % Hanson or WA
+    inputs.ghobr = 'ghobr'; % ghcl or ghobr
     % modules
     % adds in CH2O, CH3O2, CH3OH and CH3OOH.
     % may need to shorten time step.
@@ -58,7 +59,7 @@ function [inputs,vars] = runinputs
     inputs.outputrates = 1;
     inputs.savedata = 1;    
     inputs.outputdir = 'output/';
-    inputs.saveext = 'noSOA'; % extension for saving when producing debug output
+    inputs.saveext = '_WA_ghobr'; % extension for saving when producing debug output
     
     %diagnostics
     inputs.plotdiurnal = 0;

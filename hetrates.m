@@ -102,42 +102,59 @@ function [kout,gprob_hobr_hcl] = hetrates(inputs,variables,T_limit,CLONO2atm,HCL
 
     kout.hetHOCL_HCL = wrk.*av_hocl.*gprob_hocl_hcl.*variables.HOCL(timeind);
 
-     %% HOBr + HCl
+     %% HOBr + HCl    
+        
     C_hobr          = 1477.*sqrt(T_limit);
+    C_hcl          = (8.*8.31.*T_limit.*1000./(pi.*36.46)).^.5.*100;
     %D_hobr          = 9.e-9; %6.4e-8.*T_limit./vis_h2so4;
     D_hobr          = 6.4e-8.*T_limit./vis_h2so4;
+    D_hcl          = 7.8e-8.*T_limit./vis_h2so4;
     % WACCM (Hanson)
-    k_wasch         = .125.*exp(.542.*wt - 6440.*T_limiti + 10.3);
-    H_hobr          = exp( -9.86 + 5427.*T_limiti );
+    k_wasch_hanson         = .125.*exp(.542.*wt - 6440.*T_limiti + 10.3); % Hanson divides by 8
+    H_hobr_hanson          = exp( -9.86 + 5427.*T_limiti ); % Hanson's H
+    H_hobr_WA = 4.6e-4.*exp(4.5e3./T_limit); % Wasch-Abbatt H
     % Wasch-Abbatt
-    %k_wasch         = exp(.542.*wt - 6440.*T_limiti + 10.3);
+    k_wasch         = exp(.542.*wt - 6440.*T_limiti + 10.3);
     %H_hobr = 4.6e-4.*exp(4.5e3./T_limit);
     
+    switch inputs.HOBR 
+        case 'Hanson'
+            switch inputs.ghobr
+                case 'ghcl'
+                    Mcase = H_hobr_hanson.*HOBRatm;       
+                    Hcase = M_hcl_h2so4./HCLatm;
+                    Ccase = C_hcl;
+                    Dcase = D_hcl;
+                    Kcase = k_wasch_hanson;
+                case 'ghobr'
+                    Mcase = M_hcl_h2so4;       
+                    Hcase = H_hobr_hanson;
+                    Ccase = C_hobr;
+                    Dcase = D_hobr;
+                    Kcase = k_wasch_hanson;
+            end
+        case 'WA'
+            switch inputs.ghobr
+                case 'ghcl'
+                    Mcase = H_hobr_WA.*HOBRatm;       
+                    Hcase = M_hcl_h2so4./HCLatm;
+                    Ccase = C_hcl;
+                    Dcase = D_hcl;
+                    Kcase = k_wasch;
+                case 'ghobr'
+                    Mcase = M_hcl_h2so4;       
+                    Hcase = H_hobr_WA;
+                    Ccase = C_hobr;
+                    Dcase = D_hobr;
+                    Kcase = k_wasch;
+            end
+    end        
     
-    
-    switch inputs.runtype        
-        case 'ghcl'            
-            Mcase = H_hobr.*HOBRatm;       
-            Hcase = M_hcl_h2so4./HCLatm;
-            Ccase = (8.*8.31.*T_limit.*1000./(pi.*36.46)).^.5.*100;
-            Dcase = 7.8e-8.*T_limit./vis_h2so4;
-        otherwise            
-            Mcase = M_hcl_h2so4;
-            Hcase = H_hobr;
-            Ccase = C_hobr;
-            Dcase = D_hobr;
-    end
-    
-    Mcase = H_hobr.*HOBRatm;       
-    Hcase = M_hcl_h2so4./HCLatm;
-    Ccase = (8.*8.31.*T_limit.*1000./(pi.*36.46)).^.5.*100;
-    Dcase = 7.8e-8.*T_limit./vis_h2so4;
-
     k_dl            = 7.5e14.*D_hobr.*2;                       
 
-    k_hobr_hcl = NaN(size(k_wasch));
-    k_hobr_hcl(k_wasch >= k_dl) = k_dl .* Mcase(k_wasch >= k_dl);
-    k_hobr_hcl(k_wasch < k_dl) = k_wasch(k_wasch < k_dl) .* Mcase(k_wasch < k_dl);
+    k_hobr_hcl = NaN(size(Kcase));
+    k_hobr_hcl(Kcase >= k_dl) = k_dl .* Mcase(k_wasch >= k_dl);
+    k_hobr_hcl(Kcase < k_dl) = Kcase(Kcase < k_dl) .* Mcase(Kcase < k_dl);
 
     term1           = 4.*Hcase.*.082.*T_limit;
     term2           = sqrt(Dcase.*k_hobr_hcl);
@@ -157,7 +174,7 @@ function [kout,gprob_hobr_hcl] = hetrates(inputs,variables,T_limit,CLONO2atm,HCL
     else
         gprob_hobr_hcl  = 0;
     end
-    switch inputs.runtype
+    switch inputs.ghobr
         case 'ghcl'
             kout.hetHOBR_HCL = wrk.*Ccase.*gprob_hobr_hcl.*1.*variables.HCL(timeind);
         otherwise

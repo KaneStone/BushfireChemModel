@@ -5,14 +5,10 @@ function [atmosphere,variables] = initializevars(inputs)
     % variables ensuring chemical families have appropriate number densities 
 
     controlancil = load([inputs.ancildir,'variables/','climInControl.mat']);
-    solancil1 = load([inputs.ancildir,'variables/','climInSolubility.mat']);        
-    solancil = load([inputs.ancildir,'variables/','climInSolubilitynosoa.mat']);        
-    solancil2 = load([inputs.ancildir,'variables/','climInControlnosoa.mat']);        
-    % switch inputs.runtype
-    %     case {'solubility','doublelinear','doublelinear_wtsulf'}
-    %         solancil = load([inputs.ancildir,'variables/','climInSolubility.mat']);        
-    %     otherwise
-    % end
+    solancil = load([inputs.ancildir,'variables/','climInSolubility.mat']);        
+
+    %solancil = load([inputs.ancildir,'variables/','climInSolubilitynosoa.mat']);        
+    %solancil2 = load([inputs.ancildir,'variables/','climInControlnosoa.mat']);        
 
     % extract temperature, pressure, and density
     atmosphere.T = controlancil.ancil.T;
@@ -155,33 +151,44 @@ function [atmosphere,variables] = initializevars(inputs)
             SADini = .9e-8;%.7
             atmosphere.dummySAD = (SADini+1e-9 + SADini./40.*sin(2*pi./365.*(1:365)+pi.*1.1));            
             atmosphere.dummySAD = repmat(atmosphere.dummySAD, 1,2);
-            atmosphere.dummySAD = atmosphere.dummySAD(1:ceil(inputs.days));
+            %atmosphere.dummySAD = atmosphere.dummySAD(1:ceil(inputs.days));
             
             %atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:ceil(inputs.days));   % 1.5 is arbitrary 
             if strcmp(inputs.radius,'ancil')
                 atmosphere.radius = controlancil.SULFRE.vmr(inputs.altitude+1,:).*1e-4; % cm; 
                 atmosphere.radius = repmat(atmosphere.radius,1,2);
-                atmosphere.radius = atmosphere.radius(1:ceil(inputs.days));
+                %atmosphere.radius = atmosphere.radius(1:ceil(inputs.days));
             else
                 atmosphere.radius = inputs.radius;
             end
-        case 'Hunga'
+        case 'Hunga'         
+            
+            % Hunga-Tonga pulse of water vapor and aerosol surface area and
+            % radius at day 190 is constant, i.e. remains until the end of the
+            % year. This pulse is only setup for 21 km currently. To setup
+            % for other altitudes use supplementary figure S3 to estimate
+            % surface area, H2O, and radius anomalies. 
 
             SADini = .9e-8;
-            atmosphere.dummySAD = (SADini+1e-9 + SADini./40.*sin(2*pi./365.*(1:365)+pi.*1.1));            
+            atmosphere.dummySAD = (SADini+1e-9 + SADini./40.*sin(2*pi./365.*(1:365)+pi.*1.1));  
+
+            % increasing aerosol chemical surface area
             atmosphere.dummySAD(190:end) = atmosphere.dummySAD(190:end)+5e-8;
             
-
+            % Use monthly 2022 temperature data at 45S to interpolate onto daily temperature grid. Data from WACCM model simulations
             monthtemps = [215.055441932141, 215.568443982536, 214.461859807604, 213.359479872438,...
                 213.017318175080, 212.232093731955, 211.423060160350, 211.552241021724, 213.590188009631,...
                 214.743488141370, 214.875345028124, 214.348034524305];
             atmosphere.atLevel.T = interp1(1:12,monthtemps,1+11/365:11/365:12);
 
+            %at day 190 add in 2e-6 vmr water vapour
             atmosphere.dummyH2Ovmr(190:end) = atmosphere.dummyH2Ovmr(190:end)+2e-6;
             dummyh2Otemp = atmosphere.dummyH2O(1);
             atmosphere.dummyH2O = atmosphere.dummyH2Ovmr(1:365)./(inputs.k.*1e6).*(atmosphere.atLevel.P(1:365).*100)./atmosphere.atLevel.T;
             atmosphere.dummyH2O = atmosphere.dummyH2O - (atmosphere.dummyH2O(1) - dummyh2Otemp);
             atmosphere.radius = controlancil.SULFRE.vmr(inputs.altitude+1,:).*1e-4; % cm; 
+
+            % increase radius of aerosols
             atmosphere.radius(190:end) = atmosphere.radius(190:end).*2;
         
         case 'glassy'

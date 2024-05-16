@@ -40,6 +40,15 @@ Most user inputs can be set in runinputs.m, so information is provided below
 
 **outputrates**: output and save all rates values
 
+## Hunga-Tonga runcase information
+inputs.runcase = 'Hunga' will input a pulse of H2O, SAD, and double the aerosol radius on June first used for testing gamma hobr and gamma hcl considerations for the HOBR+HCL heterogeneous reaction.
+
+This is currently setup for 21 km at 45˚S. Using other altitudes will require new input anomalies for H2O, and SAD based of Jun et al. (2024) Figure 4d. Temperature data for other altitudes will also need to be input-currently uses interpolated 2022 monthly 21 km values from the specified dynamics output from Jun et al. (2024). Any new inputs for the Hunga case will need to be hard coded in initializevars.m 'Hunga' case.
+
+To test different gamma hcl and gamma hobr setups, in runinputs.m, inputs.HOBR has the option of choosing Waschewsky-Abbatt experimental values (inputs.HOBR = 'WA') or Hanson values (inputs.HOBR = 'Hanson'). inputs.ghobr gives the option of choosing to calculate gamma hobr or gamma hcl based on WA or Hanson values.
+
+a control run can performed by setting inputs.runcase = 'control' using the appopriate inputs.ghobr and inputs.HOBR for heterogeneous HOBR+HCL testing.
+
 ## Add in new species
 
 Instructions for adding in new species.
