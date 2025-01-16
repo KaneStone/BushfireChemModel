@@ -1,7 +1,7 @@
 % create time series averaged over level and latitudes from model data
 clear variables
 
-runcase = 'control';
+runcase = 'Solubility';
 %vars = {'O3','HCL','CLONO2','CLO','CL2O2','HOCL','HNO3','O'};
 %vars = {'H2', 'H2O2', 'HO2','CHO2','CL','OH','CH4','CLO','HOCL','CH3CL','CH3BR','CH2BR2','CHBR3'};
 vars = {'T','SOAB','SOAI','SOAM','SOAT','SOAX','CRMIX01','CRMIX02','CRMIX03','CRMIX04','CRMIX05',...
@@ -32,7 +32,7 @@ temp = squeeze(data.data.T(9,20,:));
 diff1 = diff(temp);
 badind = find(diff1 < -15)+1;
 
-lats = [-50 -45];
+lats = [-55 -40];
 latind = data.data.lat >= lats(1) & data.data.lat <= lats(2);
 latextract = data.data.lat(latind);
 
@@ -112,7 +112,7 @@ MIXBC = zonalmean.CRBC01.vmrregrid + zonalmean.CRBC02.vmrregrid + zonalmean.CRBC
 % zm.mixsulffrac = so4mix./(MIX + SOA + PUREORGANICS); % because assuming pure organics are in mixed particles
 
 
-zm.so4pure = PURESULF./(MIX + PURESULF + PUREORGANICS);
+zm.so4pure = PURESULF./(MIX + PURESULF + SOA + PUREORGANICS);
 so4mix = MIX - OCMIX - MIXBC; % - black carbon
 zm.mixsulffrac = so4mix./(MIX + PUREORGANICS); % because assuming pure organics are in mixed particles
 
@@ -123,12 +123,30 @@ xt = [5,10,36];
 for i = 1:length(xt)
     zm.SAD_SULFC(:,xt) = (zm.SAD_SULFC(:,xt-1) + zm.SAD_SULFC(:,xt+1))./2;
 end
+zm.aocfrac = (PUREORGANICS + OCMIX)./(PUREORGANICS + OCMIX + SOA + PURESULF + MIX);
 zm.SULFRE = zonalmean.SULFRE.vmrregrid;
 zm.aso4 = zonalmean.aso4.vmrregrid;
 zm.aoc = zonalmean.aoc.vmrregrid;
-vars2 = {'so4pure','mixsulffrac','SAD_SULFC','SULFRE','aso4','aoc'};
+vars2 = {'so4pure','mixsulffrac','SAD_SULFC','SULFRE','aso4','aoc','aocfrac'};
 
+%% plotting Pure organics
+createfig('medium','on')
+%plot(so4mix(19,:),'LineWidth',2)
+plot(-3:7:730,PUREORGANICS(19,:) + OCMIX(19,:),'LineWidth',2)
+hold on
+set(gca,'fontsize',18)
+ylabel('Pure organic mass mixing ratio (kg/kg)')
+tick = monthtick('short',1);
+tickout = [tick.monthnames,tick.monthnames];
+tickout{1} = ['J20'];
+tickout{13} = ['J21'];
+set(gca,'xtick',[tick.tick,tick.tick+365],'xticklabel',tickout)
 
+outdir = '/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushfireChemistry/2023update/DiagnosticPlots/';
+filename = ['Pure_organics_time series'];
+savefigure(outdir,filename,1,0,0,0);
+
+%%
 vars = fields(zonalmean);
 %interpolate onto daily
 timeout = 1:366*2;
@@ -186,7 +204,7 @@ end
 ancil.SAD_SULFC.vmr = test;
     %% output temperature and density data for TUV code
 
-save(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/Ancil/variables/','climIn',runcase,'nosoa.mat'],'ancil');
+save(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/Ancil/variables/','climIn',runcase,'organics_withoutsoainmixed.mat'],'ancil');
     %% smooth data
 
 

@@ -8,6 +8,7 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
     Pin = atmosphere.atLevel.P(step.doy);
     %Pin = 50;
     Tin = atmosphere.atLevel.T(step.doy);
+    %Tin = 190;
     ph2o_hpa = atmosphere.dummyH2Ovmr(step.doy).*Pin; % pressure is in hPa;
     %pHCl = variables.HCl .* variables.pressure ./ 1013.25;
 
@@ -43,6 +44,7 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
 
     % weight percent and mole fraction
     wt = 9800 .* m_h2so4 ./ (98 * m_h2so4 + 1000);
+    %wt = wt-wt./4;
     %wt (wt > 70) = NaN;
     %molar_h2so4 = den_h2so4.*wt./9.8; %mol/l
     %molar_h20 = den_h2so4.*(100-wt)./.18; %mol/l
@@ -80,8 +82,8 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
                 %molar_h2so4 = den_h2so4.*wt./9.8; 
                 
             %end
-        case 'doublelinearnomix'
-            mixedorgsulfratio = (1-atmosphere.mixsulffrac(step.doy))/atmosphere.mixsulffrac(step.doy);
+        case {'linearnomix','controllinearnomix','constantlinearnomix'}
+            mixedorgsulfratio = (1-atmosphere.mixsulffrac(step.daysincebegin))/atmosphere.mixsulffrac(step.daysincebegin);
             wt_withorg = 1./(1./wt + mixedorgsulfratio./100);
             wt_org = wt_withorg*mixedorgsulfratio;
 
@@ -103,7 +105,7 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
            term1     = .094 - x_h2so4.*(.61 - 1.2.*x_h2so4);
            term2     = (8515 - 10718.*(x_h2so4.^.7)).*Tinv;
            H_hcl_h2so4     = term1 .* exp( -8.68 + term2 );
-           M_hcl_h2so4     = H_hcl_h2so4.*HCLatm.*atmosphere.so4pure(step.doy);
+           M_hcl_h2so4     = H_hcl_h2so4.*HCLatm.*(1-atmosphere.aocfrac(step.daysincebegin));
 
            % partitioning for mixed aerosols (h2so4/water fraction in mixed)
 %            term1     = .094 - x_h2so4_newwt*(.61 - 1.2*x_h2so4_newwt);
@@ -133,17 +135,18 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
            % partitioning for mixed aerosols (organics in mixed) and using fraction of aerosols that are mixed (1-so4pure)
            H_hcl        = ratio_hcl./116.16.*den_hex.*7.9433e5;
            %H_hcl        = x_hcl./116.16.*den_hex.*(1 + 7.9433e5./ah_hcl);
-           M_hcl        = M_hcl_h2so4 + (H_hcl.*HCLatm.*x_org + M_hcl_h2so4_newwt).*(1.-atmosphere.so4pure(step.doy));
+           %M_hcl        = M_hcl_h2so4 + (H_hcl.*HCLatm.*x_org + M_hcl_h2so4_newwt).*(1.-atmosphere.so4pure(step.daysincebegin));
+           M_hcl        = M_hcl_h2so4 + H_hcl.*HCLatm.*atmosphere.aocfrac(step.daysincebegin);
            %M_hcl        = M_hcl_h2so4./atmosphere.so4pure(step.doy);
            %M_hcl = M_hcl.*4;
             % calculate acidity and new wt percent
            molar_h2so4_new = den_h2so4.*wt_withorg./9.8; 
-        case {'doublelinear','2xorganics','constantdoublelinear'}
+        case {'doublelinear','2xorganics','constantdoublelinear','controldoublelinear'}
 %             so4pure = apsul/(amix + asoa + apsul + appoa)
 %             aso4mix = amix - apoa - abc - adst - aslt
 %             mixsulffrac = aso4mix/(amix + asoa + appoa)
             
-            mixedorgsulfratio = (1-atmosphere.mixsulffrac(step.doy))/atmosphere.mixsulffrac(step.doy);
+            mixedorgsulfratio = (1-atmosphere.mixsulffrac(step.daysincebegin))/atmosphere.mixsulffrac(step.daysincebegin);
             wt_withorg = 1./(1./wt + mixedorgsulfratio./100);
             wt_org = wt_withorg*mixedorgsulfratio;
             
@@ -175,7 +178,7 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
            term1     = .094 - x_h2so4.*(.61 - 1.2.*x_h2so4);
            term2     = (8515 - 10718.*(x_h2so4.^.7)).*Tinv;
            H_hcl_h2so4     = term1 .* exp( -8.68 + term2 );
-           M_hcl_h2so4     = H_hcl_h2so4.*HCLatm.*atmosphere.so4pure(step.doy);
+           M_hcl_h2so4     = H_hcl_h2so4.*HCLatm.*(1-atmosphere.aocfrac(step.daysincebegin));
 
            % partitioning for mixed aerosols (h2so4/water fraction in mixed)
 %            term1     = .094 - x_h2so4_newwt*(.61 - 1.2*x_h2so4_newwt);
@@ -205,7 +208,8 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
            % partitioning for mixed aerosols (organics in mixed) and using fraction of aerosols that are mixed (1-so4pure)
            H_hcl        = ratio_hcl./116.16.*den_hex.*(1 + 7.9433e5./ah_hcl);
            %H_hcl        = x_hcl./116.16.*den_hex.*(1 + 7.9433e5./ah_hcl);
-           M_hcl        = M_hcl_h2so4 + (H_hcl.*HCLatm.*x_org + M_hcl_h2so4_newwt).*(1.-atmosphere.so4pure(step.doy));
+           %M_hcl        = M_hcl_h2so4 + (H_hcl.*HCLatm.*x_org + M_hcl_h2so4_newwt).*(1.-atmosphere.so4pure(step.daysincebegin));
+           M_hcl        = M_hcl_h2so4 + H_hcl.*HCLatm.*x_org.*atmosphere.aocfrac(step.daysincebegin);
            %M_hcl        = M_hcl_h2so4./atmosphere.so4pure(step.doy);
            %M_hcl = M_hcl.*4;
             % calculate acidity and new wt percent
@@ -217,7 +221,7 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
 %             aso4mix = amix - apoa - abc - adst - aslt
 %             mixsulffrac = aso4mix/(amix + asoa + appoa)
             
-            mixedorgsulfratio = (1-atmosphere.mixsulffrac(step.doy))/atmosphere.mixsulffrac(step.doy);
+            mixedorgsulfratio = (1-atmosphere.mixsulffrac(step.daysincebegin))/atmosphere.mixsulffrac(step.daysincebegin);
             wt_withorg = 1./(1./wt + mixedorgsulfratio./100);
             wt_org = wt_withorg*mixedorgsulfratio;
             
@@ -282,6 +286,36 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
             % calculate acidity and new wt percent
             
             % calculate double linear M values. thats it!
+        case 'assumedhetchem'    
+
+            x_h2so4   = wt ./ (wt + ((100 - wt)*98./18));
+
+           % partitioning for pure sulfate (so4pure)
+            term1     = .094 - x_h2so4.*(.61 - 1.2.*x_h2so4);
+            term2     = (8515 - 10718.*(x_h2so4.^.7)).*Tinv;
+            H_hcl_h2so4     = term1 .* exp( -8.68 + term2 );
+            M_hcl_h2so4     = H_hcl_h2so4.*HCLatm.*(1-atmosphere.aocfrac(step.doy));
+            
+            % Htscale = exp(3147.*(1./Tin - 1./298.15)).*2;
+            % Kascale = exp(6900.*(1./Tin - 1/298.15)).*7.9433e5;                       
+            % H_hcl = Htscale.*(1 + Kascale/1e-4);
+
+           x_hcl        = exp(28.986 - 33.458/(Tin./100) - 18.135.*log(Tin/100));
+           ratio_hcl    = 1./(1./x_hcl - 1);
+
+           % Density values from Ghatee et al. 2013 dx.doi.org/10.1021/ie3018675 (scales reasonably at colder temperatures)  
+           den_hex      = (-5.0083e-7.*Tin.^2. - 5.2309e-4.*Tin + 1.1238).*1000;
+
+           % Dissociation constant at 100C is 10^5.9 for HCl gas in water (Trummel et al. 2016 doi:10.1021/acs.jpca.6b02253)
+           % Dissociation constant should increase for colder temperatures, but unfortunately do not have these values.                             
+           % H_hcl        = ratio_hcl/116.16*den_hex*7.9433e5 or ratio_hcl/116.16*den_hex*(1 + 7.9433e5/ah_hcl) if
+           % accounting for acidity
+           % H* = H(1+Ka/ah) Williams et al. 1995 https://doi.org/10.1029/95JD00218
+
+           % partitioning for mixed aerosols (organics in mixed) and using fraction of aerosols that are mixed (1-so4pure)
+           H_hcl        = ratio_hcl./116.16.*den_hex.*(1 + 7.9433e5./1e-4);
+
+           M_hcl = M_hcl_h2so4 + H_hcl.*HCLatm.*atmosphere.aocfrac(step.doy);
     end
 
     %SAD = 1e-8;% atmosphere.atLevel.SAD.vmr(step.doy);
@@ -327,12 +361,12 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
     rates.HCL.destruction(end+1) = kout.hetHOBR_HCL;
     rates.BRCL.production(end+1) = kout.hetHOBR_HCL;
 
-    % BRONO2 + H2O -> HNO3 + HOBR
+    %BRONO2 + H2O -> HNO3 + HOBR
     rates.BRONO2.destruction(end+1) = kout.hetBRONO2_H2O;
     rates.HOBR.production(end+1) = kout.hetBRONO2_H2O;
     rates.HNO3.production(end+1) = kout.hetBRONO2_H2O;   
     
-    % % N2O5 + HCL
+    % N2O5 + HCL
     % rates.HCL.destruction(end+1) = kout.hetN2O5_HCL;
     % rates.CL.production(end+1) = kout.hetN2O5_HCL;
 

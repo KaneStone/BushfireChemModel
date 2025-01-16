@@ -135,7 +135,7 @@ TUV = 1;
 if TUV
     %% Read in MLS data (temperature and ozone) convert
     mlstype = 'PressureZM';
-    out = readinMLS(lats,mlstype,'home');
+    out = readinMLS(lats,mlstype,'work');
     modellats = data.data.lat;
 
     % convert to altitude and compare with model

@@ -37,10 +37,24 @@ photoNamlist = TUVnamelist;
 %NO2
 %photoload.pout(:,[1:6,8:114]) = repmat(photoload.pout(1:96,[1:6,8:114]),365,1);
 
+jconstant = [4:8,14:72,75:113];
+%jconstant = [2,73,74];
+%jconstant = [1:113];
+if strcmp(inputs.runtype,'constantdoublelinear')
+    %equinox
+    %photoload.pout(:,jconstant+1) = repmat(photoload.pout(x,jconstant+1),365,1);
+    %summer
+    %photoload.pout(:,jconstant+1) = repmat(photoload.pout(1:96,jconstant+1),365,1);
+    %winter
+    %photoload.pout(:,jconstant+1) = repmat(photoload.pout(17281:17281+95,jconstant+1),365,1);
+    
+end
 %% Begin simulation
 tic;
 for i = 1:inputs.timesteps
-    
+    if i == 96
+        ua = 1;
+    end
     % initiate step components
     step = initializestep(inputs,i,photolength);       
     
@@ -49,7 +63,14 @@ for i = 1:inputs.timesteps
     if inputs.photosave
         %photolysis(inputs,step,atmosphere,variables,photoload);    
         [photo,~,~] = photolysis(inputs,step,atmosphere,[],[]);
-        photoout(i,:,:) = photo.dataall;        
+        photoout(i,:,:) = photo.dataall;  
+
+        if i ==count*inputs.stepsinday+1
+            step.date       
+            count = count + 1;
+            toc
+        end 
+
         continue
     end
     
@@ -87,7 +108,7 @@ for i = 1:inputs.timesteps
     end  
     
     % debugging if statement (can remove)
-    if i == 10000
+    if i == 500
         a = 1;        
     end
     
@@ -106,7 +127,7 @@ savephoto(inputs,photoout)
 savedata(inputs,variables,dayAverage,family,rates,ratesDayAverage)
 
 %% diagnostic plotting
-vartoplot = 'NO';
+vartoplot = 'CLO';
 figure;
 plot(variables.(vartoplot));
 

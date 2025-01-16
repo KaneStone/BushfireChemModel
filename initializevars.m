@@ -4,11 +4,23 @@ function [atmosphere,variables] = initializevars(inputs)
     % reading in ancil files, smoothing them or creating own, then initializing
     % variables ensuring chemical families have appropriate number densities 
 
-    controlancil = load([inputs.ancildir,'variables/','climInControl.mat']);
-    solancil = load([inputs.ancildir,'variables/','climInSolubility.mat']);        
+    switch inputs.region
+        case 'equator'
+            controlancil = load([inputs.ancildir,'variables/','climInControlequator.mat']);
+        case 'midlatitudes'
+                 controlancil = load([inputs.ancildir,'variables/','climInControl.mat']);
+    end
 
-    %solancil = load([inputs.ancildir,'variables/','climInSolubilitynosoa.mat']);        
-    %solancil2 = load([inputs.ancildir,'variables/','climInControlnosoa.mat']);        
+    switch inputs.runtype
+        case {'controldoublelinear','controldoublelinearnomix'}
+            %solancil = load([inputs.ancildir,'variables/','climIncontrolorganics_withsoa.mat']);
+            %solancil = load([inputs.ancildir,'variables/','climIncontrolnosoa.mat']);
+            solancil = load([inputs.ancildir,'variables/','climIncontrolorganics_withoutsoainmixed.mat']);
+        otherwise
+            %solancil = load([inputs.ancildir,'variables/','climInSolubilitynosoa.mat']);        
+            solancil = load([inputs.ancildir,'variables/','climInSolubilityorganics_withoutsoainmixed.mat']);        
+    end
+    solancil2 = load([inputs.ancildir,'variables/','climInSolubility.mat']);              
 
     % extract temperature, pressure, and density
     atmosphere.T = controlancil.ancil.T;
@@ -96,42 +108,81 @@ function [atmosphere,variables] = initializevars(inputs)
 
             % 2020 had higher temperature early on.
             %atmosphere.atLevel.T(1:242) =  atmosphere.atLevel.T(242);
-        case {'doublelinear','doublelinear_wtsulf','doublelinearnomix'}
+        case {'doublelinear','doublelinear_wtsulf','linearnomix','controldoublelinear','controldoublelinearnomix'}
+
             atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:ceil(inputs.days));   % 1.5 is arbitrary 
             
 %             atmosphere.dummySAD(end-9:end) = atmosphere.dummySAD(end-10);
 %             atmosphere.dummySAD(2:10) = atmosphere.dummySAD(1);
-            atmosphere.mixsulffrac = solancil.ancil.mixsulffrac.vmr(inputs.altitude+1,1:ceil(inputs.days));
-            atmosphere.so4pure = solancil.ancil.so4pure.vmr(inputs.altitude+1,1:ceil(inputs.days));
+            % atmosphere.mixsulffrac = solancil.ancil.mixsulffrac.vmr(inputs.altitude+1,1:ceil(inputs.days));
+            % atmosphere.so4pure = solancil.ancil.so4pure.vmr(inputs.altitude+1,1:ceil(inputs.days));
 
-            atmosphere.so4pure(26:46) = atmosphere.so4pure(25);
-            atmosphere.mixsulffrac(26:46) = atmosphere.mixsulffrac(25);
+             atmosphere.mixsulffrac = solancil.ancil.mixsulffrac.vmr(inputs.altitude,1:ceil(inputs.days));
+             atmosphere.so4pure = solancil.ancil.so4pure.vmr(inputs.altitude,1:ceil(inputs.days));
+             atmosphere.aocfrac = solancil.ancil.aocfrac.vmr(inputs.altitude,1:ceil(inputs.days));
+            %atmosphere.mixsulffrac(:) = .05;
+            %atmosphere.so4pure(:) = .05;
+
+            %atmosphere.so4pure(26:46) = atmosphere.so4pure(25);
+            %atmosphere.mixsulffrac(26:46) = atmosphere.mixsulffrac(25);
 
             atmosphere.radius = solancil.ancil.SULFRE.vmr(inputs.altitude+1,1:ceil(inputs.days)).*1e-4;
             
             % 2020 had higher temperature early on.
             %atmosphere.atLevel.T(1:242) =  atmosphere.atLevel.T(242);
-        case 'constantdoublelinear'
+        case 'constantlinearnomix'
+            daytouse = 40;
             atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:ceil(inputs.days));   % 1.5 is arbitrary 
-            atmosphere.dummySAD(:) = atmosphere.dummySAD(5);
+            %atmosphere.dummySAD(:) = atmosphere.dummySAD(1);
+            atmosphere.dummySAD(:) = 1e-8;
 %             atmosphere.dummySAD(end-9:end) = atmosphere.dummySAD(end-10);
 %             atmosphere.dummySAD(2:10) = atmosphere.dummySAD(1);
             atmosphere.mixsulffrac = solancil.ancil.mixsulffrac.vmr(inputs.altitude+1,1:ceil(inputs.days));
             atmosphere.so4pure = solancil.ancil.so4pure.vmr(inputs.altitude+1,1:ceil(inputs.days));
-            
-            atmosphere.mixsulffrac(:) = atmosphere.mixsulffrac(40);    
-            atmosphere.so4pure(:) = atmosphere.so4pure(40);
+            atmosphere.aocfrac = solancil.ancil.aocfrac.vmr(inputs.altitude,1:ceil(inputs.days));
+            % atmosphere.mixsulffrac(:) = atmosphere.mixsulffrac(daytouse);    
+            % atmosphere.so4pure(:) = atmosphere.so4pure(daytouse);
+            atmosphere.mixsulffrac(:) = .05;
+            atmosphere.so4pure(:) = .05;
+            atmosphere.aocfrac(:) = .4;
 
             atmosphere.atLevel.T(:) = 214;
-            atmosphere.atLevel.H2O.vmr(:) = atmosphere.atLevel.H2O.vmr(40);
-            atmosphere.atLevel.H2O.nd(:) = atmosphere.atLevel.H2O.nd(40);
-            atmosphere.atLevel.CH4.nd(:) = atmosphere.atLevel.CH4.nd(1);
+            atmosphere.atLevel.P(:) = 65;
+            atmosphere.dummyH2Ovmr(:) = atmosphere.atLevel.H2O.vmr(daytouse);
+            atmosphere.dummyH2O(:) = atmosphere.atLevel.H2O.nd(daytouse);
+            atmosphere.dummyCH4(:) = atmosphere.atLevel.CH4.nd(daytouse);            
 
             % atmosphere.so4pure(26:46) = atmosphere.so4pure(25);
             % atmosphere.mixsulffrac(26:46) = atmosphere.mixsulffrac(25);
 
             atmosphere.radius = solancil.ancil.SULFRE.vmr(inputs.altitude+1,1:ceil(inputs.days)).*1e-4;
-            atmosphere.radius(:) = atmosphere.radius(40);
+            atmosphere.radius(:) = atmosphere.radius(daytouse);
+        case 'constantcontrol'
+            daytouse = 1;
+            atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:ceil(inputs.days));   % 1.5 is arbitrary 
+            %atmosphere.dummySAD(:) = atmosphere.dummySAD(1);
+            atmosphere.dummySAD(:) = 1e-8;
+%             atmosphere.dummySAD(end-9:end) = atmosphere.dummySAD(end-10);
+%             atmosphere.dummySAD(2:10) = atmosphere.dummySAD(1);
+            atmosphere.mixsulffrac = solancil.ancil.mixsulffrac.vmr(inputs.altitude+1,1:ceil(inputs.days));
+            atmosphere.so4pure = solancil.ancil.so4pure.vmr(inputs.altitude+1,1:ceil(inputs.days));
+            
+            % atmosphere.mixsulffrac(:) = atmosphere.mixsulffrac(daytouse);    
+            % atmosphere.so4pure(:) = atmosphere.so4pure(daytouse);
+            atmosphere.mixsulffrac(:) = .5;
+            atmosphere.so4pure(:) = .3;
+            atmosphere.atLevel.P(:) = 65;
+            atmosphere.atLevel.T(:) = 214;
+            % this
+            atmosphere.dummyH2Ovmr(:) = atmosphere.atLevel.H2O.vmr(daytouse);
+            atmosphere.dummyH2O(:) = atmosphere.atLevel.H2O.nd(daytouse);
+            atmosphere.dummyCH4(:) = atmosphere.atLevel.CH4.nd(daytouse);
+
+            % atmosphere.so4pure(26:46) = atmosphere.so4pure(25);
+            % atmosphere.mixsulffrac(26:46) = atmosphere.mixsulffrac(25);
+
+            atmosphere.radius = solancil.ancil.SULFRE.vmr(inputs.altitude+1,1:ceil(inputs.days)).*1e-4;
+            atmosphere.radius(:) = atmosphere.radius(daytouse);
         case '2xorganics'
              atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:ceil(inputs.days)).*4;   % 1.5 is arbitrary 
 %             atmosphere.dummySAD(end-9:end) = atmosphere.dummySAD(end-10);
@@ -149,11 +200,10 @@ function [atmosphere,variables] = initializevars(inputs)
         case {'control','ghcl'}
 
             SADini = .9e-8;%.7
-            atmosphere.dummySAD = (SADini+1e-9 + SADini./40.*sin(2*pi./365.*(1:365)+pi.*1.1));            
-            atmosphere.dummySAD = repmat(atmosphere.dummySAD, 1,2);
-            %atmosphere.dummySAD = atmosphere.dummySAD(1:ceil(inputs.days));
-            
-            %atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:ceil(inputs.days));   % 1.5 is arbitrary 
+            atmosphere.dummySAD = (SADini+1e-9 + SADini./40.*sin(2*pi./365.*(1:365)+pi.*1.1));                        
+            atmosphere.dummySAD = repmat(atmosphere.dummySAD, 1,2);      
+            %atmosphere.dummySAD(:) = 1e-8.*2
+
             if strcmp(inputs.radius,'ancil')
                 atmosphere.radius = controlancil.SULFRE.vmr(inputs.altitude+1,:).*1e-4; % cm; 
                 atmosphere.radius = repmat(atmosphere.radius,1,2);
@@ -161,6 +211,9 @@ function [atmosphere,variables] = initializevars(inputs)
             else
                 atmosphere.radius = inputs.radius;
             end
+
+            %atmosphere.radius(:) = atmosphere.radius(:)+atmosphere.radius(:)./2;
+
         case 'Hunga'         
             
             % Hunga-Tonga pulse of water vapor and aerosol surface area and
@@ -206,6 +259,14 @@ function [atmosphere,variables] = initializevars(inputs)
 
             atmosphere.so4pure(26:46) = atmosphere.so4pure(25);
             atmosphere.mixsulffrac(26:46) = atmosphere.mixsulffrac(25);
+
+            atmosphere.radius = solancil.ancil.SULFRE.vmr(inputs.altitude+1,1:ceil(inputs.days)).*1e-4;
+        case 'assumedhetchem'
+            atmosphere.dummySAD = solancil.ancil.SAD_SULFC.vmr(inputs.altitude+1,1:ceil(inputs.days)); 
+
+            atmosphere.mixsulffrac = solancil.ancil.mixsulffrac.vmr(inputs.altitude,1:ceil(inputs.days));
+            atmosphere.so4pure = solancil.ancil.so4pure.vmr(inputs.altitude,1:ceil(inputs.days));
+            atmosphere.aocfrac = solancil.ancil.aocfrac.vmr(inputs.altitude,1:ceil(inputs.days));
 
             atmosphere.radius = solancil.ancil.SULFRE.vmr(inputs.altitude+1,1:ceil(inputs.days)).*1e-4;
 

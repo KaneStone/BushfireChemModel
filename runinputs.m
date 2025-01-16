@@ -8,12 +8,12 @@ function [inputs,vars] = runinputs
         'HO2NO2','OH','HO2','H2O2','HNO3','BRO','HOBR','HBR','BRONO2','BR'};
     
     % time
-    inputs.startdate = '1-Jun-2017'; %2017 is chosen to have a 365 day year 
+    inputs.startdate = '1-Aug-2017'; %2017 is chosen to have a 365 day year 
     inputs.hourstep = 15/60;           
-    inputs.runlength = 7/12; %years    
+    inputs.runlength = 1; %years    
             
     % height
-    inputs.altitude = 21; % altitude to analyse in km    
+    inputs.altitude = 19; % altitude to analyse in km    
     
     % location
     inputs.region = 'midlatitudes';    
@@ -27,6 +27,11 @@ function [inputs,vars] = runinputs
             inputs.latitude = -80;
             inputs.longitude = -180;
             inputs.hemisphere = 'S';
+        case 'equator'
+            inputs.latitude = 0;
+            inputs.longitude = -180;
+            inputs.hemisphere = 'NS';
+            inputs.ancildir = 'input/';  
     end   
     
     % physics
@@ -35,14 +40,16 @@ function [inputs,vars] = runinputs
     
     % photolysis only and save    
     inputs.whichphoto = 'load'; % load, inter (use inter only if need rates for different latitude)
+    inputs.normalizedaylength = 0; % normalize photolysis to have same day length throughout year
+    inputs.normalizeintensity = 0; % normalize photolysis to have same day intensity throughout the year
     
     %solver
     inputs.evolvingJ = 0;    
     inputs.maxiterations = 50; % solver will throw error if more than max
     
     % heterogeneous chemistry
-    inputs.runtype = 'Hunga'; %'control','solubility','doublelinear',
-    % 'ghcl','Hunga','constantdoublelinear','glassy','doublelinearnomix'
+    inputs.runtype = 'control'; %'control','solubility','doublelinear',
+    % 'ghcl','Hunga','constantdoublelinear','glassy','linearnomix','controllinearnomix',constantlinearnomix,'controldoublelinear','assumedhetchem'
     inputs.radius = 'ancil'; % ancil reads yearly average radius from CARMA ancil (standard is 1e-5 cm)
     inputs.HOBR = 'Hanson'; % Hanson or WA
     inputs.ghobr = 'ghobr'; % ghcl or ghobr
@@ -59,7 +66,7 @@ function [inputs,vars] = runinputs
     inputs.outputrates = 1;
     inputs.savedata = 1;    
     inputs.outputdir = 'output/';
-    inputs.saveext = '_WA_ghobr'; % extension for saving when producing debug output
+    inputs.saveext = ''; % extension for saving when producing debug output %_jCLONO2only_equinox
     
     %diagnostics
     inputs.plotdiurnal = 0;

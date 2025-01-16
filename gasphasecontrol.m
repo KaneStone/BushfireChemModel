@@ -562,7 +562,7 @@ function [rates,kv] = gasphasecontrol(inputs,step,variables,atmosphere,rates,k,k
         rates.OH.destruction(end+1) = kv.CH3OOH_OH;
         rates.HO2.production(end+1) = kv.CH2O_O;
         
-        rates.O.destuction(end+1) = kv.CH2O_O;
+        rates.O.destruction(end+1) = kv.CH2O_O;
         
     end
     

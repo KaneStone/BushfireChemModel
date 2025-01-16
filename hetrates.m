@@ -1,10 +1,11 @@
 function [kout,gprob_hobr_hcl] = hetrates(inputs,variables,T_limit,CLONO2atm,HCLatm,HOBRatm,SAD,wt,M_hcl_h2so4,molar_h2so4,molar_h2so4_new,aw,timeind,rad_sulf,ah_hcl)
-    
+    %wt = wt;
     T_limiti = 1./T_limit;
 
     aconst    = 169.5 + wt.*(5.18 - wt.*(.0825 - 3.27e-3.*wt));
     tzero     = 144.11 + wt.*(.166 - wt.*(.015 - 2.18e-4.*wt));
-    vis_h2so4 = aconst./(T_limit.^1.43) .* exp( 448./(T_limit - tzero) );
+    vis_h2so4 = aconst./(T_limit.^1.43) .* exp( 448./(T_limit - tzero) ); %in cP (1 cP = 1 mPa/s)
+    %vis_h2so4 = 1e7;
 
     term1 = 60.51;
     term2 = .095.*wt;
@@ -15,7 +16,7 @@ function [kout,gprob_hobr_hcl] = hetrates(inputs,variables,T_limit,CLONO2atm,HCL
     term6 = -805.89 + (253.05.*(wt.^.076));
     term7 = sqrt(T_limit);
     ah    = exp( term1 - term2 + term3 - term4 - term5 + term6./term7);
-
+    %ah = 1e-4;
     wrk = .25.*SAD;
     %ah = ah_hcl;
     %molar_h2so4 = molar_h2so4_new;
@@ -75,12 +76,15 @@ function [kout,gprob_hobr_hcl] = hetrates(inputs,variables,T_limit,CLONO2atm,HCL
     gprob_cnt_h2o = gprob_cnt - gprob_cnt_hcl;
 
     kout.hetCLONO2_H2O = wrk.*av_clono2.*gprob_cnt_h2o.*variables.CLONO2(timeind);
+    %kout.hetCLONO2_H2O = wrk.*av_clono2.*.5.*variables.CLONO2(timeind);
+    kout.hetCLONO2_HCL = wrk.*av_clono2.*gprob_cnt_hcl.*variables.CLONO2(timeind);
+    %kout.hetCLONO2_HCL = wrk.*av_clono2.*.05.*variables.CLONO2(timeind);
 
-    if variables.HCL(timeind) > variables.CLONO2(timeind)
-        kout.hetCLONO2_HCL = wrk.*av_clono2.*gprob_cnt_hcl.*variables.CLONO2(timeind);
-    else         
-        kout.hetCLONO2_HCL = wrk.*av_clono2.*gprob_cnt_hcl.*variables.HCL(timeind);
-    end
+    % if variables.HCL(timeind) > variables.CLONO2(timeind)
+    %     kout.hetCLONO2_HCL = wrk.*av_clono2.*gprob_cnt_hcl.*variables.CLONO2(timeind);
+    % else         
+    %     kout.hetCLONO2_HCL = wrk.*av_clono2.*gprob_cnt_hcl.*variables.HCL(timeind);
+    % end
 
     %% HOCL + HCl
     D_hocl          = 6.4e-8.*T_limit./vis_h2so4;

@@ -22,6 +22,10 @@ d.HungaWA = load([inputs.outputdir,'runoutput/','Hunga','_',num2str(inputs.altit
     'km_',abs(num2str(inputs.latitude)),inputs.hemisphere...
     ,'_',num2str(inputs.fluxcorrections),'flux_',sprintf('%.2f',inputs.hourstep),'hours_WA.mat']);
 
+d.HungaWAGHCL = load([inputs.outputdir,'runoutput/','Hunga','_',num2str(inputs.altitude),...
+    'km_',abs(num2str(inputs.latitude)),inputs.hemisphere...
+    ,'_',num2str(inputs.fluxcorrections),'flux_',sprintf('%.2f',inputs.hourstep),'hours_WA_ghcl.mat']);
+
 d.HungaGHCL = load([inputs.outputdir,'runoutput/','Hunga','_',num2str(inputs.altitude),...
     'km_',abs(num2str(inputs.latitude)),inputs.hemisphere...
     ,'_',num2str(inputs.fluxcorrections),'flux_',sprintf('%.2f',inputs.hourstep),'hours_ghca.mat']);
@@ -41,6 +45,7 @@ HungaHCLvmr = d.Hunga.dayAverage.HCL.*inputs.k.*1e6./(atmosphere.atLevel.P(151:3
 HungaWAHCLvmr = d.HungaWA.dayAverage.HCL.*inputs.k.*1e6./(atmosphere.atLevel.P(151:362).*100).*atmosphere.atLevel.T(151:362);
 HungaghclHCLvmr = d.HungaGHCL.dayAverage.HCL.*inputs.k.*1e6./(atmosphere.atLevel.P(151:362).*100).*atmosphere.atLevel.T(151:362);
 HunganohetHOBRvmr = d.HunganohetHOBR.dayAverage.HCL.*inputs.k.*1e6./(atmosphere.atLevel.P(151:362).*100).*atmosphere.atLevel.T(151:362);
+HungaWAGHCLvmr = d.HungaWAGHCL.dayAverage.HCL.*inputs.k.*1e6./(atmosphere.atLevel.P(151:362).*100).*atmosphere.atLevel.T(151:362);
 %atmosphere.dummyH2O.*inputs.k.*1e6./(atmosphere.atLevel.P.*100).*atmosphere.atLevel.T;
 
 %% plot important rates for HCL
@@ -142,8 +147,8 @@ plot(151:362,d.HunganohetHOBR_WA.ratesDayAverage.CLO_OHb - d.controlWA.ratesDayA
 %%
 
 createfig('largelandscape','on')
-t= tiledlayout(2,2)
-title(t,'June-December, 45S, 21 km, box model HOBR+HCL reaction rates','fontsize',24,'fontweight','bold')
+t= tiledlayout(2,2);
+title(t,['June-December, ','45',char(186),'S, 21 km, box model HOBR+HCL parameters'],'fontsize',24,'fontweight','bold')
 nexttile;
 
 lwidth = 3;
@@ -166,15 +171,15 @@ ph(4) = plot(151:362,d.HungaWA.ratesDayAverage.(vars),'color',cbrewtouse(4,:),'L
 ph(5) = plot(151:362,d.HungaGHCL.ratesDayAverage.(vars),'color',cbrewtouse(5,:),'LineStyle','--','LineWidth',lwidth);    
 ph(6) = plot(151:362,d.HunganohetHOBR.ratesDayAverage.(vars),'color',cbrewtouse(6,:),'LineStyle','--','LineWidth',lwidth);    
 
-lh = legend(ph,'control, Hanson gamma hobr','control, Wasch-Abbatt gamma hobr','Hunga-Tonga, Hanson gamma hobr (WACCM values)','Hunga-Tonga, Wasch-Abbatt gamma hobr',...
-    'Hunga-Tonga, Hanson gamma hcl','Gas phase only','fontsize',fsize,'box','off');
+lh = legend(ph,'control, Hanson gamma hobr','control, Wasch-Abbatt gamma hobr','HTHH, Hanson gamma hobr (WACCM values)','HTHH, Wasch-Abbatt gamma hobr',...
+    'HTHH, Hanson gamma hcl','HTHH, Wasch-Abbatt gamma hcl','fontsize',fsize,'box','off');
 set(lh,'position',[.5 .2 .3 .2])
 tickout = monthtick('short',0);
 set(gca,'xtick',tickout.tick(6:end),'xticklabels',tickout.monthnames(6:end),'fontsize',fsize);
 addLabels(fsize,'het HOBR+HCL reaction rates','Month','molecules/cm^3/s')
-
+xlim([150 363])
 nexttile;
-plot([189 189],[1e-5 .1],'k--','LineWidth',2)
+plot([189 189],[1e-6 .1],'k--','LineWidth',2)
 hold on
 plot(151:362,d.control.ratesDayAverage.gprob_hobr_hcl,...
     'LineStyle',lstyle{1},'color',cbrewtouse(1,:),'LineWidth',lwidth);
@@ -184,6 +189,7 @@ plot(151:362,d.controlWA.ratesDayAverage.gprob_hobr_hcl,...
 plot(151:362,d.Hunga.ratesDayAverage.gprob_hobr_hcl,'color',cbrewtouse(3,:),'LineWidth',lwidth);
 plot(151:362,d.HungaWA.ratesDayAverage.gprob_hobr_hcl,'color',cbrewtouse(4,:),'LineWidth',lwidth);
 plot(151:362,d.HungaGHCL.ratesDayAverage.gprob_hobr_hcl,'color',cbrewtouse(5,:),'LineStyle','--','LineWidth',lwidth);    
+plot(151:362,d.HunganohetHOBR.ratesDayAverage.gprob_hobr_hcl,'color',cbrewtouse(6,:),'LineStyle','--','LineWidth',lwidth);    
 
 % legend('control Hanson gamma hobr','control, Wasch-Abbatt gamma hobr','Hunga-Tonga, Hanson gamma hobr','Hunga-Tonga, Wasch-Abbatt gamma hobr',...
 %     'Hunga-Tonga, Hanson gamma hcl','fontsize',fsize,'box','off','location','southeast')
@@ -191,7 +197,7 @@ tickout = monthtick('short',0);
 set(gca,'xtick',tickout.tick(6:end),'xticklabels',tickout.monthnames(6:end),'fontsize',fsize,...
     'Yscale','log');
 addLabels(fsize,'gamma hobr (hcl)','Month','Reaction probability')
-
+xlim([150 363])
 nexttile;
 plot([189 189],[-.2 .05],'k--','LineWidth',2)
 hold on
@@ -203,14 +209,15 @@ ylim([-.2 .05]);
 %plot(151:362,HungaHCLvmr,'color',cbrewtouse(3,:),'LineWidth',lwidth);
 plot(151:362,(HungaWAHCLvmr - controlWAHCLvmr).*1e9,'color',cbrewtouse(4,:),'LineWidth',lwidth);
 plot(151:362,(HungaghclHCLvmr - controlHCLvmr).*1e9,'color',cbrewtouse(5,:),'LineStyle','--','LineWidth',lwidth);    
-plot(151:362,(HunganohetHOBRvmr - controlHCLvmr).*1e9,'color',cbrewtouse(6,:),'LineStyle','--','LineWidth',lwidth);    
+plot(151:362,(HunganohetHOBRvmr - controlWAHCLvmr).*1e9,'color',cbrewtouse(6,:),'LineStyle','--','LineWidth',lwidth);    
+
 
 % legend('Hunga-Tonga, Hanson gamma hobr','Hunga-Tonga, Wasch-Abbatt gamma hobr',...
 %     'Hunga-Tonga, Hanson gamma hcl','fontsize',fsize,'box','off','location','southeast')
 tickout = monthtick('short',0);
 set(gca,'xtick',tickout.tick(6:end),'xticklabels',tickout.monthnames(6:end),'fontsize',fsize);
 addLabels(fsize,'HCL anomaly from control','Month','ppb')
-
+xlim([150 363])
 savefigure(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/HungaTonga/'],['HungaTonga_gammaAnalysis'],1,0,0,0);
 
 %% plot HCL+OH and CH4+CL and others
@@ -223,6 +230,7 @@ lwidth = 3;
 fsize = 18;
 cbrew = cbrewer('qual','Set1',10);
 cbrewtouse = [[0 0 0];[.6 .6 .6];cbrew([1,2,4,8,9],:)];
+cbrewtouse2 = cbrew([1,2,4,8,9],:);
 vars = {'HCL_OH','CL_CH4','CLO_OHb','hetHOBR_HCL'};
 vartit = {'HCL+OH','CL+CH4','CLO+OH','het. HOBR+HCL anomaly','all gas phase HCL production/loss anomaly','all gas+het. phase HCL production/loss anomaly'};
 lstyle = {'-','-','-',':','--'};
@@ -309,3 +317,53 @@ xlim([150 363])
 end
 savefigure(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/HungaTonga/'],['HungaTonga_gasphaserates'],1,0,0,0);
 
+%% plot all HOBR production and destructions
+createfig('large','on')
+t= tiledlayout(2,1);
+title(t,'June-December, 45S, 21 km, box model HOBR reaction rates','fontsize',24,'fontweight','bold')
+
+
+lwidth = 3;
+fsize = 18;
+cbrew = cbrewer('qual','Set1',10);
+cbrewtouse = [[0 0 0];[.6 .6 .6];cbrew([1,2,4,8,9],:)];
+varsprod = {'BRO_HO2','hetBRONO2_H2O'};
+varsdest = {'HOBR_O','jHOBR_OH_BR','hetHOBR_HCL'};
+vartitprod = {'HTHH, BRO+HO2','HTHH, het. BRONO2 + H2O','control, BRO+HO2','control, het. BRONO2 + H2O'}
+vartitdest = {'HTHH, HOBR+O','HTHH, jHOBR','HTHH, het. HOBR + HCL','control, HOBR+O','control, jHOBR','control, het. HOBR + HCL'};
+lstyle = {'-','-','-',':','--'};
+lims = [0 1500; 0 1500; 0 200; 0 200; -200 200; -200 200]
+
+for i = 1:2
+    nexttile
+    hold on;
+    if i == 1
+        %plot([189 189],[0 5e3],'k--','LineWidth',2)
+        for j = 1:length(varsprod)
+            phr(j) = plot(151:362,d.Hunga.ratesDayAverage.(varsprod{j}),'LineWidth',3,'color',cbrewtouse2(j,:))
+            phr2(j) = plot(151:362,d.control.ratesDayAverage.(varsprod{j}),'LineWidth',3,'color',cbrewtouse2(j,:),'LineStyle','--')
+            set(gca,'Yscale','log')
+            plot([189 189],[1e2 1e4],'k--','LineWidth',2)
+        end
+        tickout = monthtick('short',0);
+        set(gca,'xtick',tickout.tick(6:end),'xticklabels',tickout.monthnames(6:end),'fontsize',fsize);
+        legend([phr,phr2],vartitprod,'box','off','fontsize',18,'location','eastoutside')
+        addLabels(fsize,'HOBR production reactions',[],'molecules/cm^3/s')
+        box on
+        xlim([150 370])
+    else
+        plot([189 189],[.1 1e4],'k--','LineWidth',2)
+        for j = 1:length(varsdest)
+            phrc(j) = plot(151:362,d.Hunga.ratesDayAverage.(varsdest{j}),'LineWidth',3,'color',cbrewtouse2(j,:));
+            phrc2(j) = plot(151:362,d.control.ratesDayAverage.(varsdest{j}),'LineWidth',3,'color',cbrewtouse2(j,:),'LineStyle','--');
+            set(gca,'Yscale','log')
+        end
+        tickout = monthtick('short',0);
+        set(gca,'xtick',tickout.tick(6:end),'xticklabels',tickout.monthnames(6:end),'fontsize',fsize);
+        legend([phrc,phrc2],vartitdest,'box','off','fontsize',18,'location','eastoutside')
+        addLabels(fsize,'HOBR destruction reactions','Month','molecules/cm^3/s')
+        box on
+        xlim([150 370])
+    end
+end
+savefigure(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/HungaTonga/'],['HungaTonga_HOBRreactions'],1,0,0,0);
