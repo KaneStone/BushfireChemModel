@@ -32,21 +32,26 @@ function [variables,kv] = raphsonnewton(inputs,i,atmosphere,step,variables,varNa
         
         G = varsIteration(count,:) - varsInitial - ratesSum.*inputs.secondstep;
         if count == 1
+            alpha = 1;
             J = jacobian(varsIteration(count,:),varsInitial,inputs,atmosphere,step,varNames,photoload,G,kout);
+            % removing very small J values
+            % not an ideal way of handling near zero derivatives, but easy and
+            % doesn't seem to cause problems (produces very small changes in
+            % conserved families (CLY, etc). Although this may produce larger
+            % weights for variables with lower concentrations.      
+            J (J < 1e-8 & J > 0) = 1e-8; 
+            J (J > -1e-8 & J < 0) = -1e-8; 
+            %J()
+            % if J(2,1) < 1e-8 && J(2,1) > 0
+            %     J(2,1) = 1e-8;
+            % end
         elseif count > 1 && inputs.evolvingJ
             J = jacobian(varsIteration(count,:),varsInitial,inputs,atmosphere,step,varNames,photoload,G,kout);
-        end
-        
-        % removing very small J values
-        % not an ideal way of handling near zero derivatives, but easy and
-        % doesn't seem to cause problems (produces very small changes in
-        % conserved families (CLY, etc). Although this may produce larger
-        % weights for variables with lower concentrations. 
-        J (J < 1e-8 & J > 0) = 1e-8; 
-        J (J > -1e-8 & J < 0) = -1e-8; 
+        end                   
         
         % calculating iteration solution
         JG = J'\G';       
+        
         varsIteration(count+1,:) = varsIteration(count,:)' - JG;                
                                 
         % testing for convergence

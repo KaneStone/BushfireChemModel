@@ -22,39 +22,11 @@ family = [];
 dayAverage = [];
 ratesDayAverage = [];
 photoNamlist = TUVnamelist;
-%photoload.pout = photoload.pout;
-% constant HNO3 photolysis
-%photoload.pout(:,[5:13,15:73,76:114]) = repmat(photoload.pout(1:96,[5:13,15:73,76:114]),365,1);
-%photoload.pout(:,[5:114]) = repmat(photoload.pout(1:96,[5:114]),365,1);
-% CLONO2 and  Ox only
-%photoload.pout(:,[16:62,71:73,76:101,104:114]) = repmat(photoload.pout(1:96,[16:62,71:73,76:101,104:114]),365,1);
-%photoload.pout(:,[1:6,15:73,76:101,104:114]) = repmat(photoload.pout(1:96,[1:6,15:73,76:101,104:114]),365,1);
 
-%winter values
-%photoload.pout(:,[5:73,76:114]) = repmat(photoload.pout(17281:17281+95,[5:73,76:114]),365,1);
-%CLONO2 + NO2
-%photoload.pout(:,[1:6,8:73,76:114]) = repmat(photoload.pout(1:96,[1:6,8:73,76:114]),365,1);
-%NO2
-%photoload.pout(:,[1:6,8:114]) = repmat(photoload.pout(1:96,[1:6,8:114]),365,1);
-
-jconstant = [4:8,14:72,75:113];
-%jconstant = [2,73,74];
-%jconstant = [1:113];
-if strcmp(inputs.runtype,'constantdoublelinear')
-    %equinox
-    %photoload.pout(:,jconstant+1) = repmat(photoload.pout(x,jconstant+1),365,1);
-    %summer
-    %photoload.pout(:,jconstant+1) = repmat(photoload.pout(1:96,jconstant+1),365,1);
-    %winter
-    %photoload.pout(:,jconstant+1) = repmat(photoload.pout(17281:17281+95,jconstant+1),365,1);
-    
-end
 %% Begin simulation
 tic;
 for i = 1:inputs.timesteps
-    if i == 96
-        ua = 1;
-    end
+    
     % initiate step components
     step = initializestep(inputs,i,photolength);       
     
@@ -87,6 +59,7 @@ for i = 1:inputs.timesteps
     
     % initiate solver
     [variables,kv] = raphsonnewton(inputs,i,atmosphere,step,variables,vars,photoload,kout);                        
+    %[variables,kv] = gear(inputs,i,atmosphere,step,variables,vars,photoload,kout);                        
     
     % Flux correction (see inputs.fluxcorrections)
     [variables,flux] = fluxcorrection(inputs,variables,flux,atmosphere,step,i);    
@@ -127,12 +100,12 @@ savephoto(inputs,photoout)
 savedata(inputs,variables,dayAverage,family,rates,ratesDayAverage)
 
 %% diagnostic plotting
-vartoplot = 'CLO';
+vartoplot = 'NO2';
 figure;
 plot(variables.(vartoplot));
 
 %%
-vartoplot = 'HCL';
+vartoplot = 'CLONO2';
 figure;
 plot(dayAverage.(vartoplot));
 hold on;

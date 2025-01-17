@@ -8,8 +8,8 @@ function [inputs,vars] = runinputs
         'HO2NO2','OH','HO2','H2O2','HNO3','BRO','HOBR','HBR','BRONO2','BR'};
     
     % time
-    inputs.startdate = '1-Aug-2017'; %2017 is chosen to have a 365 day year 
-    inputs.hourstep = 15/60;           
+    inputs.startdate = '1-Jan-2017'; %2017 is chosen to have a 365 day year 
+    inputs.hourstep = 30/60;           
     inputs.runlength = 1; %years    
             
     % height
@@ -48,7 +48,7 @@ function [inputs,vars] = runinputs
     inputs.maxiterations = 50; % solver will throw error if more than max
     
     % heterogeneous chemistry
-    inputs.runtype = 'control'; %'control','solubility','doublelinear',
+    inputs.runtype = 'constantlinearnomix'; %'control','solubility','doublelinear',
     % 'ghcl','Hunga','constantdoublelinear','glassy','linearnomix','controllinearnomix',constantlinearnomix,'controldoublelinear','assumedhetchem'
     inputs.radius = 'ancil'; % ancil reads yearly average radius from CARMA ancil (standard is 1e-5 cm)
     inputs.HOBR = 'Hanson'; % Hanson or WA

@@ -22,5 +22,5 @@ function J = jacobian(varsIteration,varsInitial,inputs,atmosphere,step,varNames,
         G2(i,:) = varsIterationIn - varsInitial - ratessum(i,:).*inputs.secondstep;     
         J(i,:) = (G2(i,:)-G)./(varsIterationIn(i) - varsInitial(i));
     end
-
+    %J = sparse(J);
 end
