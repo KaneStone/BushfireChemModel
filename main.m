@@ -81,7 +81,7 @@ for i = 1:inputs.timesteps
     end  
     
     % debugging if statement (can remove)
-    if i == 500
+    if i == 3000
         a = 1;        
     end
     
@@ -100,12 +100,12 @@ savephoto(inputs,photoout)
 savedata(inputs,variables,dayAverage,family,rates,ratesDayAverage)
 
 %% diagnostic plotting
-vartoplot = 'NO2';
+vartoplot = 'HOCL';
 figure;
 plot(variables.(vartoplot));
 
 %%
-vartoplot = 'CLONO2';
+vartoplot = 'HOCL';
 figure;
 plot(dayAverage.(vartoplot));
 hold on;

@@ -326,6 +326,8 @@ function [rate] = gasphaserates(inputs,atmosphere,step)
     
     % HOCL + O ->  CLO + OH
     rate.HOCL_O = 1.70e-13;
+
+    rate.HOCL_HOCL = 3e-15;
     
     % HOCL + CL ->  HCL + CLO 
     rate.HOCL_CL = 3.40e-12*exp(-130./atmosphere.atLevel.T(step.doy));

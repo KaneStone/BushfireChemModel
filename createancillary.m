@@ -10,9 +10,9 @@ vars = {'T','O','N2O','OH','HO2','CL','BR','NO','NO2','O1D','H','NO3','N2O5','CL
 tic;
 switch runcase
     case 'Solubility'
-        data = readinBfolder(['/Volumes/ExternalOne/work/data/Bushfire/CESM/finalensembles/','SD/','raw','/'],'*hexanoic_nowt.nc',1); 
+        data = readinBfolder('/Users/kanestone/work/data/Bushfire/2024Paper/','*m_CARMA_pyrocb_massfrac_2020-2021_2020-2021_SD_K_h0.nc',1); 
     otherwise
-        data = readinBfolder(['/Volumes/ExternalOne/work/data/Bushfire/CESM/finalensembles/','SD/','raw','/'],'*control.nc',1); 
+        data = readinBfolder('/Users/kanestone/work/data/Bushfire/2024Paper/','*mCARMA_control_2020-2021_SD_K.cam.h0.nc',1); 
 end
 %data.data.T2 = data.data.T;
 toc;
@@ -20,11 +20,11 @@ toc;
 TUV = 0;
 
 %% fix bad data points
-temp = squeeze(data.data.T(9,20,:));
-diff1 = diff(temp);
-badind = find(diff1 < -15)+1;
+% temp = squeeze(data.data.T(9,20,:));
+% diff1 = diff(temp);
+% badind = find(diff1 < -15)+1;
 
-lats = [-50 -40];
+lats = [-85 -80];
 latind = data.data.lat >= lats(1) & data.data.lat <= lats(2);
 latextract = data.data.lat(latind);
 
@@ -226,7 +226,7 @@ ancil.O3.vmr = double(ozoneout);
 ancil.altitude = double(0:90);
     %% output temperature and density data for TUV code
 
-save(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/Ancil/variables/','climIn',runcase,'.mat'],'ancil');
+save(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/Ancil/variables/','climIn',runcase,'polar.mat'],'ancil');
     %% smooth data
 
 

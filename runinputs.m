@@ -48,7 +48,7 @@ function [inputs,vars] = runinputs
     inputs.maxiterations = 50; % solver will throw error if more than max
     
     % heterogeneous chemistry
-    inputs.runtype = 'constantlinearnomix'; %'control','solubility','doublelinear',
+    inputs.runtype = 'control'; %'control','solubility','doublelinear',
     % 'ghcl','Hunga','constantdoublelinear','glassy','linearnomix','controllinearnomix',constantlinearnomix,'controldoublelinear','assumedhetchem'
     inputs.radius = 'ancil'; % ancil reads yearly average radius from CARMA ancil (standard is 1e-5 cm)
     inputs.HOBR = 'Hanson'; % Hanson or WA

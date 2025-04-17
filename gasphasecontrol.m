@@ -50,6 +50,7 @@ function [rates,kv] = gasphasecontrol(inputs,step,variables,atmosphere,rates,k,k
     kv.CLO_OHb = k.CLO_OHb.*variables.CLO.*variables.OH;
     kv.CLO_OHa = k.CLO_OHa.*variables.CLO.*variables.OH;
     kv.HOCL_CL = k.HOCL_CL.*variables.CL.*variables.HOCL;
+    kv.HOCL_HOCL = k.HOCL_HOCL.*variables.HOCL.*variables.HOCL;
 
     kv.HCL_OH = k.HCL_OH.*variables.HCL.*variables.OH;
     kv.HCL_O = k.HCL_O.*variables.HCL.*variables.O;
@@ -235,6 +236,7 @@ function [rates,kv] = gasphasecontrol(inputs,step,variables,atmosphere,rates,k,k
     rates.CLO.production(end+1) = kv.CLONO2_O;
     rates.CLO.production(end+1) = kv.CL2O2_M.*2;
     rates.CLO.production(end+1) = kv.BR_OCLO;
+    rates.CLO.production(end+1) = kv.HOCL_HOCL;
 
     rates.CLO.destruction(end+1) = kv.CLO_CLO_M.*2;
     rates.CLO.destruction(end+1) = kv.CLO_NO2_M;
@@ -268,6 +270,8 @@ function [rates,kv] = gasphasecontrol(inputs,step,variables,atmosphere,rates,k,k
     rates.CL.production(end+1) = kv.CLO_CH3O2;
     rates.CL.production(end+1) = kv.HCL_O1D;
     rates.CL.production(end+1) = kv.HCL_O;
+    % testing
+    rates.CL.production(end+1) = kv.HOCL_HOCL;
 
     rates.CL.destruction(1) = kv.CL_O3;
     rates.CL.destruction(2) = kv.CL_H2;
@@ -302,8 +306,10 @@ function [rates,kv] = gasphasecontrol(inputs,step,variables,atmosphere,rates,k,k
     rates.HOCL.production(2) = kv.CLONO2_OH;
 
     rates.HOCL.destruction(end+1) = kv.HOCL_O;
-    rates.HOCL.destruction(end+2) = kv.HOCL_CL;
-    rates.HOCL.destruction(end+3) = kv.HOCL_OH;
+    rates.HOCL.destruction(end+1) = kv.HOCL_CL;
+    rates.HOCL.destruction(end+1) = kv.HOCL_OH;
+    % testing
+    rates.HOCL.destruction(end+1) = kv.HOCL_HOCL.*2;
 
     %% BRO
 
