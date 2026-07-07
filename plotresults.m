@@ -1,5 +1,6 @@
 % plotting 1D model
 inputs = runinputs;
+inputs.hourstep = .25;
 inputs.fluxcorrections = 0;
 inputs.altitude = 19;
 % Read in profiles then select by layer

@@ -1,10 +1,18 @@
-function [kout,gprob_hobr_hcl] = hetrates(inputs,variables,T_limit,CLONO2atm,HCLatm,HOBRatm,SAD,wt,M_hcl_h2so4,molar_h2so4,molar_h2so4_new,aw,timeind,rad_sulf,ah_hcl)
+function [kout,gprob_hobr_hcl] = hetrates(inputs,variables,atmosphere,T_limit,CLONO2atm,HCLatm,HOBRatm,SAD,wt,M_hcl_h2so4,molar_h2so4,molar_h2so4_new,aw,timeind,rad_sulf,ah_hcl,H_total)
     %wt = wt;
     T_limiti = 1./T_limit;
 
     aconst    = 169.5 + wt.*(5.18 - wt.*(.0825 - 3.27e-3.*wt));
     tzero     = 144.11 + wt.*(.166 - wt.*(.015 - 2.18e-4.*wt));
-    vis_h2so4 = aconst./(T_limit.^1.43) .* exp( 448./(T_limit - tzero) ); %in cP (1 cP = 1 mPa/s)
+    switch inputs.runtype
+        case 'fullparameterization'
+            atmosphere.atLevel.rh % percent
+            vis_h2so4 = aconst./(T_limit.^1.43) .* exp( 448./(T_limit - tzero) ); %in cP (1 cP = 1 mPa/s)
+        otherwise
+            vis_h2so4 = aconst./(T_limit.^1.43) .* exp( 448./(T_limit - tzero) ); %in cP (1 cP = 1 mPa/s)
+    end
+
+
     %vis_h2so4 = 1e7;
 
     term1 = 60.51;
@@ -40,7 +48,8 @@ function [kout,gprob_hobr_hcl] = hetrates(inputs,variables,T_limit,CLONO2atm,HCL
     C_cnt         = 1474.*sqrt(T_limit); 
     S_cnt         = .306 + 24.*T_limiti; 
     term1         = exp(-S_cnt.*molar_h2so4); 
-    H_cnt         = 1.6e-6 .* exp( 4710.*T_limiti ).*term1; 
+    H_cnt         = 1.6e-6 .* exp( 4710.*T_limiti ).*term1;    
+    % H_cnt         = H_total;
     D_cnt         = 5.e-8.*T_limit ./ vis_h2so4; 
     k_h           = 1.22e12.*exp( -6200.*T_limiti ); 
     k_h2o         = 1.95e10.*exp( -2800.*T_limiti ); 
@@ -74,7 +83,8 @@ function [kout,gprob_hobr_hcl] = hetrates(inputs,variables,T_limit,CLONO2atm,HCL
     term2         = Gamma_s_prime + Gamma_b;
     gprob_cnt_hcl = gprob_cnt .* term1./term2;
     gprob_cnt_h2o = gprob_cnt - gprob_cnt_hcl;
-
+    % gprob_cnt_hcl = .004;
+    % gprob_cnt_h2o = .004;
     kout.hetCLONO2_H2O = wrk.*av_clono2.*gprob_cnt_h2o.*variables.CLONO2(timeind);
     %kout.hetCLONO2_H2O = wrk.*av_clono2.*.5.*variables.CLONO2(timeind);
     kout.hetCLONO2_HCL = wrk.*av_clono2.*gprob_cnt_hcl.*variables.CLONO2(timeind);
@@ -93,6 +103,7 @@ function [kout,gprob_hobr_hcl] = hetrates(inputs,variables,T_limit,CLONO2atm,HCL
     S_hocl          = .0776 + 59.18.*T_limiti;
     term1           = exp( -S_hocl.*molar_h2so4 );
     H_hocl          = 1.91e-6 .* exp( 5862.4.*T_limiti ).*term1;
+    % H_hocl          = H_total;
     term1           = 4.*H_hocl.*.082.*T_limit;
     term2           = sqrt( D_hocl.*k_hocl_hcl );
     Gamma_hocl_rxn  = term1.*term2./C_hocl;

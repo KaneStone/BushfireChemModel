@@ -40,10 +40,10 @@ function [variables,kv] = raphsonnewton(inputs,i,atmosphere,step,variables,varNa
             % doesn't seem to cause problems (produces very small changes in
             % conserved families (CLY, etc). Although this may produce larger
             % weights for variables with lower concentrations.      
-            J (J < 1e-8 & J > 0) = 1e-8; 
-            J (J > -1e-8 & J < 0) = -1e-8; 
-            % toadd = eye(size(J))+1e-8;
-            % J = J+toadd;
+            % J (J < 1e-8 & J > 0) = 1e-8; 
+            % J (J > -1e-8 & J < 0) = -1e-8; 
+            toadd = eye(size(J))+1e-8;
+            J = J+toadd;
             
             %J()
             % if J(2,1) < 1e-8 && J(2,1) > 0
@@ -54,10 +54,10 @@ function [variables,kv] = raphsonnewton(inputs,i,atmosphere,step,variables,varNa
             
             J = jacobian(varsIteration(count,:),varsIteration(count-1,:),inputs,atmosphere,step,varNames,photoload,G,kout,ratesSum);
 
-            J (J < 1e-8 & J > 0) = 1e-8; 
-            J (J > -1e-8 & J < 0) = -1e-8; 
-            % toadd = eye(size(J)).*1e-10;
-            % J = J+toadd;
+            % J (J < 1e-8 & J > 0) = 1e-8; 
+            % J (J > -1e-8 & J < 0) = -1e-8; 
+            toadd = eye(size(J)).*1e-10;
+            J = J+toadd;
         end                   
         
         % calculating iteration solution

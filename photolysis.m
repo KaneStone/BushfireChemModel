@@ -17,7 +17,8 @@ function [photo,rates,sza,kv] = photolysis(inputs,step,atmosphere,variables,phot
             system('/bin/zsh runTUV.sh');
 
             % read in TUV output
-            [TUVtemp,sza] = readinTUVoutput('TUV5.4/output/output.txt',118,208);
+            % [TUVtemp,sza] = readinTUVoutput('TUV5.4/output/output.txt',118,208);
+            [TUVtemp,sza] = readinTUVoutput('TUV5.4/output/output.txt',118,198);
             photo.altitude = TUVtemp(:,1);
             photo.data = TUVtemp(inputs.altitude,2:end);
             photo.dataall = TUVtemp(:,1:end)';                

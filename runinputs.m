@@ -13,7 +13,7 @@ function [inputs,vars] = runinputs
     inputs.runlength = 1; %years    
             
     % height
-    inputs.altitude = 19; % altitude to analyse in km    
+    inputs.altitude = 14; % altitude to analyse in km    
     
     % location
     inputs.region = 'midlatitudes';    
@@ -23,9 +23,15 @@ function [inputs,vars] = runinputs
             inputs.longitude = -180;
             inputs.ancildir = 'input/';            
             inputs.hemisphere = 'S';
-        case 'polar'
-            inputs.latitude = -80;
+        case 'polarnorth'
+            inputs.latitude = 60;
             inputs.longitude = -180;
+            inputs.ancildir = 'input/';            
+            inputs.hemisphere = 'N';
+        case 'polarwinter'
+            inputs.latitude = -45;
+            inputs.longitude = -180;
+            inputs.ancildir = 'input/';
             inputs.hemisphere = 'S';
         case 'equator'
             inputs.latitude = 0;
@@ -48,8 +54,21 @@ function [inputs,vars] = runinputs
     inputs.maxiterations = 50; % solver will throw error if more than max
     
     % heterogeneous chemistry
-    inputs.runtype = 'control'; %'control','solubility','doublelinear',
-    % 'ghcl','Hunga','constantdoublelinear','glassy','linearnomix','controllinearnomix',constantlinearnomix,'controldoublelinear','assumedhetchem'
+    inputs.runtype = 'fullparameterization'; 
+    %'control'
+    %'solubility'
+    %'doublelinear',
+    %'ghcl'
+    %'Hunga'
+    %'constantdoublelinear'
+    %'glassy'
+    %'linearnomix'
+    %'controllinearnomix'
+    %'constantlinearnomix,
+    %'controldoublelinear',
+    %'assumedhetchem'
+    %'fullparameterization'
+
     inputs.radius = 'ancil'; % ancil reads yearly average radius from CARMA ancil (standard is 1e-5 cm)
     inputs.HOBR = 'Hanson'; % Hanson or WA
     inputs.ghobr = 'ghobr'; % ghcl or ghobr
@@ -66,7 +85,7 @@ function [inputs,vars] = runinputs
     inputs.outputrates = 1;
     inputs.savedata = 1;    
     inputs.outputdir = 'output/';
-    inputs.saveext = ''; % extension for saving when producing debug output %_jCLONO2only_equinox
+    inputs.saveext = 'wt'; % extension for saving when producing debug output %_jCLONO2only_equinox
     
     %diagnostics
     inputs.plotdiurnal = 0;
@@ -74,6 +93,14 @@ function [inputs,vars] = runinputs
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % END USER INPUTS. Do not alter anything below here    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    if inputs.methanechemistry
+        addvars = {'CH2O','CH3O2','CH3OOH','CH3OH'};
+        addvarslength = length(addvars);
+        varslength = length(vars);        
+        vars(varslength+1:addvarslength+varslength) = addvars;
+        inputs.hourstep = 30/60;     
+    end
+
     inputs.secondstep = inputs.hourstep.*60.*60;            
     inputs.timesteps = 365*24/inputs.hourstep*inputs.runlength;
     inputs.days = 365.*inputs.runlength;
@@ -90,14 +117,6 @@ function [inputs,vars] = runinputs
             inputs.photosave = 1;
         otherwise
             inputs.photosave = 0;
-    end
-    
-    if inputs.methanechemistry
-        addvars = {'CH2O','CH3O2','CH3OOH','CH3OH'};
-        addvarslength = length(addvars);
-        varslength = length(vars);        
-        vars(varslength+1:addvarslength+varslength) = addvars;
-        inputs.hourstep = 5/60;     
-    end
+    end   
     
 end

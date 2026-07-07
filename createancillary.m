@@ -6,7 +6,7 @@ runcase = 'control';
 %vars = {'H2', 'H2O2', 'HO2','CHO2','CL','OH','CH4','CLO','HOCL','CH3CL','CH3BR','CH2BR2','CHBR3'};
 vars = {'T','O','N2O','OH','HO2','CL','BR','NO','NO2','O1D','H','NO3','N2O5','CLO','CLONO2','HCL','HOCL','CL2','H2','CH3CL','CH4','H2O2','OCLO','CL2O2',...
     'CH3O2','BRO','BRCL','CH2O','HNO3','HO2NO2','H2O','HBR',...
-    'BRONO2','HOBR','CO','SULFRE','aoc','aso4','SO2','SO3','HSO3','H2SO4','SO','S','OCS','CH3OH','CH3OOH','SAD_SULFC'};
+    'BRONO2','HOBR','CO','SULFRE','SO2','SO3','HSO3','H2SO4','SO','S','OCS','CH3OH','CH3OOH','SAD_SULFC'};
 tic;
 switch runcase
     case 'Solubility'
@@ -20,11 +20,11 @@ toc;
 TUV = 0;
 
 %% fix bad data points
-% temp = squeeze(data.data.T(9,20,:));
-% diff1 = diff(temp);
-% badind = find(diff1 < -15)+1;
+temp = squeeze(data.data.T(9,20,:));
+diff1 = diff(temp);
+badind = find(diff1 < -15)+1;
 
-lats = [-85 -80];
+lats = [55 75];
 latind = data.data.lat >= lats(1) & data.data.lat <= lats(2);
 latextract = data.data.lat(latind);
 
@@ -145,7 +145,7 @@ if TUV
 
     %% Read in ERA5
 
-    ERATdir = '/Volumes/ExternalOne/work/data/ERA5/forChemModel/';
+    ERATdir = '/Users/kanestone/work/data/ERA5/hourly/';
     ERAT = ncread([ERATdir,'Temperature_2010_hourly.nc'],'t');
     ERAO3 = ncread([ERATdir,'Ozone_2010_hourly.nc'],'o3');
     ERA_latitude = ncread([ERATdir,'Temperature_2010_hourly.nc'],'latitude');
@@ -174,12 +174,12 @@ if TUV
     % adding in ERA5 to missing MLS data for TUV mainly
 
     mls_level_new = [flipud(ERA_level);out.lev(8:end)];
-    mls_temp_new = [flipud(ERA5T_day);out.Temperatureclim(8:end,:)];
+    mls_temp_new = [flipud(ERA5T_day);out.Tclim(8:end,:)];
     mls_ozone_new = [flipud(ERA5O3_day);out.O3clim(8:end,:)];
 
     mls_ozone_new_nd = 1./1.38066e-23.*repmat(mls_level_new.*100,[1,366])./mls_temp_new.*mls_ozone_new.*1e-6;
     %%
-    for k = 1:size(mls_level_new)-1                  
+    for k = 1:size(mls_level_new,1)-1                  
         if k == 1    
             altitude(k,:) = 287.*mean([repmat(273.15,[1,366]);mls_temp_new(k,:)],1,'omitnan')./9.81.*log(1013.25./mls_level_new(k));    
             altitude(k+1,:) = 287.*mean(mls_temp_new(k:k+1,:),1,'omitnan')./9.81.*log(mls_level_new(k)./mls_level_new(k+1));
@@ -226,7 +226,7 @@ ancil.O3.vmr = double(ozoneout);
 ancil.altitude = double(0:90);
     %% output temperature and density data for TUV code
 
-save(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/Ancil/variables/','climIn',runcase,'polar.mat'],'ancil');
+save(['/Users/kanestone/Dropbox (MIT)/Work_Share/MITWork/BushChemModel/Ancil/variables/','climIn',runcase,'polarnorth.mat'],'ancil');
     %% smooth data
 
 

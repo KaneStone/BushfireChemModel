@@ -9,7 +9,7 @@ function [photoout,photoload,photolength] = loadphoto(inputs)
         case 'inter'
             photoload = [];
             photolength = 1;
-            photoout = zeros(inputs.timesteps,114,91);
+            photoout = zeros(inputs.timesteps,114,81);
     end
   
     if inputs.normalizedaylength || inputs.normalizeintensity

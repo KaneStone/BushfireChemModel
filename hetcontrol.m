@@ -1,6 +1,6 @@
 function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacobian)
 
-    timeind = 1;
+    timeind = 1;    
 
     % Shi et al
     % calculate water in partial pressure hPa
@@ -8,10 +8,11 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
     Pin = atmosphere.atLevel.P(step.doy);
     %Pin = 50;
     Tin = atmosphere.atLevel.T(step.doy);
-    %Tin = 190;
-    ph2o_hpa = atmosphere.dummyH2Ovmr(step.doy).*Pin; % pressure is in hPa;
+    % Tin = 195;
+    ph2o_hpa = atmosphere.dummyH2Ovmr(step.doy).*Pin; % pressure is in hPa;   
+    %ph2o_hpa = 4.5e-6.*Pin; % pressure is in hPa;   
     %pHCl = variables.HCl .* variables.pressure ./ 1013.25;
-
+    % ph2o_hpa = 3.5366e-04;
     wt_e0 = 18.452406985;
     wt_e1 = 3505.1578807;
     wt_e2 = 330918.55082;
@@ -44,6 +45,7 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
 
     % weight percent and mole fraction
     wt = 9800 .* m_h2so4 ./ (98 * m_h2so4 + 1000);
+    % wt = 30;
     %wt = wt-wt./4;
     %wt (wt > 70) = NaN;
     %molar_h2so4 = den_h2so4.*wt./9.8; %mol/l
@@ -53,13 +55,22 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
     %variables.HCL.*inputs.k.*1e6./(atmosphere.atLevel.P(step.doy).*100).*atmosphere.atLevel.T(step.doy)./101;
     %HCLvmr = 1./inputs.k*1e-6.*data(i).data.(vartemp).*data2(i).pressure./data(i).data.T;
      %dataout.CLONO2.pressureregrid ./ 100 ./ 1013.25
+    % variables.HCL(timeind) = atmosphere.atLevel.HCL.nd(1);
+    % variables.HCL(timeind) = atmosphere.atLevel.HCL.nd(1);
+    % HCLvmr = variables.HCL(timeind).*
+    % variables.CLONO2(timeind) = 4.3693e8;
+    
     HCLatm = Tin./(100).*inputs.k.*variables.HCL(timeind)./1e-6 / 1013.25;
+    
+    %HCLatm = 7e-10.*Pin./1013.25;
+    % HCLatm
+    % HCLatm2
     HOBRatm = Tin./(100).*inputs.k.*variables.HOBR(timeind)./1e-6 / 1013.25;
     
     CLONO2atm = Tin./(100).*inputs.k.*variables.CLONO2(timeind)./1e-6 /1013.25;
+    %CLONO2atm = 5e-10.*Pin./1013.25;    
     
-    
-     x_h2so4 = wt ./ (wt + (100 - wt) .* 98 ./ 18); % mole fraction
+    x_h2so4 = wt ./ (wt + (100 - wt) .* 98 ./ 18); % mole fraction
 
     term1 = .094 - x_h2so4 .* (.61 - 1.2 .* x_h2so4);        
     term2 = (8515 - 10718 .* (x_h2so4.^.7)).*Tinv;                
@@ -68,6 +79,7 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
     molar_h2so4 = den_h2so4.*wt./9.8;
     ah_hcl = [];
     molar_h2so4_new = [];
+    H_total = [];
     switch inputs.runtype
         case 'solubility'
             %if atmosphere.aoc_aso4_ratio(step.doy) > .7
@@ -83,23 +95,25 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
                 
             %end
         case {'linearnomix','controllinearnomix','constantlinearnomix'}
-            mixedorgsulfratio = (1-atmosphere.mixsulffrac(step.daysincebegin))/atmosphere.mixsulffrac(step.daysincebegin);
-            wt_withorg = 1./(1./wt + mixedorgsulfratio./100);
-            wt_org = wt_withorg*mixedorgsulfratio;
+            % mixedorgsulfratio = (1-atmosphere.mixsulffrac(step.daysincebegin))/atmosphere.mixsulffrac(step.daysincebegin);
+            % wt_withorg = 1./(1./wt + mixedorgsulfratio./100);
 
-            wt_water = 100 - wt_withorg - wt_org;
-            x_org = wt_org./(wt_org + (wt_water.*116.16./18) + (wt_withorg.*116.16./98));
-            x_h2so4water = 1 - x_org;            
+            % wt_org = wt_withorg*mixedorgsulfratio;
+
+            % wt_water = 100 - wt_withorg - wt_org;
+            % x_org = wt_org./(wt_org + (wt_water.*116.16./18) + (wt_withorg.*116.16./98));
+            % x_h2so4water = 1 - x_org;            
 
             
 %             H_hcl_hex = molarity.*(1+Ka./ah);
 %             M_hcl_hex = H_hcl_hex.*pHCl_Tbin; %(mol/l/atm * atm) = mol/l
             
            % For solubility in h2so4/water in mixed aerosol.
-           x_h2so4_newwt   = wt_withorg./(wt_withorg + (wt_water.*98./18.) + (wt_org.*98./116.));
+           % x_h2so4_newwt   = wt_withorg./(wt_withorg + (wt_water.*98./18.) + (wt_org.*98./116.));
 
            % For solubility in pure sulfate
            x_h2so4   = wt ./ (wt + ((100 - wt)*98./18));
+           % x_h2so4 = x_h2so4_newwt;
 
            % partitioning for pure sulfate (so4pure)
            term1     = .094 - x_h2so4.*(.61 - 1.2.*x_h2so4);
@@ -113,10 +127,10 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
 %            H_hcl_h2so4_newwt     = term1 * exp( -8.68 + term2 );
 %            M_hcl_h2so4_newwt     = H_hcl_h2so4_newwt.*HCLatm.*x_h2so4water;
            
-           term1     = .094 - x_h2so4*(.61 - 1.2*x_h2so4);
-           term2     = (8515. - 10718.*(x_h2so4.^.7))*Tinv;
-           H_hcl_h2so4_newwt     = term1 * exp( -8.68 + term2 );
-           M_hcl_h2so4_newwt     = H_hcl_h2so4_newwt.*HCLatm.*x_h2so4water;
+           % term1     = .094 - x_h2so4*(.61 - 1.2*x_h2so4);
+           % term2     = (8515. - 10718.*(x_h2so4.^.7))*Tinv;
+           % H_hcl_h2so4_newwt     = term1 * exp( -8.68 + term2 );
+           % M_hcl_h2so4_newwt     = H_hcl_h2so4_newwt.*HCLatm.*x_h2so4water;
 
            % Estimating H_hcl from mole fraction solubiltiy of HCl in hexanoic acid
            % from solubility data series page 204 (https://srdata.nist.gov/solubility/IUPAC/SDS-42/SDS-42.pdf)
@@ -137,10 +151,43 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
            %H_hcl        = x_hcl./116.16.*den_hex.*(1 + 7.9433e5./ah_hcl);
            %M_hcl        = M_hcl_h2so4 + (H_hcl.*HCLatm.*x_org + M_hcl_h2so4_newwt).*(1.-atmosphere.so4pure(step.daysincebegin));
            M_hcl        = M_hcl_h2so4 + H_hcl.*HCLatm.*atmosphere.aocfrac(step.daysincebegin);
+           % M_hcl        = M_hcl_h2so4_newwt;% + H_hcl.*HCLatm.*atmosphere.aocfrac(step.daysincebegin);
+           H_total = H_hcl.*atmosphere.aocfrac(step.daysincebegin) + H_hcl_h2so4*(1-atmosphere.aocfrac(step.daysincebegin));
+           % H_total = H_total;
            %M_hcl        = M_hcl_h2so4./atmosphere.so4pure(step.doy);
            %M_hcl = M_hcl.*4;
             % calculate acidity and new wt percent
            molar_h2so4_new = den_h2so4.*wt_withorg./9.8; 
+       case 'enhancedCL2'
+            % if step.hour > 10 && step.hour < 16 && step.month == 4 && step.day == 4
+                atmosphere.aocfrac(step.daysincebegin) = .7;
+            % end
+
+
+           % For solubility in pure sulfate
+           x_h2so4   = wt ./ (wt + ((100 - wt)*98./18));
+
+           % partitioning for pure sulfate (so4pure)
+           term1     = .094 - x_h2so4.*(.61 - 1.2.*x_h2so4);
+           term2     = (8515 - 10718.*(x_h2so4.^.7)).*Tinv;
+           H_hcl_h2so4     = term1 .* exp( -8.68 + term2 );
+           M_hcl_h2so4     = H_hcl_h2so4.*HCLatm.*(1-atmosphere.aocfrac(step.daysincebegin));                      
+
+           % Estimating H_hcl from mole fraction solubiltiy of HCl in hexanoic acid
+           % from solubility data series page 204 (https://srdata.nist.gov/solubility/IUPAC/SDS-42/SDS-42.pdf)
+           x_hcl        = exp(28.986 - 33.458/(Tin./100) - 18.135.*log(Tin/100));
+           ratio_hcl    = 1./(1./x_hcl - 1);
+
+           % Density values from Ghatee et al. 2013 dx.doi.org/10.1021/ie3018675 (scales reasonably at colder temperatures)  
+           den_hex      = (-5.0083e-7.*Tin.^2. - 5.2309e-4.*Tin + 1.1238).*1000;
+
+           % Dissociation constant at 100C is 10^5.9 for HCl gas in water (Trummel et al. 2016 doi:10.1021/acs.jpca.6b02253)
+           % Dissociation constant should increase for colder temperatures, but unfortunately do not have these values.                                       
+           % H_hcl        = ratio_hcl./116.16.*den_hex.*7.9433e5;
+           H_hcl        = ratio_hcl./116.16.*den_hex.*7.9433e8;
+           H_total = H_hcl.*atmosphere.aocfrac(step.daysincebegin) + H_hcl_h2so4*(1-atmosphere.aocfrac(step.daysincebegin));
+           M_hcl        = M_hcl_h2so4 + H_hcl.*HCLatm.*atmosphere.aocfrac(step.daysincebegin);
+           % molar_h2so4_new = den_h2so4.*wt_withorg./9.8; 
         case {'doublelinear','2xorganics','constantdoublelinear','controldoublelinear'}
 %             so4pure = apsul/(amix + asoa + apsul + appoa)
 %             aso4mix = amix - apoa - abc - adst - aslt
@@ -316,13 +363,16 @@ function [rates,kv] = hetcontrol(inputs,step,variables,atmosphere,rates,kv,jacob
            H_hcl        = ratio_hcl./116.16.*den_hex.*(1 + 7.9433e5./1e-4);
 
            M_hcl = M_hcl_h2so4 + H_hcl.*HCLatm.*atmosphere.aocfrac(step.doy);
+        case 'fullparameterization'
+            % viscosity
+            % separate by surface area full coating
     end
 
     %SAD = 1e-8;% atmosphere.atLevel.SAD.vmr(step.doy);
         
     %aw = .01;    
-    [kout,kv.gprob_hobr_hcl] = hetrates(inputs,variables,Tin,CLONO2atm,HCLatm,HOBRatm,atmosphere.dummySAD(step.daysincebegin),...
-        wt,M_hcl,molar_h2so4,molar_h2so4_new,aw,timeind,atmosphere.radius(step.daysincebegin),ah_hcl);
+    [kout,kv.gprob_hobr_hcl] = hetrates(inputs,variables,atmosphere,Tin,CLONO2atm,HCLatm,HOBRatm,atmosphere.dummySAD(step.daysincebegin),...
+        wt,M_hcl,molar_h2so4,molar_h2so4_new,aw,timeind,atmosphere.radius(step.daysincebegin),ah_hcl,H_total);
     switch inputs.runtype
         case 'glassy'
             av_clono2 = (8.*inputs.R.*Tin.*1000./(pi*98)).^.5 * 100; 
